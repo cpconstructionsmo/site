@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contact — CP Constructions</title>
+  <link rel="icon" href="assets/logo-icon.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="/" class="logo">
+      <img src="assets/logo.png" alt="CP Constructions">
+    </a>
+    <nav class="main">
+      <a href="/">Accueil</a>
+      <a href="a-propos.html">À propos</a>
+      <a href="services.html">Services</a>
+      <a href="projets.html">Projets</a>
+      <a href="conseils.html">Conseils</a>
+      <a href="contact.html" class="active">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container page-detail">
+
+<div class="breadcrumb">
+  <a href="/">Accueil</a> → Contact
+</div>
+
+<h1>Nous contacter</h1>
+<p class="page-detail-intro">
+  Vous avez un projet de rénovation, d'extension ou de surélévation ? Contactez-nous pour en discuter sans engagement.
+</p>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px; margin: 48px 0;">
+
+  <div style="background: var(--surface); border: 1px solid var(--filet); border-radius: 8px; padding: 24px;">
+    <h3 style="color: var(--brique); margin-top: 0;">Par téléphone</h3>
+    <p style="margin: 0;">
+      <strong>06 95 69 84 08</strong><br>
+      <span style="font-size: 13px; color: var(--gris);">Lun-Ven 8h-18h, Sam 9h-12h</span>
+    </p>
+  </div>
+
+  <div style="background: var(--surface); border: 1px solid var(--filet); border-radius: 8px; padding: 24px;">
+    <h3 style="color: var(--brique); margin-top: 0;">Par email</h3>
+    <p style="margin: 0;">
+      <strong><a href="mailto:contact@cpconstructions.fr">contact@cpconstructions.fr</a></strong><br>
+      <span style="font-size: 13px; color: var(--gris);">Réponse sous 48h</span>
+    </p>
+  </div>
+
+  <div style="background: var(--surface); border: 1px solid var(--filet); border-radius: 8px; padding: 24px;">
+    <h3 style="color: var(--brique); margin-top: 0;">Localisation</h3>
+    <p style="margin: 0;">
+      <strong>Région Occitanie</strong><br>
+      <span style="font-size: 13px; color: var(--gris);">Interventions dans un rayon de 80 km</span>
+    </p>
+  </div>
+
+</div>
+
+<section style="background: var(--surface); border: 1px solid var(--filet); border-radius: 8px; padding: 40px; margin-top: 48px;">
+  <h2 style="margin-top: 0;">Demander un devis</h2>
+  <p style="color: var(--gris);">Remplissez le formulaire ci-dessous et nous vous recontacterons rapidement.</p>
+
+  <form id="contactForm" style="margin-top: 32px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+      <div class="form-group">
+        <label for="nom">Nom complet *</label>
+        <input type="text" id="nom" name="nom" required>
+      </div>
+      <div class="form-group">
+        <label for="tel">Téléphone *</label>
+        <input type="tel" id="tel" name="tel" required>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="email">Email *</label>
+      <input type="email" id="email" name="email" required>
+    </div>
+
+    <div class="form-group">
+      <label for="commune">Commune du projet *</label>
+      <input type="text" id="commune" name="commune" required>
+    </div>
+
+    <div class="form-group">
+      <label for="service">Type de projet *</label>
+      <select id="service" name="service" required>
+        <option value="">Choisir...</option>
+        <option value="renovation">Rénovation complète</option>
+        <option value="extension">Extension de maison</option>
+        <option value="surelevation">Surélévation</option>
+        <option value="conseil">Consultation/Conseil</option>
+        <option value="autre">Autre</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="surface">Surface approximative (m²)</label>
+      <input type="number" id="surface" name="surface">
+    </div>
+
+    <div class="form-group">
+      <label for="budget">Budget envisagé</label>
+      <select id="budget" name="budget">
+        <option value="">Non défini</option>
+        <option value="moins50k">Moins de 50 000 €</option>
+        <option value="50-100k">50 000 - 100 000 €</option>
+        <option value="100-200k">100 000 - 200 000 €</option>
+        <option value="200k+">Plus de 200 000 €</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="message">Message / Description du projet *</label>
+      <textarea id="message" name="message" rows="6" required></textarea>
+    </div>
+
+    <button type="submit" class="btn">Envoyer ma demande</button>
+  </form>
+
+  <p style="font-size: 12px; color: var(--gris); margin-top: 24px;">
+    * Champs obligatoires. Vos données sont confidentielles et utilisées uniquement pour vous contacter.
+  </p>
+</section>
+
+<section style="margin-top: 48px; text-align: center;">
+  <h2>Ou appelez-nous directement</h2>
+  <p>Vous préférez discuter au téléphone ? C'est tout aussi rapide !</p>
+  <a href="tel:+33695698408" class="btn">Appeler 06 95 69 84 08</a>
+</section>
+
+</main>
+
+<footer>
+  <p><strong>CP Constructions</strong></p>
+  <p>Maîtrise d'œuvre complète • Rénovation • Extension • Surélévation</p>
+  <p style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,.2); padding-top: 20px;">
+    📞 <a href="tel:+33695698408">06 95 69 84 08</a> •
+    ✉️ <a href="mailto:contact@cpconstructions.fr">contact@cpconstructions.fr</a>
+  </p>
+  <p style="font-size: 12px; margin-top: 20px; opacity: .8;">© 2026 CP Constructions. Tous droits réservés.</p>
+</footer>
+
+<script>
+  document.getElementById('contactForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const nom = document.getElementById('nom').value;
+    const tel = document.getElementById('tel').value;
+    const email = document.getElementById('email').value;
+    const commune = document.getElementById('commune').value;
+    const service = document.getElementById('service').value;
+    const surface = document.getElementById('surface').value;
+    const budget = document.getElementById('budget').value;
+    const message = document.getElementById('message').value;
+
+    const subject = `Devis ${service} - ${nom}`;
+    const body = `Nom: ${nom}%0ATel: ${tel}%0AEmail: ${email}%0ACommune: ${commune}%0AService: ${service}%0ASurface: ${surface} m²%0ABudget: ${budget}%0A%0AMessage:%0A${message}`;
+
+    window.location.href = `mailto:contact@cpconstructions.fr?subject=${encodeURIComponent(subject)}&body=${body}`;
+  });
+</script>
+
+</body>
+</html>
