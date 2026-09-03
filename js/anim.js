@@ -21,9 +21,18 @@
   }
 
   /* --- 2. Diaporama des panneaux du héros ---
-     Chaque panneau enchaîne ses diapositives en fondu. Les deux panneaux
-     sont décalés dans le temps pour ne pas basculer à l'unisson, ce qui
-     ferait clignoter toute la page d'un coup. */
+     Chaque panneau enchaîne ses diapositives en fondu. Une diapositive
+     peut porter une vidéo : on ne la lit que lorsqu'elle est visible,
+     pour ne pas faire tourner quatre décodeurs en même temps.
+
+     Sur mobile et en mouvement réduit, les vidéos sont retirées : il
+     reste le poster (la photo). Quelques mégaoctets de vidéo sur un
+     forfait 4G, pour un fond décoratif, ne se justifient pas. */
+
+  var ecranEtroit = window.matchMedia &&
+    window.matchMedia('(max-width: 860px)').matches;
+
+  var sansVideo = ecranEtroit || mouvementReduit;
 
   var panneaux = document.querySelectorAll('.hero-panneau');
 
@@ -31,17 +40,48 @@
     var diapos = panneau.querySelectorAll('.diapo');
     if (!diapos.length) return;
 
-    diapos[0].classList.add('actif');
-    if (diapos.length < 2 || mouvementReduit) return;
+    Array.prototype.forEach.call(panneau.querySelectorAll('.diapo-video'),
+      function (v) {
+        if (sansVideo) {
+          // Le poster disparaît avec la balise ; le .jpg du dégradé CSS
+          // prend le relais.
+          v.remove();
+          return;
+        }
+        // Une source absente ou illisible laisse la place au poster.
+        v.addEventListener('error', function () { v.remove(); });
+        var src = v.querySelector('source');
+        if (src) src.addEventListener('error', function () { v.remove(); });
+      });
 
-    var courante = 0;
-    var avancer = function () {
-      diapos[courante].classList.remove('actif');
-      courante = (courante + 1) % diapos.length;
-      diapos[courante].classList.add('actif');
+    // Les deux panneaux démarrent sur des vues différentes, sinon ils
+    // affichent la même image côte à côte au chargement.
+    var courante = (indexPanneau * 2) % diapos.length;
+
+    var montrer = function (i) {
+      Array.prototype.forEach.call(diapos, function (d, j) {
+        var actif = (j === i);
+        d.classList.toggle('actif', actif);
+        var v = d.querySelector('.diapo-video');
+        if (!v) return;
+        if (actif) {
+          var lecture = v.play();
+          if (lecture && lecture.catch) lecture.catch(function () {});
+        } else {
+          v.pause();
+        }
+      });
     };
 
-    // Décalage initial : le second panneau démarre à contretemps.
+    montrer(courante);
+    if (diapos.length < 2 || mouvementReduit) return;
+
+    var avancer = function () {
+      courante = (courante + 1) % diapos.length;
+      montrer(courante);
+    };
+
+    // Décalage initial pour que les panneaux ne basculent pas ensemble.
     window.setTimeout(function () {
       window.setInterval(avancer, 5200);
     }, indexPanneau * 2600);

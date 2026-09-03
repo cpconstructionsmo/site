@@ -215,6 +215,18 @@ nav.main a.active { color: var(--nuit); background: var(--ocre); }
 
 .diapo.actif { opacity: 1; transform: scale(1); }
 
+/* Une diapositive peut porter une vidéo. Le poster (la photo .jpg) occupe
+   la place pendant le chargement et reste affiché si le .mp4 manque ; le
+   dégradé de repli est encore en dessous. */
+.diapo-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 .diapo:nth-child(1) { background-image: url("../assets/hero/1.jpg"), linear-gradient(150deg, #6B4030, #3A211A); }
 .diapo:nth-child(2) { background-image: url("../assets/hero/2.jpg"), linear-gradient(150deg, #8A5A3C, #46251A); }
 .diapo:nth-child(3) { background-image: url("../assets/hero/3.jpg"), linear-gradient(150deg, #B08050, #55301F); }
