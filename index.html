@@ -6,6 +6,7 @@
   <title>CP Constructions — Maîtrise d'Œuvre</title>
   <link rel="icon" href="assets/logo-icon.png">
   <link rel="stylesheet" href="css/style.css">
+  <script src="js/anim.js" defer></script>
 </head>
 <body>
 
@@ -22,15 +23,40 @@
       <a href="conseils.html">Conseils</a>
       <a href="contact.html">Contact</a>
     </nav>
+      <a href="contact.html" class="nav-cta">Être conseillé</a>
   </div>
 </header>
 
 <main>
 
 <section class="hero">
-  <h1>Concrétisez vos projets de construction</h1>
-  <p>Maîtrise d'œuvre complète pour rénovations, extensions et surélévations en région Occitanie</p>
-  <a href="contact.html" class="cta">Parlons de votre projet</a>
+  <!-- Les panneaux affichent assets/hero/1.jpg à 4.jpg en fondu enchaîné.
+       Tant qu'aucune photo n'est déposée, chaque diapositive retombe sur
+       son dégradé et le héros reste présentable. -->
+  <div class="hero-panneau gauche" aria-hidden="true">
+    <div class="diapo"></div>
+    <div class="diapo"></div>
+    <div class="diapo"></div>
+    <div class="diapo"></div>
+  </div>
+
+  <div class="hero-centre">
+    <span class="surtitre">Maîtrise d'œuvre indépendante</span>
+    <h1>Concrétisez vos projets<br><em>de construction</em></h1>
+    <p>Rénovation, extension et surélévation en Normandie et Pays de la Loire.
+       De l'esquisse à la remise des clés, nous pilotons votre chantier.</p>
+    <div class="hero-actions">
+      <a href="contact.html" class="cta">Démarrer mon projet</a>
+      <a href="projets.html" class="btn fantome">Voir nos réalisations</a>
+    </div>
+  </div>
+
+  <div class="hero-panneau droite" aria-hidden="true">
+    <div class="diapo"></div>
+    <div class="diapo"></div>
+    <div class="diapo"></div>
+    <div class="diapo"></div>
+  </div>
 </section>
 
 <section class="container">
@@ -61,7 +87,7 @@
         <div class="projet-meta">
           <div class="meta-item">
             <div class="meta-label">Lieu</div>
-            <div class="meta-value">Couronne Toulousaine</div>
+            <div class="meta-value">Orne (61)</div>
           </div>
           <div class="meta-item">
             <div class="meta-label">Surface</div>
@@ -84,7 +110,7 @@
         <div class="projet-meta">
           <div class="meta-item">
             <div class="meta-label">Lieu</div>
-            <div class="meta-value">Toulouse (31)</div>
+            <div class="meta-value">Sarthe (72)</div>
           </div>
           <div class="meta-item">
             <div class="meta-label">Surface</div>
@@ -107,7 +133,7 @@
         <div class="projet-meta">
           <div class="meta-item">
             <div class="meta-label">Lieu</div>
-            <div class="meta-label">Région Midi-Pyrénées</div>
+            <div class="meta-value">Mayenne (53)</div>
           </div>
           <div class="meta-item">
             <div class="meta-label">Surface</div>
@@ -124,35 +150,35 @@
     </div>
   </div>
   <div style="text-align: center; margin-top: 48px;">
-    <a href="projets.html" class="btn">Voir tous les projets</a>
+    <a href="projets.html" class="btn sombre">Voir tous les projets</a>
   </div>
 </section>
 
-<section style="background: var(--surface); border-top: 1px solid var(--filet); border-bottom: 1px solid var(--filet);">
+<section style="background: var(--surface); border-radius: var(--r-xl); box-shadow: var(--ombre-s); margin: 0 20px;">
   <div class="container">
     <h2>Pourquoi nous choisir ?</h2>
     <div class="grid">
-      <div class="card" style="border: none; box-shadow: none;">
+      <div class="card">
         <h3>Expérience</h3>
         <p>Plus de 15 ans dans la construction et la rénovation complète.</p>
       </div>
-      <div class="card" style="border: none; box-shadow: none;">
+      <div class="card">
         <h3>Transparence</h3>
         <p>Devis détaillés et suivi régulier, pas de mauvaise surprise.</p>
       </div>
-      <div class="card" style="border: none; box-shadow: none;">
+      <div class="card">
         <h3>Qualité</h3>
         <p>Matériaux sélectionnés et équipes reconnues sur chaque spécialité.</p>
       </div>
-      <div class="card" style="border: none; box-shadow: none;">
+      <div class="card">
         <h3>Respect des délais</h3>
         <p>Planification rigoureuse et suivi de chantier quotidien.</p>
       </div>
-      <div class="card" style="border: none; box-shadow: none;">
+      <div class="card">
         <h3>Conseil</h3>
         <p>Aide au choix des matériaux, optimisation des budgets.</p>
       </div>
-      <div class="card" style="border: none; box-shadow: none;">
+      <div class="card">
         <h3>Maîtrise d'œuvre</h3>
         <p>Coordination complète des artisans et des corps de métiers.</p>
       </div>
@@ -176,7 +202,7 @@
   <p><strong>CP Constructions</strong></p>
   <p>Maîtrise d'œuvre complète • Rénovation • Extension • Surélévation</p>
   <p style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,.2); padding-top: 20px;">
-    📞 <a href="tel:+33695698408">06 95 69 84 08</a> •
+    📞 <a href="tel:+33665676881">06 65 67 68 81</a> •
     ✉️ <a href="mailto:contact@cpconstructions.fr">contact@cpconstructions.fr</a>
   </p>
   <p style="font-size: 12px; margin-top: 20px; opacity: .8;">© 2026 CP Constructions. Tous droits réservés.</p>

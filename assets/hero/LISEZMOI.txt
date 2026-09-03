@@ -1,0 +1,10 @@
+Photos du bandeau d'accueil.
+
+Déposez ici 1.jpg, 2.jpg, 3.jpg et 4.jpg : elles défileront en fondu
+enchaîné dans les deux panneaux de la page d'accueil.
+
+Format conseillé : portrait ou carré, au moins 900 px de large,
+moins de 400 Ko par image pour rester rapide sur mobile.
+
+Sans ces fichiers, chaque diapositive affiche un dégradé de repli et
+la page reste correcte.
