@@ -672,3 +672,65 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
 .text-center { text-align: center; }
 .mt-4 { margin-top: 36px; }
 .mb-4 { margin-bottom: 36px; }
+
+
+/* ---------- Photos de projet ----------
+   Même principe que le héros : la photo se pose sur un dégradé de repli,
+   donc un fichier manquant ne laisse jamais de rectangle vide. */
+
+.photo-projet {
+  position: relative;
+  overflow: hidden;
+  margin: 0 0 44px;
+  aspect-ratio: 16 / 10;
+  border-radius: var(--r-l);
+  background-size: cover;
+  background-position: center;
+  box-shadow: var(--ombre-m);
+}
+
+.photo-projet[data-photo="1"] {
+  background-image: url("../assets/projets/magny-1.jpg"),
+                    linear-gradient(140deg, #C9BFAC, #7E6F58);
+}
+
+.photo-projet[data-photo="2"] {
+  background-image: url("../assets/projets/magny-2.jpg"),
+                    linear-gradient(140deg, #B3A894, #635847);
+}
+
+.photo-projet figcaption {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  padding: 34px 24px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(180deg, transparent, rgba(26,19,16,.75));
+}
+
+/* Vignette d'un projet dans une liste. */
+.projet-image[data-photo="1"] {
+  background-image: url("../assets/projets/magny-1.jpg"),
+                    linear-gradient(140deg, #C9BFAC, #7E6F58);
+  background-size: cover;
+  background-position: center;
+  color: transparent;
+}
+
+
+/* ---------- Encart d'appel en fin de page ---------- */
+
+.appel {
+  margin-top: 56px;
+  padding: 42px 28px;
+  text-align: center;
+  background: var(--surface);
+  border: 1px solid var(--filet);
+  border-radius: var(--r-l);
+  box-shadow: var(--ombre-s);
+}
+
+.appel h2 { text-align: center; margin-top: 0; }
+.appel h2::after { margin: 16px auto 0; }
+.appel p { color: var(--gris); margin-bottom: 26px; }

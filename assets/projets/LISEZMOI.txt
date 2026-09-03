@@ -1,0 +1,13 @@
+Photos des pages projets.
+
+Maison neuve de Magny-le-Désert :
+
+  magny-1.jpg   vue au sol, depuis l'entrée
+  magny-2.jpg   vue aérienne
+
+Ces deux fichiers alimentent la page projets/magny-le-desert.html ainsi
+que la vignette du projet sur l'accueil et sur la page Projets.
+
+Format : paysage, 1600 px de large environ, moins de 500 Ko.
+Sans ces fichiers, un dégradé de repli prend la place et les pages
+restent présentables.
