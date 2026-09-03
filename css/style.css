@@ -1,416 +1,662 @@
-/* CP Constructions — Charte vitrine */
+/* CP Constructions — charte vitrine
+   Brun brique et ocre doré repris du logo. Angles très arrondis, ombres
+   diffuses plutôt que traits durs, apparitions au défilement discrètes.
+   Le site doit rester lisible et rapide sur un téléphone en plein soleil. */
+
 :root {
   --brique: #7E3B2A;
+  --brique-fonce: #5C2A1B;
+  --brique-clair: #9A5340;
   --ocre: #D29B48;
-  --ocre-light: #E8B966;
+  --ocre-clair: #E8B966;
   --encre: #1A2B36;
   --fond: #F7F5F0;
+  --fond-tiede: #F1EDE4;
   --surface: #fff;
-  --filet: #E2DDD3;
+  --filet: #E6E0D4;
   --gris: #6E7B84;
-  --ombre: 0 1px 2px rgba(26,43,54,.05), 0 2px 8px rgba(26,43,54,.05);
-  --ombre-h: 0 2px 4px rgba(26,43,54,.07), 0 6px 18px rgba(26,43,54,.09);
+
+  /* Fond sombre du héros et de la barre : un espresso tiré du brun brique,
+     assez dense pour que le texte blanc passe sans effort. */
+  --nuit: #241310;
+  --nuit-clair: #3A211A;
+
+  --ombre-s: 0 1px 2px rgba(26,43,54,.04), 0 2px 6px rgba(26,43,54,.05);
+  --ombre-m: 0 2px 4px rgba(26,43,54,.05), 0 8px 24px rgba(26,43,54,.07);
+  --ombre-l: 0 4px 8px rgba(26,43,54,.06), 0 18px 48px rgba(26,43,54,.12);
+
+  --r-xs: 10px;
+  --r-s: 14px;
+  --r-m: 20px;
+  --r-l: 28px;
+  --r-xl: 36px;
+  --pilule: 999px;
+
+  --transition: .35s cubic-bezier(.22,.61,.36,1);
 }
 
 * { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
 
 body {
   margin: 0;
   background: var(--fond);
   color: var(--encre);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica Neue, Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+               "Helvetica Neue", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
-  line-height: 1.6;
+  line-height: 1.65;
+  overflow-x: hidden;
 }
-
-html, body { height: 100%; }
 
 a { color: var(--brique); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
-/* Header / Nav */
+img { max-width: 100%; }
+
+
+/* ---------- Barre de navigation en pilule flottante ---------- */
+
 header {
-  background: var(--surface);
-  border-bottom: 1px solid var(--filet);
   position: sticky;
-  top: 0;
+  top: 14px;
   z-index: 100;
-  box-shadow: var(--ombre);
+  padding: 0 16px;
+  margin-bottom: -78px;   /* la barre flotte par-dessus le héros */
 }
 
 .header-inner {
-  max-width: 1200px;
+  max-width: 1120px;
   margin: 0 auto;
-  padding: 12px 16px;
+  padding: 9px 9px 9px 14px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border-radius: var(--pilule);
+  background: rgba(36,19,16,.72);
+  border: 1px solid rgba(255,255,255,.1);
+  backdrop-filter: saturate(180%) blur(16px);
+  -webkit-backdrop-filter: saturate(180%) blur(16px);
+  transition: background var(--transition), box-shadow var(--transition);
 }
 
+/* Une fois qu'on a quitté le haut de page, la pilule se densifie pour
+   rester lisible au-dessus du contenu clair. */
+header.detachee .header-inner {
+  background: rgba(36,19,16,.94);
+  box-shadow: 0 8px 30px rgba(26,43,54,.22);
+}
+
+/* Le logo est en brun sur fond transparent : il lui faut une pastille
+   claire pour ressortir sur la pilule sombre. */
 .logo {
-  height: 50px;
+  flex: 0 0 auto;
+  display: block;
+  height: 42px;
+  padding: 5px 12px;
+  border-radius: var(--pilule);
+  background: var(--surface);
 }
 
-.logo img {
-  height: 100%;
-  object-fit: contain;
-}
+.logo img { height: 100%; width: auto; object-fit: contain; display: block; }
 
-nav.main {
-  display: flex;
-  gap: 24px;
-  flex-wrap: wrap;
-}
+nav.main { display: flex; gap: 2px; flex-wrap: wrap; justify-content: center; }
 
 nav.main a {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
-  color: var(--encre);
-  padding: 8px 0;
-  border-bottom: 2px solid transparent;
-  transition: border-color .15s, color .15s;
+  letter-spacing: .02em;
+  color: rgba(255,255,255,.82);
+  padding: 9px 14px;
+  border-radius: var(--pilule);
+  white-space: nowrap;
+  transition: color var(--transition), background var(--transition);
 }
 
-nav.main a:hover, nav.main a.active {
-  color: var(--brique);
-  border-bottom-color: var(--ocre);
+nav.main a:hover {
+  color: #fff;
+  background: rgba(255,255,255,.1);
   text-decoration: none;
 }
 
-/* Hero */
+nav.main a.active { color: var(--nuit); background: var(--ocre); }
+
+.nav-cta {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--nuit);
+  background: var(--surface);
+  padding: 11px 20px;
+  border-radius: var(--pilule);
+  white-space: nowrap;
+  transition: background var(--transition), transform var(--transition);
+}
+
+.nav-cta:hover {
+  background: var(--ocre-clair);
+  transform: translateY(-1px);
+  text-decoration: none;
+}
+
+
+/* ---------- Héros ---------- */
+
 .hero {
-  background: linear-gradient(135deg, var(--brique) 0%, #5C2A1B 100%);
-  color: var(--surface);
-  padding: 80px 16px;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: var(--nuit);
+  color: #fff;
+  border-radius: 0 0 var(--r-xl) var(--r-xl);
+  padding: 118px 20px 92px;
+
+  /* Deux panneaux photo encadrent la colonne de texte, comme sur les
+     sites de maîtrise d'œuvre : la photo porte le message, le texte reste
+     lisible au centre. */
+  display: grid;
+  grid-template-columns: minmax(0,1fr) minmax(0,2.1fr) minmax(0,1fr);
+  align-items: stretch;
+  gap: 34px;
+}
+
+/* Halo ocre qui dérive lentement derrière la colonne centrale. */
+.hero::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  top: -20%; left: 50%;
+  width: 60vw; height: 60vw;
+  min-width: 420px; min-height: 420px;
+  margin-left: -30vw;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: .3;
+  background: radial-gradient(circle, rgba(210,155,72,.75), transparent 68%);
+  animation: derive 20s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes derive {
+  from { transform: translate3d(0,0,0) scale(1); }
+  to   { transform: translate3d(4vw,7vh,0) scale(1.2); }
+}
+
+
+/* --- Panneaux photo latéraux --- */
+
+.hero-panneau {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  min-height: 460px;
+  border-radius: var(--r-l);
+  background: var(--nuit-clair);
+  box-shadow: 0 20px 50px rgba(0,0,0,.32);
+}
+
+/* Chaque diapositive porte un dégradé de repli SOUS la photo : tant
+   qu'aucun fichier n'est déposé dans assets/hero/, le panneau reste beau
+   au lieu d'afficher un carré vide. */
+.diapo {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transform: scale(1.06);
+  transition: opacity 1.4s ease, transform 7s linear;
+}
+
+.diapo.actif { opacity: 1; transform: scale(1); }
+
+.diapo:nth-child(1) { background-image: url("../assets/hero/1.jpg"), linear-gradient(150deg, #6B4030, #3A211A); }
+.diapo:nth-child(2) { background-image: url("../assets/hero/2.jpg"), linear-gradient(150deg, #8A5A3C, #46251A); }
+.diapo:nth-child(3) { background-image: url("../assets/hero/3.jpg"), linear-gradient(150deg, #B08050, #55301F); }
+.diapo:nth-child(4) { background-image: url("../assets/hero/4.jpg"), linear-gradient(150deg, #5E3A2C, #2E1913); }
+
+/* Voile bas pour que rien ne vienne concurrencer le texte central. */
+.hero-panneau::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(36,19,16,.12), rgba(36,19,16,.55));
+  pointer-events: none;
+}
+
+
+/* --- Colonne centrale --- */
+
+.hero-centre {
+  position: relative;
+  z-index: 2;
   text-align: center;
+  align-self: center;
+  padding: 24px 0;
+}
+
+.hero .surtitre {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--ocre-clair);
+  margin-bottom: 22px;
 }
 
 .hero h1 {
-  font-size: 48px;
-  margin: 0 0 16px 0;
-  font-weight: 700;
+  font-size: clamp(32px, 4.6vw, 54px);
+  line-height: 1.12;
+  letter-spacing: -.025em;
+  margin: 0 0 20px;
+  font-weight: 800;
+  text-wrap: balance;
 }
+
+.hero h1 em { font-style: normal; color: var(--ocre); }
 
 .hero p {
-  font-size: 20px;
-  margin: 0 0 32px 0;
-  opacity: 0.95;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
+  font-size: clamp(15px, 1.5vw, 17px);
+  margin: 0 auto 34px;
+  max-width: 540px;
+  color: rgba(255,255,255,.76);
+  text-wrap: pretty;
 }
 
-.hero .cta {
+.hero-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+
+/* ---------- Boutons ---------- */
+
+.cta, .btn {
   display: inline-block;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 15px 30px;
+  border-radius: var(--pilule);
   background: var(--ocre);
-  color: var(--encre);
-  padding: 14px 32px;
-  border-radius: 6px;
-  font-weight: 600;
-  transition: background .15s, transform .08s;
+  color: var(--nuit);
+  box-shadow: 0 6px 18px rgba(210,155,72,.28);
+  transition: transform var(--transition), box-shadow var(--transition),
+              background var(--transition), color var(--transition);
 }
 
-.hero .cta:hover {
-  background: var(--ocre-light);
-  transform: translateY(-2px);
+.cta:hover, .btn:hover {
+  background: var(--ocre-clair);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(210,155,72,.4);
   text-decoration: none;
 }
 
-/* Main container */
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 16px;
+.cta:active, .btn:active { transform: translateY(-1px); }
+
+.btn.fantome {
+  background: transparent;
+  color: #fff;
+  border: 1.5px solid rgba(255,255,255,.4);
+  box-shadow: none;
 }
 
-/* Sections */
-section {
-  padding: 64px 0;
+.btn.fantome:hover {
+  background: rgba(255,255,255,.12);
+  border-color: #fff;
+  color: #fff;
+  box-shadow: none;
 }
+
+.btn.sombre {
+  background: var(--brique);
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(126,59,42,.26);
+}
+
+.btn.sombre:hover {
+  background: var(--brique-fonce);
+  color: #fff;
+  box-shadow: 0 12px 30px rgba(126,59,42,.34);
+}
+
+
+/* ---------- Structure ---------- */
+
+.container { max-width: 1180px; margin: 0 auto; padding: 0 20px; }
+
+section { padding: 84px 0; }
 
 section h2 {
-  font-size: 32px;
-  margin: 0 0 48px 0;
+  font-size: clamp(26px, 3.6vw, 38px);
+  letter-spacing: -.02em;
+  margin: 0 0 14px;
   text-align: center;
   color: var(--brique);
-  position: relative;
-  padding-bottom: 16px;
+  text-wrap: balance;
 }
 
 section h2::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80px;
+  content: "";
+  display: block;
+  width: 68px;
   height: 4px;
-  background: var(--ocre);
-  border-radius: 2px;
+  margin: 18px auto 0;
+  border-radius: var(--pilule);
+  background: linear-gradient(90deg, var(--ocre), var(--brique-clair));
 }
 
-/* Grid */
+
+/* ---------- Cartes ---------- */
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 24px;
-  margin-top: 40px;
+  margin-top: 48px;
 }
 
 .card {
-  background: var(--surface);
-  border: 1px solid var(--filet);
-  border-radius: 8px;
-  padding: 24px;
-  box-shadow: var(--ombre);
-  transition: box-shadow .15s, transform .08s;
-}
-
-.card:hover {
-  box-shadow: var(--ombre-h);
-  transform: translateY(-4px);
-}
-
-.card h3 {
-  color: var(--brique);
-  margin: 0 0 12px 0;
-  font-size: 18px;
-}
-
-.card p {
-  margin: 0;
-  font-size: 14px;
-  color: var(--gris);
-}
-
-/* Projets */
-.projet {
-  background: var(--surface);
-  border: 1px solid var(--filet);
-  border-radius: 8px;
+  position: relative;
   overflow: hidden;
-  box-shadow: var(--ombre);
-  margin-bottom: 24px;
+  background: var(--surface);
+  border: 1px solid var(--filet);
+  border-radius: var(--r-m);
+  padding: 30px 26px;
+  box-shadow: var(--ombre-s);
+  transition: transform var(--transition), box-shadow var(--transition),
+              border-color var(--transition);
 }
+
+/* Un filet ocre se déploie en haut de la carte au survol. */
+.card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--ocre), var(--brique-clair));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--transition);
+}
+
+.card:hover { transform: translateY(-6px); box-shadow: var(--ombre-l); border-color: transparent; }
+.card:hover::before { transform: scaleX(1); }
+
+.card h3 { color: var(--brique); margin: 0 0 10px; font-size: 19px; letter-spacing: -.01em; }
+.card p  { margin: 0; font-size: 15px; color: var(--gris); }
+
+
+/* ---------- Projets ---------- */
+
+.projet {
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--filet);
+  border-radius: var(--r-l);
+  box-shadow: var(--ombre-s);
+  margin-bottom: 28px;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.projet:hover { transform: translateY(-5px); box-shadow: var(--ombre-l); }
 
 .projet-image {
-  width: 100%;
-  height: 240px;
-  background: #E8E2D5;
+  position: relative;
+  overflow: hidden;
+  height: 260px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--gris);
   font-size: 14px;
-  font-weight: 600;
-}
-
-.projet-content {
-  padding: 24px;
-}
-
-.projet h3 {
-  margin: 0 0 8px 0;
+  font-weight: 700;
+  letter-spacing: .04em;
   color: var(--brique);
-  font-size: 20px;
+  background: linear-gradient(135deg, var(--fond-tiede), #E2D8C6);
 }
+
+/* Balayage lumineux au survol, en attendant les vraies photos. */
+.projet-image::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 38%, rgba(255,255,255,.55) 50%, transparent 62%);
+  transform: translateX(-100%);
+  transition: transform .9s cubic-bezier(.22,.61,.36,1);
+}
+
+.projet:hover .projet-image::after { transform: translateX(100%); }
+
+.projet-content { padding: 30px 28px; }
+.projet h3 { margin: 0 0 6px; color: var(--brique); font-size: 22px; letter-spacing: -.01em; }
 
 .projet-meta {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 16px;
-  margin: 16px 0;
-  padding: 16px 0;
-  border-top: 1px solid var(--filet);
-  border-bottom: 1px solid var(--filet);
+  gap: 18px;
+  margin: 22px 0;
+  padding: 20px;
+  border-radius: var(--r-s);
+  background: var(--fond);
 }
 
-.meta-item {
-  font-size: 13px;
-}
+.meta-item { font-size: 13px; }
 
 .meta-label {
   color: var(--gris);
   text-transform: uppercase;
   font-weight: 700;
-  letter-spacing: 0.05em;
+  letter-spacing: .06em;
+  font-size: 11px;
 }
 
-.meta-value {
-  color: var(--brique);
-  font-weight: 600;
-  margin-top: 4px;
-}
+.meta-value { color: var(--brique); font-weight: 700; margin-top: 5px; font-size: 15px; }
 
-.projet p {
-  margin: 0;
-  color: var(--gris);
-  font-size: 14px;
-  line-height: 1.7;
-}
+.projet p { margin: 0; color: var(--gris); font-size: 15px; }
 
-.projet a {
+.projet a[href] {
   display: inline-block;
-  margin-top: 16px;
-  padding: 10px 16px;
+  margin-top: 20px;
+  padding: 12px 24px;
+  border-radius: var(--pilule);
   background: var(--brique);
-  color: var(--surface);
-  border-radius: 4px;
-  font-weight: 600;
-  font-size: 13px;
-  transition: background .15s;
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  transition: background var(--transition), transform var(--transition),
+              box-shadow var(--transition);
 }
 
-.projet a:hover {
-  background: #5C2A1B;
+.projet a[href]:hover {
+  background: var(--brique-fonce);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(126,59,42,.3);
   text-decoration: none;
 }
 
-/* Footer */
-footer {
-  background: var(--brique);
-  color: var(--surface);
-  padding: 40px 16px;
-  text-align: center;
-  margin-top: 80px;
-}
 
-footer p {
-  margin: 0 0 12px 0;
-  font-size: 14px;
-}
+/* ---------- Pages intérieures ---------- */
 
-footer a {
-  color: var(--ocre);
-}
-
-footer a:hover {
-  text-decoration: underline;
-}
-
-/* Page detail */
-.page-detail {
-  padding: 48px 0;
-}
+/* La barre flottante déborde sur le contenu : les pages sans héros
+   doivent réserver la place. */
+.page-detail { padding: 122px 0 40px; }
 
 .page-detail h1 {
-  font-size: 36px;
-  margin: 0 0 16px 0;
+  font-size: clamp(28px, 4.4vw, 44px);
+  letter-spacing: -.02em;
+  margin: 0 0 18px;
   color: var(--brique);
+  text-wrap: balance;
 }
 
 .page-detail-intro {
   font-size: 18px;
   color: var(--gris);
-  margin: 0 0 32px 0;
-  line-height: 1.7;
+  margin: 0 0 40px;
+  max-width: 760px;
+  text-wrap: pretty;
 }
 
 .breadcrumb {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--gris);
-  margin-bottom: 24px;
+  margin-bottom: 22px;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: .08em;
+  font-weight: 600;
 }
 
-.breadcrumb a {
-  color: var(--brique);
+.page-detail h2 { text-align: left; font-size: clamp(21px, 2.6vw, 28px); }
+.page-detail h2::after { margin: 14px 0 0; }
+.page-detail ul { padding-left: 22px; }
+.page-detail li { margin-bottom: 8px; }
+
+table {
+  border-radius: var(--r-s);
+  overflow: hidden;
+  box-shadow: var(--ombre-s);
+  background: var(--surface);
 }
 
-/* Form */
-.form-group {
-  margin-bottom: 20px;
-}
+
+/* ---------- Formulaire ---------- */
+
+.form-group { margin-bottom: 22px; }
 
 label {
   display: block;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
   color: var(--gris);
-  margin-bottom: 6px;
-  letter-spacing: 0.05em;
+  margin-bottom: 7px;
+  letter-spacing: .07em;
 }
 
 input, textarea, select {
   width: 100%;
-  padding: 11px 12px;
-  border: 1px solid var(--filet);
-  border-radius: 4px;
+  padding: 14px 16px;
+  border: 1.5px solid var(--filet);
+  border-radius: var(--r-xs);
   background: var(--surface);
   color: var(--encre);
   font-size: 16px;
-  transition: border-color .15s, box-shadow .15s;
   font-family: inherit;
+  transition: border-color var(--transition), box-shadow var(--transition);
 }
+
+textarea { border-radius: var(--r-s); resize: vertical; }
 
 input:focus, textarea:focus, select:focus {
   outline: none;
   border-color: var(--brique);
-  box-shadow: 0 0 0 3px rgba(126, 59, 42, .12);
+  box-shadow: 0 0 0 4px rgba(126,59,42,.12);
 }
 
-.btn {
-  padding: 12px 24px;
-  font-size: 14px;
-  font-weight: 700;
-  border: none;
-  background: var(--brique);
-  color: var(--surface);
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background .15s, transform .08s;
+
+/* ---------- Pied de page ---------- */
+
+footer {
+  margin-top: 96px;
+  padding: 56px 20px 44px;
+  text-align: center;
+  color: #fff;
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+  background: linear-gradient(160deg, var(--brique), var(--nuit));
 }
 
-.btn:hover {
-  background: #5C2A1B;
-  transform: translateY(-2px);
+footer p { margin: 0 0 12px; font-size: 15px; }
+footer a { color: var(--ocre-clair); font-weight: 600; }
+
+
+/* ---------- Apparitions au défilement ---------- */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity .7s cubic-bezier(.22,.61,.36,1),
+              transform .7s cubic-bezier(.22,.61,.36,1);
+  will-change: opacity, transform;
 }
 
-.btn:active {
-  transform: translateY(0);
+.reveal.vu { opacity: 1; transform: none; }
+
+.reveal[data-retard="1"] { transition-delay: .09s; }
+.reveal[data-retard="2"] { transition-delay: .18s; }
+.reveal[data-retard="3"] { transition-delay: .27s; }
+.reveal[data-retard="4"] { transition-delay: .36s; }
+.reveal[data-retard="5"] { transition-delay: .45s; }
+
+
+/* ---------- Écrans intermédiaires ---------- */
+
+@media (max-width: 1080px) {
+  /* Un seul panneau photo : deux colonnes latérales deviennent trop
+     étroites pour montrer quoi que ce soit d'utile. */
+  .hero { grid-template-columns: minmax(0,1fr) minmax(0,1.25fr); gap: 26px; }
+  .hero-panneau.droite { display: none; }
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .header-inner {
-    flex-direction: column;
-    gap: 16px;
-  }
 
-  nav.main {
-    gap: 16px;
-    justify-content: center;
-  }
+/* ---------- Écrans étroits ---------- */
 
-  .hero h1 {
-    font-size: 32px;
-  }
+@media (max-width: 860px) {
+  header { top: 10px; padding: 0 12px; margin-bottom: -70px; }
+  .header-inner { flex-wrap: wrap; justify-content: center; border-radius: var(--r-l); padding: 10px; }
+  .logo { height: 36px; }
+  nav.main { order: 3; width: 100%; gap: 1px; }
+  nav.main a { padding: 8px 11px; font-size: 12.5px; }
+  .nav-cta { padding: 10px 16px; font-size: 12.5px; }
 
-  .hero p {
-    font-size: 16px;
-  }
-
-  section h2 {
-    font-size: 24px;
-  }
-
-  .grid {
+  /* Les panneaux passent en bandeau unique sous le texte. */
+  .hero {
     grid-template-columns: 1fr;
+    padding: 132px 18px 30px;
+    border-radius: 0 0 var(--r-l) var(--r-l);
+    gap: 28px;
   }
+  .hero-panneau.gauche { order: 2; min-height: 240px; }
+  .hero-panneau.droite { display: none; }
+  .hero-centre { order: 1; padding: 0; }
 
-  .projet-meta {
-    grid-template-columns: 1fr;
-  }
-
-  .page-detail h1 {
-    font-size: 24px;
-  }
+  section { padding: 60px 0; }
+  .page-detail { padding: 176px 0 30px; }
+  .grid { grid-template-columns: 1fr; gap: 18px; }
+  .projet-meta { grid-template-columns: 1fr 1fr; }
+  .projet-content { padding: 24px 20px; }
+  .cta, .btn { padding: 14px 26px; width: 100%; text-align: center; }
+  .hero-actions { flex-direction: column; align-items: stretch; }
+  footer { margin-top: 64px; border-radius: var(--r-l) var(--r-l) 0 0; }
 }
 
-/* Utilities */
+
+/* ---------- Mouvement réduit ----------
+   Réglage système de l'utilisateur : on coupe tout ce qui bouge et on
+   affiche les contenus directement, sans rien casser. */
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+  .reveal { opacity: 1; transform: none; }
+}
+
+
+/* ---------- Utilitaires ---------- */
+
 .text-center { text-align: center; }
-.mt-4 { margin-top: 32px; }
-.mb-4 { margin-bottom: 32px; }
-.py-4 { padding-top: 32px; padding-bottom: 32px; }
+.mt-4 { margin-top: 36px; }
+.mb-4 { margin-bottom: 36px; }
