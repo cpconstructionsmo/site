@@ -49,7 +49,7 @@
      ajuster :
 
        1. la photo     : déposez-la dans assets/chantiers/ puis indiquez
-                         son nom dans le style="--photo: url(...)"
+                         son nom dans le style="background-image: url(...)"
        2. l'avancement : data-avancement="45" pour 45 %, la barre suit
        3. l'étape      : le texte sous la barre
 
@@ -60,7 +60,7 @@
 
 <!--
 <article class="chantier">
-  <div class="chantier-photo" style="--photo: url('assets/chantiers/exemple.jpg')"></div>
+  <div class="chantier-photo" style="background-image: url('assets/chantiers/exemple.jpg'), linear-gradient(150deg, #C9BFAC, #7E6F58);"></div>
   <div class="chantier-corps">
     <h2>Maison individuelle à Commune</h2>
     <div class="projet-meta">
@@ -92,7 +92,7 @@
 -->
 
 <article class="chantier">
-  <div class="chantier-photo" style="--photo: url('assets/chantiers/charchigne-5.jpg')"></div>
+  <div class="chantier-photo" style="background-image: url('assets/chantiers/charchigne-5.jpg'), linear-gradient(150deg, #C9BFAC, #7E6F58);"></div>
   <div class="chantier-corps">
     <h2>Maison neuve à Charchigné</h2>
     <div class="projet-meta">
@@ -119,7 +119,7 @@
 </article>
 
 <article class="chantier">
-  <div class="chantier-photo" style="--photo: url('assets/chantiers/ceauce-9.jpg')"></div>
+  <div class="chantier-photo" style="background-image: url('assets/chantiers/ceauce-9.jpg'), linear-gradient(150deg, #C9BFAC, #7E6F58);"></div>
   <div class="chantier-corps">
     <h2>Maison neuve à Ceaucé</h2>
     <div class="projet-meta">
@@ -142,6 +142,33 @@
       <p class="avancement-etape">Plancher coulé, reprise du chantier en septembre</p>
     </div>
     <a href="chantiers/ceauce.html">Voir le suivi complet</a>
+  </div>
+</article>
+
+<article class="chantier">
+  <div class="chantier-photo" style="background-image: url('assets/chantiers/saintcyr-9.jpg'), linear-gradient(150deg, #C9BFAC, #7E6F58);"></div>
+  <div class="chantier-corps">
+    <h2>Maison neuve à Saint-Cyr-en-Pail</h2>
+    <div class="projet-meta">
+      <div class="meta-item">
+        <div class="meta-label">Commune</div>
+        <div class="meta-value">Saint-Cyr-en-Pail (53)</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Nature</div>
+        <div class="meta-value">Construction neuve</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Démarrage</div>
+        <div class="meta-value">Fin juillet 2026</div>
+      </div>
+    </div>
+    <p>Construction neuve en Mayenne. Terrassement et fondations achevés, le plancher béton vient d'être coulé. Fin de maçonnerie prévue fin octobre.</p>
+    <div class="avancement" data-avancement="25">
+      <div class="avancement-barre"><span></span></div>
+      <p class="avancement-etape">Plancher béton coulé, élévation des murs à venir</p>
+    </div>
+    <a href="chantiers/saint-cyr-en-pail.html">Voir le suivi complet</a>
   </div>
 </article>
 
