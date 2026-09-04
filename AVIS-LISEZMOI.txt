@@ -1,35 +1,81 @@
-Avis Google affichés sur la page d'accueil.
+Avis Google affichés sur la page d'accueil
+==========================================
 
 Le fichier avis.json alimente la section « Ce qu'ils disent ». Tant qu'il
 ne contient aucun avis, la section ne s'affiche pas du tout : mieux vaut
 pas de rubrique qu'une rubrique vide.
 
-Pour ajouter vos avis, ouvrez votre fiche Google (Google Business
-Profile), et recopiez-les tels quels. Exemple de fichier rempli :
+Deux façons de le remplir. La première est automatique.
+
+
+1. AUTOMATIQUE — recommandé
+---------------------------
+
+Une tâche planifiée interroge votre fiche Google chaque matin et met
+avis.json à jour toute seule. Vous n'avez plus rien à faire ensuite.
+
+Ce qu'il faut préparer, une fois :
+
+  a) Sur console.cloud.google.com, créez un projet et activez l'API
+     « Places API (New) ». Un compte de facturation est exigé, même pour
+     rester dans le quota gratuit : Google demande une carte bancaire.
+
+  b) Créez une clef d'API. Restreignez-la à la seule Places API — c'est
+     une sécurité en cas de fuite.
+
+  c) Récupérez l'identifiant de votre fiche (le « Place ID ») sur
+     developers.google.com/maps/documentation/places/web-service/place-id
+     en y cherchant CP Constructions.
+
+  d) Sur GitHub, dans le dépôt : Settings → Secrets and variables →
+     Actions → New repository secret. Créez-en deux :
+
+         GOOGLE_API_KEY     votre clef
+         GOOGLE_PLACE_ID    l'identifiant de la fiche
+
+     Ces valeurs restent chez GitHub. Elles ne sont jamais publiées avec
+     le site, et un visiteur ne peut pas les lire.
+
+  e) Onglet Actions → « Rafraîchir les avis Google » → Run workflow, pour
+     vérifier tout de suite que ça marche.
+
+Ce que vous devez savoir :
+
+  - Google ne rend que CINQ avis par fiche, et c'est lui qui choisit
+    lesquels. On ne peut pas en afficher davantage par cette voie.
+  - Les avis sans texte sont écartés : une note nue ne fait pas un
+    témoignage lisible.
+  - La note moyenne et le nombre total d'avis sont récupérés aussi, et
+    affichés sous le titre.
+
+
+2. MANUEL
+---------
+
+Si vous préférez ne pas ouvrir de compte Google Cloud, recopiez vos avis
+à la main dans avis.json :
 
 {
   "lien_google": "https://g.page/r/VOTRE-IDENTIFIANT/review",
+  "note_moyenne": 4.9,
+  "nombre_avis": 27,
   "avis": [
     {
       "auteur": "Prénom Nom",
       "date": "il y a 2 mois",
       "note": 5,
       "texte": "Le texte de l'avis, recopié mot pour mot."
-    },
-    {
-      "auteur": "Autre Personne",
-      "date": "il y a 6 mois",
-      "note": 5,
-      "texte": "Un autre avis."
     }
   ]
 }
 
-Deux points importants :
+Recopiez-les mot pour mot, sans les retoucher. Un avis inventé ou
+réécrit est une fausse allégation commerciale, sanctionnable.
 
-  - Recopiez les avis mot pour mot, sans les retoucher. Un avis inventé
-    ou réécrit est une fausse allégation commerciale, sanctionnable.
-  - "lien_google" est facultatif. S'il est renseigné, un bouton
-    « Voir tous nos avis sur Google » apparaît sous les avis.
+Cette voie n'a pas la limite des cinq avis : vous pouvez en mettre
+autant que vous voulez. En revanche, si l'automatisation est active,
+elle écrasera vos ajouts au prochain passage — choisissez l'une ou
+l'autre, pas les deux.
 
-Le champ "note" va de 1 à 5 et dessine les étoiles.
+Le champ "note" va de 1 à 5 et dessine les étoiles. "lien_google",
+"note_moyenne" et "nombre_avis" sont facultatifs.

@@ -870,3 +870,13 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
   background-image: url("../assets/projets/magny-3.jpg"),
                     linear-gradient(140deg, #A99C86, #564C3D);
 }
+
+.avis-resume[hidden] { display: none; }
+
+.avis-resume {
+  margin: 18px 0 0;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ocre);
+}
