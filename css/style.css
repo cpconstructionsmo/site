@@ -888,6 +888,29 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
   color: var(--gris);
 }
 
+/* Photo d'illustration libre de droits dans un article : même principe
+   que les vidéos, l'image garde son format naturel (souvent portrait)
+   au lieu d'être forcée dans le cadre 16/10 des photos de chantier. */
+.article-photo {
+  margin: 0 0 44px;
+  text-align: center;
+}
+
+.article-photo img {
+  display: inline-block;
+  max-width: min(100%, 480px);
+  width: 100%;
+  border-radius: var(--r-l);
+  box-shadow: var(--ombre-m);
+}
+
+.article-photo figcaption {
+  margin-top: 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gris);
+}
+
 /* Vignette d'un projet dans une liste. */
 .projet-image[data-photo="1"] {
   background-image: url("../assets/projets/magny-1.jpg"),
