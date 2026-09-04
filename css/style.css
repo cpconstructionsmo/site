@@ -215,6 +215,18 @@ nav.main a.active { color: var(--nuit); background: var(--ocre); }
 
 .diapo.actif { opacity: 1; transform: scale(1); }
 
+/* Une diapositive peut porter une vidéo. Le poster (la photo .jpg) occupe
+   la place pendant le chargement et reste affiché si le .mp4 manque ; le
+   dégradé de repli est encore en dessous. */
+.diapo-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 .diapo:nth-child(1) { background-image: url("../assets/hero/1.jpg"), linear-gradient(150deg, #6B4030, #3A211A); }
 .diapo:nth-child(2) { background-image: url("../assets/hero/2.jpg"), linear-gradient(150deg, #8A5A3C, #46251A); }
 .diapo:nth-child(3) { background-image: url("../assets/hero/3.jpg"), linear-gradient(150deg, #B08050, #55301F); }
@@ -660,3 +672,201 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
 .text-center { text-align: center; }
 .mt-4 { margin-top: 36px; }
 .mb-4 { margin-bottom: 36px; }
+
+
+/* ---------- Photos de projet ----------
+   Même principe que le héros : la photo se pose sur un dégradé de repli,
+   donc un fichier manquant ne laisse jamais de rectangle vide. */
+
+.photo-projet {
+  position: relative;
+  overflow: hidden;
+  margin: 0 0 44px;
+  aspect-ratio: 16 / 10;
+  border-radius: var(--r-l);
+  background-size: cover;
+  background-position: center;
+  box-shadow: var(--ombre-m);
+}
+
+.photo-projet[data-photo="1"] {
+  background-image: url("../assets/projets/magny-1.jpg"),
+                    linear-gradient(140deg, #C9BFAC, #7E6F58);
+}
+
+.photo-projet[data-photo="2"] {
+  background-image: url("../assets/projets/magny-2.jpg"),
+                    linear-gradient(140deg, #B3A894, #635847);
+}
+
+.photo-projet figcaption {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  padding: 34px 24px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(180deg, transparent, rgba(26,19,16,.75));
+}
+
+/* Vignette d'un projet dans une liste. */
+.projet-image[data-photo="1"] {
+  background-image: url("../assets/projets/magny-1.jpg"),
+                    linear-gradient(140deg, #C9BFAC, #7E6F58);
+  background-size: cover;
+  background-position: center;
+  color: transparent;
+}
+
+
+/* ---------- Encart d'appel en fin de page ---------- */
+
+.appel {
+  margin-top: 56px;
+  padding: 42px 28px;
+  text-align: center;
+  background: var(--surface);
+  border: 1px solid var(--filet);
+  border-radius: var(--r-l);
+  box-shadow: var(--ombre-s);
+}
+
+.appel h2 { text-align: center; margin-top: 0; }
+.appel h2::after { margin: 16px auto 0; }
+.appel p { color: var(--gris); margin-bottom: 26px; }
+
+
+/* ---------- Avis Google ----------
+   La section reste masquée tant qu'avis.json ne contient rien : une
+   rubrique « Ce qu'ils disent » vide dessert plus qu'elle ne sert. */
+
+#avis[hidden] { display: none; }
+
+.avis-piste {
+  display: flex;
+  gap: 20px;
+  margin-top: 48px;
+  padding: 6px 4px 20px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.avis-piste::-webkit-scrollbar { display: none; }
+
+.avis-carte {
+  flex: 0 0 min(340px, 82vw);
+  scroll-snap-align: center;
+  background: var(--surface);
+  border: 1px solid var(--filet);
+  border-radius: var(--r-m);
+  padding: 24px;
+  box-shadow: var(--ombre-s);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.avis-carte:hover { transform: translateY(-4px); box-shadow: var(--ombre-m); }
+
+.avis-tete { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+
+/* Initiale de l'auteur, faute de photo de profil accessible. */
+.avis-pastille {
+  flex: 0 0 auto;
+  width: 42px; height: 42px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  background: var(--brique);
+  color: #fff;
+  font-weight: 700;
+  font-size: 17px;
+}
+
+.avis-qui { flex: 1 1 auto; min-width: 0; }
+.avis-nom { font-weight: 700; font-size: 15px; }
+.avis-date { font-size: 12px; color: var(--gris); }
+
+.avis-etoiles { color: var(--ocre); letter-spacing: 2px; font-size: 15px; margin-bottom: 10px; }
+.avis-texte { margin: 0; font-size: 14.5px; color: var(--gris); }
+
+.avis-fleches[hidden] { display: none; }
+
+.avis-fleches { display: flex; gap: 10px; justify-content: center; margin-top: 8px; }
+
+.avis-fleches button {
+  width: 42px; height: 42px;
+  border: 1px solid var(--filet);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--brique);
+  font-size: 17px;
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition);
+}
+
+.avis-fleches button:hover { background: var(--fond-tiede); transform: translateY(-2px); }
+
+
+/* ---------- Chantiers en cours ---------- */
+
+.chantier {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: 0;
+  overflow: hidden;
+  margin-bottom: 32px;
+  background: var(--surface);
+  border: 1px solid var(--filet);
+  border-radius: var(--r-l);
+  box-shadow: var(--ombre-s);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.chantier:hover { transform: translateY(-4px); box-shadow: var(--ombre-l); }
+
+.chantier-photo {
+  min-height: 280px;
+  background-image: var(--photo), linear-gradient(150deg, #C9BFAC, #7E6F58);
+  background-size: cover;
+  background-position: center;
+}
+
+.chantier-corps { padding: 30px 28px; }
+.chantier-corps h2 { text-align: left; margin-top: 0; font-size: clamp(20px, 2.4vw, 26px); }
+.chantier-corps h2::after { margin: 14px 0 0; }
+.chantier-corps p { color: var(--gris); font-size: 15px; }
+
+.avancement { margin-top: 22px; }
+
+.avancement-barre {
+  height: 10px;
+  border-radius: var(--pilule);
+  background: var(--fond-tiede);
+  overflow: hidden;
+}
+
+.avancement-barre span {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: var(--pilule);
+  background: linear-gradient(90deg, var(--ocre), var(--brique-clair));
+  transition: width 1.2s cubic-bezier(.22,.61,.36,1);
+}
+
+.avancement-etape {
+  margin: 10px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--brique);
+}
+
+@media (max-width: 860px) {
+  .chantier { grid-template-columns: 1fr; }
+  .chantier-photo { min-height: 200px; }
+  .chantier-corps { padding: 24px 20px; }
+}
+
+.photo-projet[data-photo="3"] {
+  background-image: url("../assets/projets/magny-3.jpg"),
+                    linear-gradient(140deg, #A99C86, #564C3D);
+}

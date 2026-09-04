@@ -1,10 +1,28 @@
-Photos du bandeau d'accueil.
+Médias du bandeau d'accueil.
 
-Déposez ici 1.jpg, 2.jpg, 3.jpg et 4.jpg : elles défileront en fondu
-enchaîné dans les deux panneaux de la page d'accueil.
+Déposez ici jusqu'à quatre visuels, numérotés 1 à 4. Ils défilent en
+fondu enchaîné dans les deux panneaux de la page d'accueil.
 
-Format conseillé : portrait ou carré, au moins 900 px de large,
-moins de 400 Ko par image pour rester rapide sur mobile.
+  1.jpg à 4.jpg   photos  (ou images d'attente des vidéos)
+  1.mp4 à 4.mp4   vidéos  (facultatif)
 
-Sans ces fichiers, chaque diapositive affiche un dégradé de repli et
-la page reste correcte.
+Comment ça se comporte :
+
+  - une vidéo présente est lue en boucle, sans son ;
+  - le .jpg du même numéro s'affiche pendant son chargement ;
+  - sans vidéo, le .jpg seul est utilisé ;
+  - sans rien, un dégradé de repli prend la place et la page reste
+    présentable.
+
+Sur téléphone, et pour les visiteurs ayant demandé moins d'animations,
+les vidéos ne sont pas chargées du tout : seules les photos s'affichent.
+Cela évite de consommer plusieurs mégaoctets de forfait mobile pour un
+fond décoratif.
+
+Formats conseillés :
+
+  photos  portrait ou carré, 900 px de large au minimum, moins de 400 Ko
+  vidéos  MP4 H.264, portrait, 5 à 10 s, sans son, moins de 3 Mo
+
+Les panneaux sont hauts et étroits : un visuel panoramique s'y recadre
+mal, préférez le portrait.

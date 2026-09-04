@@ -21,9 +21,18 @@
   }
 
   /* --- 2. Diaporama des panneaux du héros ---
-     Chaque panneau enchaîne ses diapositives en fondu. Les deux panneaux
-     sont décalés dans le temps pour ne pas basculer à l'unisson, ce qui
-     ferait clignoter toute la page d'un coup. */
+     Chaque panneau enchaîne ses diapositives en fondu. Une diapositive
+     peut porter une vidéo : on ne la lit que lorsqu'elle est visible,
+     pour ne pas faire tourner quatre décodeurs en même temps.
+
+     Sur mobile et en mouvement réduit, les vidéos sont retirées : il
+     reste le poster (la photo). Quelques mégaoctets de vidéo sur un
+     forfait 4G, pour un fond décoratif, ne se justifient pas. */
+
+  var ecranEtroit = window.matchMedia &&
+    window.matchMedia('(max-width: 860px)').matches;
+
+  var sansVideo = ecranEtroit || mouvementReduit;
 
   var panneaux = document.querySelectorAll('.hero-panneau');
 
@@ -31,17 +40,48 @@
     var diapos = panneau.querySelectorAll('.diapo');
     if (!diapos.length) return;
 
-    diapos[0].classList.add('actif');
-    if (diapos.length < 2 || mouvementReduit) return;
+    Array.prototype.forEach.call(panneau.querySelectorAll('.diapo-video'),
+      function (v) {
+        if (sansVideo) {
+          // Le poster disparaît avec la balise ; le .jpg du dégradé CSS
+          // prend le relais.
+          v.remove();
+          return;
+        }
+        // Une source absente ou illisible laisse la place au poster.
+        v.addEventListener('error', function () { v.remove(); });
+        var src = v.querySelector('source');
+        if (src) src.addEventListener('error', function () { v.remove(); });
+      });
 
-    var courante = 0;
-    var avancer = function () {
-      diapos[courante].classList.remove('actif');
-      courante = (courante + 1) % diapos.length;
-      diapos[courante].classList.add('actif');
+    // Les deux panneaux démarrent sur des vues différentes, sinon ils
+    // affichent la même image côte à côte au chargement.
+    var courante = (indexPanneau * 2) % diapos.length;
+
+    var montrer = function (i) {
+      Array.prototype.forEach.call(diapos, function (d, j) {
+        var actif = (j === i);
+        d.classList.toggle('actif', actif);
+        var v = d.querySelector('.diapo-video');
+        if (!v) return;
+        if (actif) {
+          var lecture = v.play();
+          if (lecture && lecture.catch) lecture.catch(function () {});
+        } else {
+          v.pause();
+        }
+      });
     };
 
-    // Décalage initial : le second panneau démarre à contretemps.
+    montrer(courante);
+    if (diapos.length < 2 || mouvementReduit) return;
+
+    var avancer = function () {
+      courante = (courante + 1) % diapos.length;
+      montrer(courante);
+    };
+
+    // Décalage initial pour que les panneaux ne basculent pas ensemble.
     window.setTimeout(function () {
       window.setInterval(avancer, 5200);
     }, indexPanneau * 2600);
@@ -80,15 +120,117 @@
       racine.querySelectorAll('[data-compteur]'), compter);
   }
 
-  /* --- 4. Apparitions au défilement ---
+  /* --- 4. Avis Google ---
+     Les avis vivent dans avis.json, à la racine du site, pour qu'ils
+     puissent être mis à jour sans toucher au HTML. Tant que le fichier
+     est vide ou illisible, la section reste masquée. */
+
+  var sectionAvis = document.getElementById('avis');
+
+  if (sectionAvis && window.fetch) {
+    fetch('avis.json', { cache: 'no-cache' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (donnees) {
+        if (!donnees || !donnees.avis || !donnees.avis.length) return;
+        afficherAvis(donnees);
+      })
+      .catch(function () { /* section laissée masquée */ });
+  }
+
+  function afficherAvis(donnees) {
+    var piste = sectionAvis.querySelector('.avis-piste');
+
+    donnees.avis.forEach(function (avis) {
+      var carte = document.createElement('article');
+      carte.className = 'avis-carte';
+
+      var tete = document.createElement('div');
+      tete.className = 'avis-tete';
+
+      var pastille = document.createElement('div');
+      pastille.className = 'avis-pastille';
+      pastille.textContent = (avis.auteur || '?').trim().charAt(0).toUpperCase();
+
+      var qui = document.createElement('div');
+      qui.className = 'avis-qui';
+      var nom = document.createElement('div');
+      nom.className = 'avis-nom';
+      nom.textContent = avis.auteur || '';
+      var date = document.createElement('div');
+      date.className = 'avis-date';
+      date.textContent = avis.date || '';
+      qui.appendChild(nom);
+      qui.appendChild(date);
+
+      tete.appendChild(pastille);
+      tete.appendChild(qui);
+
+      var note = Math.max(0, Math.min(5, parseInt(avis.note, 10) || 0));
+      var etoiles = document.createElement('div');
+      etoiles.className = 'avis-etoiles';
+      etoiles.textContent = '★★★★★'.slice(0, note) + '☆☆☆☆☆'.slice(0, 5 - note);
+      etoiles.setAttribute('aria-label', note + ' étoiles sur 5');
+
+      var texte = document.createElement('p');
+      texte.className = 'avis-texte';
+      // textContent, jamais innerHTML : le contenu est recopié depuis
+      // Google, il n'a pas à pouvoir injecter du balisage.
+      texte.textContent = avis.texte || '';
+
+      carte.appendChild(tete);
+      carte.appendChild(etoiles);
+      carte.appendChild(texte);
+      piste.appendChild(carte);
+    });
+
+    if (donnees.lien_google) {
+      var lien = sectionAvis.querySelector('.avis-lien');
+      lien.href = donnees.lien_google;
+      lien.hidden = false;
+    }
+
+    // Les flèches ne servent que s'il y a de quoi défiler.
+    var fleches = sectionAvis.querySelector('.avis-fleches');
+    var defiler = function (sens) {
+      var carte = piste.querySelector('.avis-carte');
+      piste.scrollBy({ left: sens * (carte.offsetWidth + 20), behavior: 'smooth' });
+    };
+    fleches.querySelector('[data-sens="-1"]').addEventListener('click', function () { defiler(-1); });
+    fleches.querySelector('[data-sens="1"]').addEventListener('click', function () { defiler(1); });
+
+    sectionAvis.hidden = false;   // avant toute mesure : masqué, tout vaut zéro
+
+    var majFleches = function () {
+      fleches.hidden = piste.scrollWidth <= piste.clientWidth + 4;
+    };
+    majFleches();
+    window.addEventListener('resize', majFleches, { passive: true });
+  }
+
+  /* --- 5. Barres d'avancement des chantiers ---
+     La largeur finale est portée par data-avancement ; la barre part de
+     zéro et s'y rend une fois le bloc à l'écran. */
+
+  var barres = document.querySelectorAll('.avancement[data-avancement]');
+
+  function remplir(bloc) {
+    var pct = Math.max(0, Math.min(100, parseInt(bloc.getAttribute('data-avancement'), 10) || 0));
+    var span = bloc.querySelector('.avancement-barre span');
+    if (span) span.style.width = pct + '%';
+  }
+
+  /* --- 6. Apparitions au défilement ---
      Sans IntersectionObserver, ou en mouvement réduit, on ne pose jamais
      la classe .reveal : les contenus restent simplement visibles. */
 
-  if (mouvementReduit || !('IntersectionObserver' in window)) return;
+  if (mouvementReduit || !('IntersectionObserver' in window)) {
+    Array.prototype.forEach.call(barres, remplir);
+    return;
+  }
 
   var candidats = document.querySelectorAll(
     'section > h2, section > .container > h2, ' +
-    '.card, .projet, .grid > *, ' +
+    '.card, .projet, .chantier, .grid > *, ' +
     '.page-detail > section, .page-detail-intro, table'
   );
 
@@ -122,6 +264,8 @@
       entree.target.classList.add('vu');
       observateur.unobserve(entree.target);
       compterDans(entree.target);
+      Array.prototype.forEach.call(
+        entree.target.querySelectorAll('.avancement[data-avancement]'), remplir);
     });
   }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
 

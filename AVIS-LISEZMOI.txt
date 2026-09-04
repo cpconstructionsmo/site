@@ -1,0 +1,35 @@
+Avis Google affichés sur la page d'accueil.
+
+Le fichier avis.json alimente la section « Ce qu'ils disent ». Tant qu'il
+ne contient aucun avis, la section ne s'affiche pas du tout : mieux vaut
+pas de rubrique qu'une rubrique vide.
+
+Pour ajouter vos avis, ouvrez votre fiche Google (Google Business
+Profile), et recopiez-les tels quels. Exemple de fichier rempli :
+
+{
+  "lien_google": "https://g.page/r/VOTRE-IDENTIFIANT/review",
+  "avis": [
+    {
+      "auteur": "Prénom Nom",
+      "date": "il y a 2 mois",
+      "note": 5,
+      "texte": "Le texte de l'avis, recopié mot pour mot."
+    },
+    {
+      "auteur": "Autre Personne",
+      "date": "il y a 6 mois",
+      "note": 5,
+      "texte": "Un autre avis."
+    }
+  ]
+}
+
+Deux points importants :
+
+  - Recopiez les avis mot pour mot, sans les retoucher. Un avis inventé
+    ou réécrit est une fausse allégation commerciale, sanctionnable.
+  - "lien_google" est facultatif. S'il est renseigné, un bouton
+    « Voir tous nos avis sur Google » apparaît sous les avis.
+
+Le champ "note" va de 1 à 5 et dessine les étoiles.
