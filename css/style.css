@@ -900,6 +900,97 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
                     linear-gradient(140deg, #999E9E, #303436);
 }
 
+/* Chantier de Saint-Julien-sur-Sarthe, dans l'ordre chronologique. */
+.photo-projet[data-photo="saintjulien-1"] {
+  background-image: url("../assets/chantiers/saintjulien-1.jpg"),
+                    linear-gradient(140deg, #C9C2A8, #6E6A50);
+}
+
+.photo-projet[data-photo="saintjulien-2"] {
+  background-image: url("../assets/chantiers/saintjulien-2.jpg"),
+                    linear-gradient(140deg, #C0B9A0, #656148);
+}
+
+.photo-projet[data-photo="saintjulien-3"] {
+  background-image: url("../assets/chantiers/saintjulien-3.jpg"),
+                    linear-gradient(140deg, #B7B098, #5C5840);
+}
+
+.photo-projet[data-photo="saintjulien-4"] {
+  background-image: url("../assets/chantiers/saintjulien-4.jpg"),
+                    linear-gradient(140deg, #AEA890, #534F39);
+}
+
+.photo-projet[data-photo="saintjulien-5"] {
+  background-image: url("../assets/chantiers/saintjulien-5.jpg"),
+                    linear-gradient(140deg, #A5A088, #4A4732);
+}
+
+.photo-projet[data-photo="saintjulien-6"] {
+  background-image: url("../assets/chantiers/saintjulien-6.jpg"),
+                    linear-gradient(140deg, #9C9780, #41402C);
+}
+
+.photo-projet[data-photo="saintjulien-7"] {
+  background-image: url("../assets/chantiers/saintjulien-7.jpg"),
+                    linear-gradient(140deg, #93A0B4, #40454A);
+}
+
+.photo-projet[data-photo="saintjulien-8"] {
+  background-image: url("../assets/chantiers/saintjulien-8.jpg"),
+                    linear-gradient(140deg, #8AA7A9, #383D40);
+}
+
+.photo-projet[data-photo="saintjulien-9"] {
+  background-image: url("../assets/chantiers/saintjulien-9.jpg"),
+                    linear-gradient(140deg, #819E9E, #303436);
+}
+
+.photo-projet[data-photo="saintjulien-10"] {
+  background-image: url("../assets/chantiers/saintjulien-10.jpg"),
+                    linear-gradient(140deg, #C9BFAC, #7E6F58);
+}
+
+.photo-projet[data-photo="saintjulien-11"] {
+  background-image: url("../assets/chantiers/saintjulien-11.jpg"),
+                    linear-gradient(140deg, #B3A894, #635847);
+}
+
+.photo-projet[data-photo="saintjulien-12"] {
+  background-image: url("../assets/chantiers/saintjulien-12.jpg"),
+                    linear-gradient(140deg, #9DA0A4, #4A4E50);
+}
+
+.photo-projet[data-photo="saintjulien-13"] {
+  background-image: url("../assets/chantiers/saintjulien-13.jpg"),
+                    linear-gradient(140deg, #8A9296, #3A3E40);
+}
+
+.photo-projet[data-photo="saintjulien-14"] {
+  background-image: url("../assets/chantiers/saintjulien-14.jpg"),
+                    linear-gradient(140deg, #B0A88C, #584F38);
+}
+
+.photo-projet[data-photo="saintjulien-15"] {
+  background-image: url("../assets/chantiers/saintjulien-15.jpg"),
+                    linear-gradient(140deg, #A79F84, #4F4730);
+}
+
+.photo-projet[data-photo="saintjulien-16"] {
+  background-image: url("../assets/chantiers/saintjulien-16.jpg"),
+                    linear-gradient(140deg, #9E9E9E, #4A4A4A);
+}
+
+.photo-projet[data-photo="saintjulien-17"] {
+  background-image: url("../assets/chantiers/saintjulien-17.jpg"),
+                    linear-gradient(140deg, #8C9294, #3D4142);
+}
+
+.photo-projet[data-photo="saintjulien-18"] {
+  background-image: url("../assets/chantiers/saintjulien-18.jpg"),
+                    linear-gradient(140deg, #7A8586, #2E3334);
+}
+
 .photo-projet figcaption {
   position: absolute;
   left: 0; right: 0; bottom: 0;
