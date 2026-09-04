@@ -49,6 +49,15 @@ if (!reponse.ok) {
 }
 
 const fiche = await reponse.json();
+
+// Diagnostic : la fiche peut afficher des avis sur Maps sans que l'API
+// les rende (délai de propagation, palier de facturation...). Ce résumé
+// permet de voir précisément ce que Google a répondu, sans avoir à
+// deviner. Rien de sensible : ce ne sont que des données déjà publiques
+// sur la fiche.
+console.log('Réponse Google — clefs reçues :', Object.keys(fiche).join(', ') || '(aucune)');
+console.log('Réponse Google — contenu :', JSON.stringify(fiche));
+
 const brut = fiche.reviews ?? [];
 
 // L'API ne rend que les avis publics de la fiche, cinq au maximum. On ne
