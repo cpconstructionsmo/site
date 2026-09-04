@@ -730,6 +730,57 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
                     linear-gradient(140deg, #94886F, #453B2C);
 }
 
+/* Chantier de Ceaucé, dans l'ordre chronologique. */
+.photo-projet[data-photo="ceauce-1"] {
+  background-image: url("../assets/chantiers/ceauce-1.jpg"),
+                    linear-gradient(140deg, #C7B99C, #6E5C40);
+}
+
+.photo-projet[data-photo="ceauce-2"] {
+  background-image: url("../assets/chantiers/ceauce-2.jpg"),
+                    linear-gradient(140deg, #B8AA8C, #5F4E36);
+}
+
+.photo-projet[data-photo="ceauce-3"] {
+  background-image: url("../assets/chantiers/ceauce-3.jpg"),
+                    linear-gradient(140deg, #ACA083, #55452F);
+}
+
+.photo-projet[data-photo="ceauce-4"] {
+  background-image: url("../assets/chantiers/ceauce-4.jpg"),
+                    linear-gradient(140deg, #A79A7C, #504029);
+}
+
+.photo-projet[data-photo="ceauce-5"] {
+  background-image: url("../assets/chantiers/ceauce-5.jpg"),
+                    linear-gradient(140deg, #9F9375, #4A3B26);
+}
+
+.photo-projet[data-photo="ceauce-6"] {
+  background-image: url("../assets/chantiers/ceauce-6.jpg"),
+                    linear-gradient(140deg, #97917E, #443F30);
+}
+
+.photo-projet[data-photo="ceauce-7"] {
+  background-image: url("../assets/chantiers/ceauce-7.jpg"),
+                    linear-gradient(140deg, #A6ADB4, #3E444A);
+}
+
+.photo-projet[data-photo="ceauce-8"] {
+  background-image: url("../assets/chantiers/ceauce-8.jpg"),
+                    linear-gradient(140deg, #9CA4AC, #383E44);
+}
+
+.photo-projet[data-photo="ceauce-9"] {
+  background-image: url("../assets/chantiers/ceauce-9.jpg"),
+                    linear-gradient(140deg, #A8ADAF, #3C4143);
+}
+
+.photo-projet[data-photo="ceauce-10"] {
+  background-image: url("../assets/chantiers/ceauce-10.jpg"),
+                    linear-gradient(140deg, #A2A7A3, #3A3F3C);
+}
+
 .photo-projet figcaption {
   position: absolute;
   left: 0; right: 0; bottom: 0;
