@@ -1,6 +1,37 @@
 {
-  "lien_google": "https://maps.google.com/?cid=4142280286902618268&g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNlEAIYBCAA",
-  "note_moyenne": null,
-  "nombre_avis": null,
-  "avis": []
+  "lien_google": "https://maps.google.com/?cid=627876290551233175&g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNlEAIYBCAA",
+  "note_moyenne": 5,
+  "nombre_avis": 12,
+  "avis": [
+    {
+      "auteur": "Annah Dubois",
+      "date": "il y a un mois",
+      "note": 5,
+      "texte": "Je recommande vivement ce maître d’œuvre ! Dès le premier rendez-vous, nous avons été séduits par son professionnalisme, son écoute et la qualité de ses conseils. Il prend le temps de comprendre les besoins de ses clients et apporte des solutions pertinentes, adaptées au projet et au budget.\n\nLe suivi est tout aussi sérieux : disponible, réactif et toujours de bon conseil, il inspire confiance à chaque échange. On sent une véritable implication et une réelle passion pour son métier.\n\nC’est un professionnel compétent, rigoureux et humain, que je recommande sans hésitation à toute personne souhaitant être accompagnée dans son projet."
+    },
+    {
+      "auteur": "N T",
+      "date": "il y a 6 mois",
+      "note": 5,
+      "texte": "Entreprise sérieuse et suivi impeccable ! La communication est fluide. Nous sommes totalemét satisfait de CP CONSTRUCTION et gros plus pour monsieur PORTIER qui est tres professionnel."
+    },
+    {
+      "auteur": "Melanie Wallner",
+      "date": "il y a un an",
+      "note": 5,
+      "texte": "Très satisfaits de notre expérience avec C.P.Constructions !\n\nNous avons fait construire notre maison à Alençon avec C.P.Constructions, et tout s’est parfaitement déroulé du début à la fin. Mr PORTIER a toujours été à l’écoute, professionnel et réactif à chaque étape du projet. Le chantier a été bien suivi, les délais ont été respectés, et le résultat final correspond en tous points à nos attentes.\nNous recommandons vivement cette entreprise pour son sérieux, la qualité de ses prestations, et son accompagnement humain tout au long de la construction!"
+    },
+    {
+      "auteur": "Marcel Taburet",
+      "date": "il y a 9 mois",
+      "note": 5,
+      "texte": "Artisan partenaire, je suis très satisfait de notre collaboration : sérieux bonne communication et chantier bien organisé. Je recommande ce constructeur."
+    },
+    {
+      "auteur": "Guillemette Ellien",
+      "date": "il y a 6 mois",
+      "note": 5,
+      "texte": "Claude sait répondre à nos demandes et à nos projets en toutes circonstances.\nPatiente et pertinence en sont les mots clé.\nJe recommande CP constructions !"
+    }
+  ]
 }
