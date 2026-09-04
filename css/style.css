@@ -854,6 +854,52 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
                     linear-gradient(140deg, #A2A7A3, #3A3F3C);
 }
 
+/* Chantier de Saint-Cyr-en-Pail, dans l'ordre chronologique. */
+.photo-projet[data-photo="saintcyr-1"] {
+  background-image: url("../assets/chantiers/saintcyr-1.jpg"),
+                    linear-gradient(140deg, #C7C2A8, #6E6A50);
+}
+
+.photo-projet[data-photo="saintcyr-2"] {
+  background-image: url("../assets/chantiers/saintcyr-2.jpg"),
+                    linear-gradient(140deg, #BEB9A0, #656148);
+}
+
+.photo-projet[data-photo="saintcyr-3"] {
+  background-image: url("../assets/chantiers/saintcyr-3.jpg"),
+                    linear-gradient(140deg, #B5B098, #5C5840);
+}
+
+.photo-projet[data-photo="saintcyr-4"] {
+  background-image: url("../assets/chantiers/saintcyr-4.jpg"),
+                    linear-gradient(140deg, #ACA890, #534F39);
+}
+
+.photo-projet[data-photo="saintcyr-5"] {
+  background-image: url("../assets/chantiers/saintcyr-5.jpg"),
+                    linear-gradient(140deg, #A3A088, #4A4732);
+}
+
+.photo-projet[data-photo="saintcyr-6"] {
+  background-image: url("../assets/chantiers/saintcyr-6.jpg"),
+                    linear-gradient(140deg, #9A9780, #41402C);
+}
+
+.photo-projet[data-photo="saintcyr-7"] {
+  background-image: url("../assets/chantiers/saintcyr-7.jpg"),
+                    linear-gradient(140deg, #ABB0B4, #40454A);
+}
+
+.photo-projet[data-photo="saintcyr-8"] {
+  background-image: url("../assets/chantiers/saintcyr-8.jpg"),
+                    linear-gradient(140deg, #A2A7A9, #383D40);
+}
+
+.photo-projet[data-photo="saintcyr-9"] {
+  background-image: url("../assets/chantiers/saintcyr-9.jpg"),
+                    linear-gradient(140deg, #999E9E, #303436);
+}
+
 .photo-projet figcaption {
   position: absolute;
   left: 0; right: 0; bottom: 0;
@@ -1027,7 +1073,11 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
 
 .chantier-photo {
   min-height: 280px;
-  background-image: var(--photo), linear-gradient(150deg, #C9BFAC, #7E6F58);
+  /* La photo se fixe par élément via background-image en style inline
+     (jamais par une variable CSS --photo) : une url() portée par une
+     variable personnalisée se résout par rapport à ce fichier CSS et non
+     à la page HTML, ce qui casserait tout chemin relatif. */
+  background-image: linear-gradient(150deg, #C9BFAC, #7E6F58);
   background-size: cover;
   background-position: center;
 }
