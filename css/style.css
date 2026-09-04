@@ -866,10 +866,6 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
   .chantier-corps { padding: 24px 20px; }
 }
 
-.photo-projet[data-photo="3"] {
-  background-image: url("../assets/projets/magny-3.jpg"),
-                    linear-gradient(140deg, #A99C86, #564C3D);
-}
 
 .avis-resume[hidden] { display: none; }
 
