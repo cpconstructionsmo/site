@@ -183,6 +183,15 @@
       piste.appendChild(carte);
     });
 
+    // Note moyenne et volume : c'est ce qui donne du poids aux avis.
+    if (donnees.note_moyenne) {
+      var resume = sectionAvis.querySelector('.avis-resume');
+      var moyenne = Number(donnees.note_moyenne).toFixed(1).replace('.', ',');
+      resume.textContent = moyenne + ' sur 5'
+        + (donnees.nombre_avis ? ' · ' + donnees.nombre_avis + ' avis Google' : ' sur Google');
+      resume.hidden = false;
+    }
+
     if (donnees.lien_google) {
       var lien = sectionAvis.querySelector('.avis-lien');
       lien.href = donnees.lien_google;

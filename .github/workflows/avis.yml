@@ -1,0 +1,44 @@
+name: Rafraîchir les avis Google
+
+on:
+  schedule:
+    # Tous les jours à 5 h 00 UTC, soit 7 h du matin en heure d'été.
+    - cron: '0 5 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: avis
+  cancel-in-progress: false
+
+jobs:
+  rafraichir:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Interroger la fiche Google
+        env:
+          # Ces deux valeurs vivent dans Settings → Secrets and variables
+          # → Actions. Elles ne sont jamais publiées avec le site.
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          GOOGLE_PLACE_ID: ${{ secrets.GOOGLE_PLACE_ID }}
+        run: node scripts/recuperer-avis.mjs
+
+      - name: Publier si les avis ont changé
+        run: |
+          if git diff --quiet -- avis.json; then
+            echo "Rien de neuf, pas de commit."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add avis.json
+          git commit -m "Avis Google du $(date -u +%d/%m/%Y)"
+          git push
