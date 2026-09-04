@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Financement — CP Constructions</title>
+  <meta name="description" content="Simulez la mensualité de votre prêt immobilier selon le montant, la durée et le taux d'intérêt.">
+  <link rel="icon" href="assets/logo-icon.png">
+  <link rel="stylesheet" href="css/style.css?v=14">
+  <script src="js/anim.js?v=14" defer></script>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="/" class="logo">
+      <img src="assets/logo.png" alt="CP Constructions">
+    </a>
+    <nav class="main">
+      <a href="/">Accueil</a>
+      <a href="a-propos.html">À propos</a>
+      <a href="services.html">Services</a>
+      <a href="projets.html">Projets</a>
+      <a href="chantiers.html">Chantiers en cours</a>
+      <a href="articles.html">Articles</a>
+      <a href="financement.html" class="active">Financement</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+      <a href="contact.html" class="nav-cta">Être conseillé</a>
+  </div>
+</header>
+
+<main class="container page-detail">
+
+<div class="breadcrumb">
+  <a href="/">Accueil</a> → Financement
+</div>
+
+<h1>Simulez votre financement</h1>
+<p class="page-detail-intro">
+  Ajustez le montant emprunté, la durée et le taux pour estimer la
+  mensualité de votre futur prêt immobilier, avant même d'avoir déposé
+  vos plans.
+</p>
+
+<section class="mt-4">
+  <div class="simulateur">
+
+    <div class="simulateur-entrees">
+
+      <div class="simulateur-champ">
+        <label for="fin-montant">
+          Montant emprunté
+          <span class="simulateur-valeur">
+            <input type="number" id="fin-montant" min="10000" max="1000000" step="1000" value="200000">
+            €
+          </span>
+        </label>
+        <input type="range" id="fin-montant-range" min="20000" max="600000" step="1000" value="200000" aria-label="Montant emprunté">
+      </div>
+
+      <div class="simulateur-champ">
+        <label for="fin-duree">
+          Durée du crédit
+          <span class="simulateur-valeur">
+            <input type="number" id="fin-duree" min="5" max="30" step="1" value="20">
+            ans
+          </span>
+        </label>
+        <input type="range" id="fin-duree-range" min="5" max="30" step="1" value="20" aria-label="Durée du crédit en années">
+      </div>
+
+      <div class="simulateur-champ">
+        <label for="fin-taux">
+          Taux d'intérêt
+          <span class="simulateur-valeur">
+            <input type="number" id="fin-taux" min="0.1" max="8" step="0.01" value="3.62">
+            %
+          </span>
+        </label>
+        <input type="range" id="fin-taux-range" min="0.5" max="7" step="0.01" value="3.62" aria-label="Taux d'intérêt annuel">
+        <button type="button" class="simulateur-lien-reinit" id="fin-reinit-taux">Revenir au taux indicatif pour cette durée</button>
+      </div>
+
+      <div class="simulateur-champ">
+        <label for="fin-assurance">
+          Taux d'assurance (TAEA)
+          <span class="simulateur-valeur">
+            <input type="number" id="fin-assurance" min="0" max="2" step="0.01" value="0.34">
+            %
+          </span>
+        </label>
+        <input type="range" id="fin-assurance-range" min="0" max="1.5" step="0.01" value="0.34" aria-label="Taux annuel effectif d'assurance">
+      </div>
+
+      <p class="simulateur-note">
+        Le taux d'intérêt se met à jour automatiquement selon la durée
+        choisie, à partir des taux moyens indicatifs du marché. Vous
+        pouvez le remplacer par le taux qui vous a été proposé.
+      </p>
+
+    </div>
+
+    <div class="simulateur-resultat">
+      <span class="resultat-label">Mensualité estimée</span>
+      <span class="resultat-montant"><span id="fin-mensualite">0 €</span><span class="resultat-unite">/mois</span></span>
+
+      <div class="resultat-detail">
+        <div>
+          <span>Dont assurance</span>
+          <strong id="fin-assurance-mensuelle">0 €/mois</strong>
+        </div>
+        <div>
+          <span>Coût total des intérêts</span>
+          <strong id="fin-cout-interets">0 €</strong>
+        </div>
+        <div>
+          <span>Coût total de l'assurance</span>
+          <strong id="fin-cout-assurance">0 €</strong>
+        </div>
+        <div class="resultat-total">
+          <span>Coût total du crédit</span>
+          <strong id="fin-cout-total">0 €</strong>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="simulateur-avertissement">
+    Cette simulation est fournie à titre indicatif et ne constitue ni une
+    offre de prêt, ni un engagement de CP Constructions ou d'un
+    établissement bancaire. Elle ne tient pas compte des frais de dossier,
+    de garantie, de notaire, ni d'un éventuel prêt à taux zéro (PTZ). Les
+    taux réellement accordés dépendent de votre profil, de votre apport et
+    de l'établissement prêteur : rapprochez-vous de votre banque ou d'un
+    courtier pour une offre personnalisée.
+  </div>
+</section>
+
+<section class="mt-4">
+  <h2>Exemple pour 150 000 € empruntés</h2>
+  <p>
+    À titre d'illustration, voici comment la durée du crédit fait varier
+    le taux d'intérêt et la mensualité, pour un même montant emprunté de
+    150 000 € (avec une assurance à 0,34 %).
+  </p>
+  <div style="overflow-x: auto; margin-top: 24px;">
+    <table>
+      <thead>
+        <tr>
+          <th>Durée</th>
+          <th>Taux d'intérêt</th>
+          <th>Mensualité</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>10 ans</td>
+          <td>3,46 %</td>
+          <td><strong>1 523 €</strong></td>
+        </tr>
+        <tr>
+          <td>15 ans</td>
+          <td>3,58 %</td>
+          <td><strong>1 121 €</strong></td>
+        </tr>
+        <tr>
+          <td>20 ans</td>
+          <td>3,62 %</td>
+          <td><strong>922 €</strong></td>
+        </tr>
+        <tr>
+          <td>25 ans</td>
+          <td>3,74 %</td>
+          <td><strong>813 €</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size: 12px; color: var(--gris); margin-top: 14px;">
+    Source : Meilleurtaux, taux moyens constatés début septembre 2026.
+    Une durée plus longue réduit la mensualité mais augmente le coût total du crédit.
+  </p>
+</section>
+
+<section class="appel">
+  <h2>Un projet en tête ?</h2>
+  <p>Parlons de votre financement en même temps que de vos travaux.</p>
+  <a href="contact.html" class="btn">Nous contacter</a>
+</section>
+
+</main>
+
+<footer>
+  <p><strong>CP Constructions</strong></p>
+  <p>Maîtrise d'œuvre complète • Construction • Rénovation • Extension • Surélévation</p>
+  <p style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,.2); padding-top: 20px;">
+    📞 <a href="tel:+33665676881">06 65 67 68 81</a> •
+    ✉️ <a href="mailto:contact@cpconstructions.fr">contact@cpconstructions.fr</a>
+  </p>
+  <p style="font-size: 12px; margin-top: 20px; opacity: .8;">© 2026 CP Constructions. Tous droits réservés.</p>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  var pointsTaux = [[10, 3.46], [15, 3.58], [20, 3.62], [25, 3.74]];
+
+  function tauxIndicatif(duree) {
+    if (duree <= pointsTaux[0][0]) return pointsTaux[0][1];
+    var dernier = pointsTaux[pointsTaux.length - 1];
+    if (duree >= dernier[0]) return dernier[1];
+    for (var i = 0; i < pointsTaux.length - 1; i++) {
+      var a = pointsTaux[i], b = pointsTaux[i + 1];
+      if (duree >= a[0] && duree <= b[0]) {
+        var ratio = (duree - a[0]) / (b[0] - a[0]);
+        return a[1] + (b[1] - a[1]) * ratio;
+      }
+    }
+    return dernier[1];
+  }
+
+  var montantNb = document.getElementById('fin-montant');
+  var montantRg = document.getElementById('fin-montant-range');
+  var dureeNb = document.getElementById('fin-duree');
+  var dureeRg = document.getElementById('fin-duree-range');
+  var tauxNb = document.getElementById('fin-taux');
+  var tauxRg = document.getElementById('fin-taux-range');
+  var assuranceNb = document.getElementById('fin-assurance');
+  var assuranceRg = document.getElementById('fin-assurance-range');
+  var boutonReinit = document.getElementById('fin-reinit-taux');
+
+  if (!montantNb) return; // page sans simulateur
+
+  var tauxModifieManuellement = false;
+
+  function relier(nb, rg) {
+    nb.addEventListener('input', function () { rg.value = nb.value; calculer(); });
+    rg.addEventListener('input', function () { nb.value = rg.value; calculer(); });
+  }
+
+  relier(montantNb, montantRg);
+  relier(dureeNb, dureeRg);
+  relier(assuranceNb, assuranceRg);
+
+  [tauxNb, tauxRg].forEach(function (champ) {
+    champ.addEventListener('input', function () {
+      tauxModifieManuellement = true;
+      if (champ === tauxNb) tauxRg.value = tauxNb.value;
+      else tauxNb.value = tauxRg.value;
+      calculer();
+    });
+  });
+
+  [dureeNb, dureeRg].forEach(function (champ) {
+    champ.addEventListener('input', function () {
+      if (!tauxModifieManuellement) {
+        var suggestion = tauxIndicatif(parseFloat(champ.value) || 0);
+        var arrondi = Math.round(suggestion * 100) / 100;
+        tauxNb.value = arrondi;
+        tauxRg.value = arrondi;
+      }
+    });
+  });
+
+  boutonReinit.addEventListener('click', function () {
+    var duree = parseFloat(dureeNb.value) || 20;
+    var suggestion = Math.round(tauxIndicatif(duree) * 100) / 100;
+    tauxNb.value = suggestion;
+    tauxRg.value = suggestion;
+    tauxModifieManuellement = false;
+    calculer();
+  });
+
+  function formaterEuros(n) {
+    return Math.round(n).toLocaleString('fr-FR') + ' €';
+  }
+
+  function calculer() {
+    var montant = parseFloat(montantNb.value) || 0;
+    var duree = parseFloat(dureeNb.value) || 0;
+    var tauxAnnuel = parseFloat(tauxNb.value) || 0;
+    var assuranceAnnuel = parseFloat(assuranceNb.value) || 0;
+
+    var n = duree * 12;
+    var tauxMensuel = tauxAnnuel / 100 / 12;
+
+    var mensualiteHorsAssurance;
+    if (n <= 0) {
+      mensualiteHorsAssurance = 0;
+    } else if (tauxMensuel === 0) {
+      mensualiteHorsAssurance = montant / n;
+    } else {
+      mensualiteHorsAssurance = montant * tauxMensuel /
+        (1 - Math.pow(1 + tauxMensuel, -n));
+    }
+
+    var assuranceMensuelle = montant * assuranceAnnuel / 100 / 12;
+    var mensualiteTotale = mensualiteHorsAssurance + assuranceMensuelle;
+    var coutInterets = Math.max(0, mensualiteHorsAssurance * n - montant);
+    var coutAssurance = assuranceMensuelle * n;
+    var coutTotal = montant + coutInterets + coutAssurance;
+
+    document.getElementById('fin-mensualite').textContent = formaterEuros(mensualiteTotale);
+    document.getElementById('fin-assurance-mensuelle').textContent = formaterEuros(assuranceMensuelle) + '/mois';
+    document.getElementById('fin-cout-interets').textContent = formaterEuros(coutInterets);
+    document.getElementById('fin-cout-assurance').textContent = formaterEuros(coutAssurance);
+    document.getElementById('fin-cout-total').textContent = formaterEuros(coutTotal);
+  }
+
+  calculer();
+})();
+</script>
+
+</body>
+</html>
