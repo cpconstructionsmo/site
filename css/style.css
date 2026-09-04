@@ -699,10 +699,7 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
                     linear-gradient(140deg, #B3A894, #635847);
 }
 
-/* Chantier de Charchigné. Les deux premières étapes (terrassement,
-   fondations) n'ont pas encore de photo déposée : le dégradé sert de
-   repli tant que assets/chantiers/charchigne-1.jpg et -2.jpg n'existent
-   pas. */
+/* Chantier de Charchigné, dans l'ordre chronologique. */
 .photo-projet[data-photo="charchigne-1"] {
   background-image: url("../assets/chantiers/charchigne-1.jpg"),
                     linear-gradient(140deg, #C2B49A, #6B5A42);
@@ -721,6 +718,16 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
 .photo-projet[data-photo="charchigne-4"] {
   background-image: url("../assets/chantiers/charchigne-4.jpg"),
                     linear-gradient(140deg, #9C8F79, #4E4335);
+}
+
+.photo-projet[data-photo="charchigne-5"] {
+  background-image: url("../assets/chantiers/charchigne-5.jpg"),
+                    linear-gradient(140deg, #A89A80, #4F4433);
+}
+
+.photo-projet[data-photo="charchigne-6"] {
+  background-image: url("../assets/chantiers/charchigne-6.jpg"),
+                    linear-gradient(140deg, #94886F, #453B2C);
 }
 
 .photo-projet figcaption {
