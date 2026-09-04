@@ -29,6 +29,8 @@ const url = `https://places.googleapis.com/v1/places/${encodeURIComponent(FICHE)
           + '?languageCode=fr&regionCode=FR';
 
 const champs = [
+  'displayName',   // diagnostic : confirme que GOOGLE_PLACE_ID pointe
+  'types',         // bien sur l'établissement, pas sur un lieu personnel
   'googleMapsUri',
   'rating',
   'userRatingCount',
