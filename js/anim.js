@@ -228,7 +228,28 @@
     if (span) span.style.width = pct + '%';
   }
 
-  /* --- 6. Apparitions au défilement ---
+  /* --- 6. Mini-diaporamas des chantiers en cours (page d'accueil) ---
+     Même principe que le héros, en plus simple : pas de vidéo, juste un
+     fondu entre quelques photos, à son rythme propre par carte pour que
+     les vignettes ne changent pas toutes en même temps. */
+
+  var vignettes = document.querySelectorAll('.chantier-teaser-photo');
+
+  Array.prototype.forEach.call(vignettes, function (boite, index) {
+    var diapos = boite.querySelectorAll('.mini-diapo');
+    if (diapos.length < 2 || mouvementReduit) return;
+
+    var courante = 0;
+    window.setTimeout(function () {
+      window.setInterval(function () {
+        diapos[courante].classList.remove('actif');
+        courante = (courante + 1) % diapos.length;
+        diapos[courante].classList.add('actif');
+      }, 3400);
+    }, index * 1200);
+  });
+
+  /* --- 7. Apparitions au défilement ---
      Sans IntersectionObserver, ou en mouvement réduit, on ne pose jamais
      la classe .reveal : les contenus restent simplement visibles. */
 
