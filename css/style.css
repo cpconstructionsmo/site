@@ -518,6 +518,58 @@ section h2::after {
 }
 
 
+/* ---------- Articles ---------- */
+
+.article-carte { display: flex; flex-direction: column; }
+
+.article-categorie {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--ocre);
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: .06em;
+  font-size: 11px;
+}
+
+.article-carte p { flex-grow: 1; }
+
+.article-carte a[href] {
+  display: inline-block;
+  align-self: flex-start;
+  margin-top: 18px;
+  padding: 10px 22px;
+  border-radius: var(--pilule);
+  background: var(--brique);
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  transition: background var(--transition), transform var(--transition),
+              box-shadow var(--transition);
+}
+
+.article-carte a[href]:hover {
+  background: var(--brique-fonce);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(126,59,42,.3);
+  text-decoration: none;
+}
+
+.article-section p {
+  margin: 0 0 18px;
+  color: var(--gris);
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.article-section ul {
+  margin: 0 0 18px;
+  color: var(--gris);
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+
 /* ---------- Pages intérieures ---------- */
 
 /* La barre flottante déborde sur le contenu : les pages sans héros
