@@ -733,6 +733,30 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
   background: linear-gradient(180deg, transparent, rgba(26,19,16,.75));
 }
 
+/* Vidéo de chantier, filmée verticalement au téléphone : on respecte son
+   format au lieu de la forcer dans le cadre 16/10 des photos, ce qui la
+   couperait ou la ferait flotter dans des bandes vides. */
+.video-projet {
+  margin: 0 0 44px;
+  text-align: center;
+}
+
+.video-projet video {
+  display: inline-block;
+  max-width: min(100%, 420px);
+  width: 100%;
+  border-radius: var(--r-l);
+  box-shadow: var(--ombre-m);
+  background: var(--nuit-clair);
+}
+
+.video-projet figcaption {
+  margin-top: 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gris);
+}
+
 /* Vignette d'un projet dans une liste. */
 .projet-image[data-photo="1"] {
   background-image: url("../assets/projets/magny-1.jpg"),
