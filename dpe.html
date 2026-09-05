@@ -7,8 +7,8 @@
   <meta name="description" content="Estimez le DPE de votre logement et découvrez les travaux prioritaires pour gagner des classes énergétiques.">
   <link rel="icon" href="assets/logo-icon.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-  <link rel="stylesheet" href="css/style.css?v=25">
-  <script src="js/anim.js?v=25" defer></script>
+  <link rel="stylesheet" href="css/style.css?v=26">
+  <script src="js/anim.js?v=26" defer></script>
 </head>
 <body>
 
@@ -139,6 +139,14 @@
       <h2>Décrivez votre bien</h2>
       <p class="dpe-soustitre">Ces informations permettent d'estimer les déperditions de votre logement. Plus elles sont précises, plus l'estimation et les travaux proposés le seront aussi.</p>
 
+      <div class="form-group">
+        <label>Type de bien</label>
+        <div class="dpe-choix" data-groupe="type-bien">
+          <button type="button" data-valeur="maison">Maison individuelle</button>
+          <button type="button" data-valeur="appartement">Appartement</button>
+        </div>
+      </div>
+
       <div class="dpe-grille-champs">
         <div class="form-group">
           <label for="dpe-surface">Surface habitable (m²)</label>
@@ -183,39 +191,69 @@
 
       <p class="dpe-section-titre">Structure du bâti</p>
 
-      <div class="dpe-grille-champs dpe-grille-3">
-        <div class="form-group">
-          <label>Emplacement de la maison</label>
-          <div class="dpe-choix" data-groupe="emplacement">
-            <button type="button" data-valeur="isolee">Isolée</button>
-            <button type="button" data-valeur="mitoyenne1">Mitoyenne sur 1 côté</button>
-            <button type="button" data-valeur="mitoyenne2">Mitoyenne sur 2 côtés</button>
+      <div id="dpe-structure-maison">
+        <div class="dpe-grille-champs dpe-grille-3">
+          <div class="form-group">
+            <label>Emplacement de la maison</label>
+            <div class="dpe-choix" data-groupe="emplacement">
+              <button type="button" data-valeur="isolee">Isolée</button>
+              <button type="button" data-valeur="mitoyenne1">Mitoyenne sur 1 côté</button>
+              <button type="button" data-valeur="mitoyenne2">Mitoyenne sur 2 côtés</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Forme de la maison</label>
+            <div class="dpe-choix" data-groupe="forme">
+              <button type="button" data-valeur="carree">Carrée / compacte</button>
+              <button type="button" data-valeur="rectangulaire">Rectangulaire</button>
+              <button type="button" data-valeur="l">En L</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Nombre de niveaux</label>
+            <div class="dpe-choix" data-groupe="niveaux">
+              <button type="button" data-valeur="1">1 niveau (plain-pied)</button>
+              <button type="button" data-valeur="2">2 niveaux</button>
+              <button type="button" data-valeur="3">3 niveaux ou plus</button>
+            </div>
           </div>
         </div>
-        <div class="form-group">
-          <label>Forme de la maison</label>
-          <div class="dpe-choix" data-groupe="forme">
-            <button type="button" data-valeur="carree">Carrée / compacte</button>
-            <button type="button" data-valeur="rectangulaire">Rectangulaire</button>
-            <button type="button" data-valeur="l">En L</button>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Nombre de niveaux</label>
-          <div class="dpe-choix" data-groupe="niveaux">
-            <button type="button" data-valeur="1">1 niveau (plain-pied)</button>
-            <button type="button" data-valeur="2">2 niveaux</button>
-            <button type="button" data-valeur="3">3 niveaux ou plus</button>
-          </div>
-        </div>
+        <p class="dpe-astuce">
+          Une maison compacte (carrée, plusieurs niveaux) expose moins de
+          murs et de toiture par rapport à sa surface habitable qu'une
+          maison en L de plain-pied : à isolation égale, elle perd moins
+          de chaleur. Être mitoyen réduit aussi les déperditions, le mur
+          commun n'étant pas exposé à l'extérieur.
+        </p>
       </div>
-      <p class="dpe-astuce">
-        Une maison compacte (carrée, plusieurs niveaux) expose moins de
-        murs et de toiture par rapport à sa surface habitable qu'une
-        maison en L de plain-pied : à isolation égale, elle perd moins
-        de chaleur. Être mitoyen réduit aussi les déperditions, le mur
-        commun n'étant pas exposé à l'extérieur.
-      </p>
+
+      <div id="dpe-structure-appartement" hidden>
+        <div class="dpe-grille-champs">
+          <div class="form-group">
+            <label>Position dans l'immeuble</label>
+            <div class="dpe-choix" data-groupe="position">
+              <button type="button" data-valeur="rdc">Rez-de-chaussée</button>
+              <button type="button" data-valeur="intermediaire">Étage intermédiaire</button>
+              <button type="button" data-valeur="dernier">Dernier étage</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Nombre de façades donnant sur l'extérieur</label>
+            <div class="dpe-choix" data-groupe="facades">
+              <button type="button" data-valeur="1">1 façade</button>
+              <button type="button" data-valeur="2">2 façades (traversant)</button>
+              <button type="button" data-valeur="3">3 façades ou plus</button>
+            </div>
+          </div>
+        </div>
+        <p class="dpe-astuce">
+          Un appartement d'étage intermédiaire est entouré de logements
+          chauffés : il ne perd de chaleur ni par le haut ni par le bas,
+          et consomme donc nettement moins qu'une maison de même surface.
+          Au dernier étage, la toiture devient déperditive ; au
+          rez-de-chaussée, c'est le plancher bas.
+        </p>
+      </div>
 
       <p class="dpe-section-titre">Informations complémentaires</p>
 
@@ -237,6 +275,7 @@
             <option value="h2">H2 — Ouest, Centre, Sud-Ouest (climat océanique/tempéré)</option>
             <option value="h3">H3 — Pourtour méditerranéen, Corse (hiver doux)</option>
           </select>
+          <p class="dpe-champ-note" id="dpe-zone-auto" hidden>Déduite de votre code postal — modifiable si besoin.</p>
         </div>
       </div>
       <p class="dpe-astuce">
@@ -258,7 +297,7 @@
             <button type="button" data-valeur="aucune">Aucun travaux</button>
           </div>
         </div>
-        <div class="form-group">
+        <div class="form-group" id="dpe-champ-isolation-toiture">
           <label>Dernière isolation de la toiture</label>
           <div class="dpe-choix" data-groupe="isolation-toiture">
             <button type="button" data-valeur="recente">&lt; 10 ans</button>
@@ -266,7 +305,7 @@
             <button type="button" data-valeur="aucune">Aucun travaux</button>
           </div>
         </div>
-        <div class="form-group">
+        <div class="form-group" id="dpe-champ-sous-sol">
           <label>Type de sous-sol</label>
           <div class="dpe-choix" data-groupe="sous-sol">
             <button type="button" data-valeur="terre_plein">Terre-plein</button>
@@ -274,9 +313,7 @@
             <button type="button" data-valeur="sous_sol_non_chauffe">Sous-sol non chauffé</button>
           </div>
         </div>
-      </div>
-      <div class="dpe-grille-champs dpe-grille-3">
-        <div class="form-group">
+        <div class="form-group" id="dpe-champ-isolation-sol">
           <label>Dernière isolation du plancher bas</label>
           <div class="dpe-choix" data-groupe="isolation-sol">
             <button type="button" data-valeur="recente">&lt; 10 ans</button>
@@ -322,6 +359,26 @@
         </div>
       </div>
 
+      <p class="dpe-section-titre">Vos consommations actuelles (facultatif)</p>
+
+      <div class="dpe-grille-champs">
+        <div class="form-group">
+          <label for="dpe-facture-connue">Dépenses d'énergie annuelles (€/an)</label>
+          <input type="number" id="dpe-facture-connue" min="0" step="10" placeholder="Ex : 1800">
+        </div>
+        <div class="form-group">
+          <label for="dpe-conso-connue">ou consommation annuelle (kWh/an)</label>
+          <input type="number" id="dpe-conso-connue" min="0" step="100" placeholder="Ex : 16000">
+        </div>
+      </div>
+      <p class="dpe-astuce">
+        Comme la méthode 3CL réglementaire, ce simulateur calcule une
+        consommation conventionnelle, qui ne connaît pas vos habitudes
+        réelles. Si vous renseignez une vraie facture ou un vrai relevé,
+        l'estimation est recalée dessus : les économies et les temps de
+        retour affichés à la fin gagnent alors nettement en fiabilité.
+      </p>
+
       <p class="dpe-erreur" id="dpe-erreur-2" hidden>Merci de compléter tous les champs pour continuer.</p>
 
       <div class="dpe-actions">
@@ -354,6 +411,26 @@
           <button type="button" data-valeur="indecis">Plus tard / je ne sais pas</button>
         </div>
       </div>
+
+      <div class="form-group">
+        <label>Revenus de votre foyer <span class="dpe-label-facultatif">(pour estimer vos aides)</span></label>
+        <div class="dpe-choix" data-groupe="revenus">
+          <button type="button" data-valeur="tres_modeste">Très modestes</button>
+          <button type="button" data-valeur="modeste">Modestes</button>
+          <button type="button" data-valeur="intermediaire">Intermédiaires</button>
+          <button type="button" data-valeur="superieur">Supérieurs</button>
+        </div>
+      </div>
+      <p class="dpe-astuce">
+        Ce sont les quatre catégories de ressources utilisées par
+        MaPrimeRénov' (barème de l'Anah), calculées sur le revenu fiscal
+        de référence du foyer, le nombre de personnes et la région. À
+        titre de repère, pour un couple en province, « très modestes »
+        correspond à environ 27 000 € de revenu fiscal de référence,
+        « modestes » à environ 33 000 € et « intermédiaires » à environ
+        46 000 €. Sans réponse, l'estimation utilise la catégorie
+        intermédiaire.
+      </p>
 
       <p class="dpe-erreur" id="dpe-erreur-3" hidden>Merci de répondre aux deux questions pour continuer.</p>
 
@@ -501,57 +578,109 @@
         <ul id="dpe-recommandations-liste"></ul>
       </div>
 
-      <h3 style="color: var(--brique); margin-bottom: 18px;">Découvrez vos solutions de travaux</h3>
-      <div class="dpe-solutions">
-        <div class="dpe-solution premiere-etape">
-          <div class="dpe-solution-tete">Première étape</div>
-          <div class="dpe-solution-corps">
-            <div class="dpe-solution-stats">
-              <div>
-                <span class="dpe-solution-stat-label">Économie d'énergie</span>
-                <strong id="dpe-premiere-etape-pourcent">-</strong>
-              </div>
-              <div>
-                <span class="dpe-solution-stat-label">Valeur foncière</span>
-                <strong id="dpe-premiere-etape-valeur">-</strong>
-              </div>
-            </div>
-            <div class="dpe-solution-classes">
-              <div class="dpe-etiquette-classe" id="dpe-premiere-etape-avant">-</div>
-              <span class="dpe-solution-fleche">→</span>
-              <div class="dpe-etiquette-classe" id="dpe-premiere-etape-apres">-</div>
-            </div>
-            <p id="dpe-premiere-etape-detail" style="font-size: 13px; color: var(--gris); margin: 10px 0 0;"></p>
-          </div>
-        </div>
-        <div class="dpe-solution">
-          <div class="dpe-solution-tete">Rénovation d'ampleur</div>
-          <div class="dpe-solution-corps">
-            <div class="dpe-solution-stats">
-              <div>
-                <span class="dpe-solution-stat-label">Économie d'énergie</span>
-                <strong id="dpe-ampleur-pourcent">-</strong>
-              </div>
-              <div>
-                <span class="dpe-solution-stat-label">Valeur foncière</span>
-                <strong id="dpe-ampleur-valeur">-</strong>
-              </div>
-            </div>
-            <div class="dpe-solution-classes">
-              <div class="dpe-etiquette-classe" id="dpe-ampleur-avant">-</div>
-              <span class="dpe-solution-fleche">→</span>
-              <div class="dpe-etiquette-classe" id="dpe-ampleur-apres">-</div>
-            </div>
-            <p style="font-size: 13px; color: var(--gris); margin: 10px 0 0;">Isolation des murs, de la toiture, du sol, vitrage triple, ventilation et chauffage performants.</p>
-          </div>
-        </div>
+      <h3 style="color: var(--brique); margin-bottom: 6px;">Vos deux scénarios de travaux</h3>
+      <p class="dpe-soustitre" id="dpe-scenarios-profil"></p>
+
+      <div class="dpe-tableau-conteneur">
+        <table class="dpe-scenarios">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Option A — Geste ciblé</th>
+              <th>Option B — Rénovation d'ampleur</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th>Travaux</th>
+              <td id="dpe-sa-travaux">-</td>
+              <td id="dpe-sb-travaux">-</td>
+            </tr>
+            <tr>
+              <th>Étiquette visée</th>
+              <td>
+                <span class="dpe-etiquette-mini" id="dpe-sa-avant">-</span>
+                <span class="dpe-fleche-mini">→</span>
+                <span class="dpe-etiquette-mini" id="dpe-sa-apres">-</span>
+              </td>
+              <td>
+                <span class="dpe-etiquette-mini" id="dpe-sb-avant">-</span>
+                <span class="dpe-fleche-mini">→</span>
+                <span class="dpe-etiquette-mini" id="dpe-sb-apres">-</span>
+              </td>
+            </tr>
+            <tr>
+              <th>Gain d'énergie</th>
+              <td id="dpe-sa-gain">-</td>
+              <td id="dpe-sb-gain">-</td>
+            </tr>
+            <tr>
+              <th>Économie sur la facture</th>
+              <td id="dpe-sa-economie">-</td>
+              <td id="dpe-sb-economie">-</td>
+            </tr>
+            <tr>
+              <th>Coût estimé des travaux</th>
+              <td id="dpe-sa-cout">-</td>
+              <td id="dpe-sb-cout">-</td>
+            </tr>
+            <tr>
+              <th>Aides estimées</th>
+              <td id="dpe-sa-aides">-</td>
+              <td id="dpe-sb-aides">-</td>
+            </tr>
+            <tr class="dpe-ligne-forte">
+              <th>Reste à charge</th>
+              <td id="dpe-sa-reste">-</td>
+              <td id="dpe-sb-reste">-</td>
+            </tr>
+            <tr class="dpe-ligne-forte">
+              <th>Retour sur investissement</th>
+              <td id="dpe-sa-roi">-</td>
+              <td id="dpe-sb-roi">-</td>
+            </tr>
+            <tr>
+              <th>Effet sur la valeur du bien</th>
+              <td id="dpe-sa-valeur">-</td>
+              <td id="dpe-sb-valeur">-</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
+
+      <h3 style="color: var(--brique); margin: 36px 0 6px;">Travaux poste par poste, du plus rentable au moins rentable</h3>
+      <p class="dpe-soustitre">Classement par temps de retour sur investissement : le reste à charge divisé par l'économie annuelle attendue.</p>
+
+      <div class="dpe-tableau-conteneur">
+        <table class="dpe-gestes">
+          <thead>
+            <tr>
+              <th>Travaux</th>
+              <th>Coût estimé</th>
+              <th>Aides</th>
+              <th>Reste à charge</th>
+              <th>Économie / an</th>
+              <th>Retour</th>
+              <th>Classe</th>
+            </tr>
+          </thead>
+          <tbody id="dpe-gestes-corps"></tbody>
+        </table>
+      </div>
+
       <p class="dpe-source-valeur">
-        Estimation de l'effet sur la valeur foncière basée sur l'étude
-        Notaires de France 2025 sur la valeur verte des logements
-        (écarts moyens observés pour des maisons, par rapport à une
-        classe D) : à titre indicatif, l'effet réel dépend fortement du
-        marché local.
+        Coûts indicatifs : fourchettes de prix du marché français
+        observées en 2025, fourniture et pose comprises. Aides estimées
+        à partir des forfaits MaPrimeRénov' par geste et du parcours
+        accompagné pour la rénovation d'ampleur, selon la catégorie de
+        ressources indiquée ; les certificats d'économies d'énergie
+        (CEE), l'éco-prêt à taux zéro et les aides locales peuvent
+        s'ajouter. Ces montants sont révisés chaque année et dépendent
+        de conditions (entreprise RGE, audit énergétique, gain de
+        classes réellement atteint) : seul un devis et un dépôt de
+        dossier font foi. L'effet sur la valeur du bien s'appuie sur
+        l'étude Notaires de France 2025 sur la valeur verte des
+        logements (écarts moyens par rapport à une classe D).
       </p>
 
       <div class="dpe-avertissement">
@@ -625,9 +754,12 @@
     ecs: '',
     ventilation: '',
     zoneClimatique: '',
+    typeBien: '',
     emplacement: '',
     forme: '',
     niveaux: '',
+    position: '',
+    facades: '',
     isolationMurs: '',
     isolationToiture: '',
     sousSol: '',
@@ -637,6 +769,7 @@
     nombreFenetres: 8,
     occupation: '',
     delai: '',
+    revenus: '',
     dpeConnu: null, // { conso, ges, facture, deperditionMax } si un DPE a été importé
     ajustementManuel: null // { unite: 'euros'|'kwh', valeur } si corrigé à la main à l'étape 4
   };
@@ -730,6 +863,29 @@
   function masquerSuggestions() {
     suggestions.hidden = true;
     suggestions.innerHTML = '';
+  }
+
+  /* --- Zone climatique déduite du code postal ---
+     Découpage de la réglementation thermique française : H3 pour le
+     pourtour méditerranéen et la Corse, H2 pour la façade atlantique,
+     le Sud-Ouest et le sud de la vallée du Rhône, H1 pour le reste
+     (Nord, Est, Île-de-France, Massif central, montagne). La réponse
+     reste modifiable : c'est une proposition, pas une contrainte, et le
+     découpage officiel descend jusqu'au canton dans quelques cas. */
+
+  var DEPARTEMENTS_H3 = ['06', '11', '13', '20', '2A', '2B', '30', '34', '66', '83'];
+  var DEPARTEMENTS_H2 = ['04', '07', '09', '12', '16', '17', '22', '24', '26', '29', '31', '32',
+    '33', '35', '36', '37', '40', '41', '44', '46', '47', '48', '49', '50', '53', '56', '64',
+    '65', '72', '79', '81', '82', '84', '85', '86', '87'];
+
+  function proposerZoneClimatique(codePostal) {
+    if (!codePostal || String(codePostal).length < 2) return;
+    var departement = String(codePostal).substring(0, 2);
+    var zone = DEPARTEMENTS_H3.indexOf(departement) !== -1 ? 'h3'
+      : DEPARTEMENTS_H2.indexOf(departement) !== -1 ? 'h2' : 'h1';
+    document.getElementById('dpe-zone-climatique').value = zone;
+    etat.zoneClimatique = zone;
+    document.getElementById('dpe-zone-auto').hidden = false;
   }
 
   /* --- Recherche automatique d'un DPE existant (base ADEME) ---
@@ -861,6 +1017,7 @@
               etat.lat = f.geometry.coordinates[1];
               masquerSuggestions();
               placerMarqueur(etat.lat, etat.lon);
+              proposerZoneClimatique(f.properties.postcode);
               chercherDpeAdeme(f.properties.label);
             });
             suggestions.appendChild(bouton);
@@ -971,14 +1128,6 @@
     var mFacture = texte.match(/([\d]+[,.]\d{2})\s*€\s*(?:abonnements|\)|$)/i);
     if (mFacture) trouve.facture = normaliserNombre(mFacture[1]);
 
-    var deperditions = {};
-    ['Toiture', 'Façades', 'Sols', 'Fenêtres', 'Ventilation'].forEach(function (poste) {
-      var re = new RegExp(poste.replace('ç', '[çc]').replace('ê', '[êe]') + '\\D{0,15}(\\d{1,2})\\s*%', 'i');
-      var m = texte.match(re);
-      if (m) deperditions[poste] = parseInt(m[1], 10);
-    });
-    if (Object.keys(deperditions).length) trouve.deperditions = deperditions;
-
     return trouve;
   }
 
@@ -1008,14 +1157,6 @@
       etat.dpeConnu = etat.dpeConnu || {};
       etat.dpeConnu.facture = trouve.facture;
     }
-    if (trouve.deperditions) {
-      var posteMax = Object.keys(trouve.deperditions).reduce(function (a, b) {
-        return trouve.deperditions[a] >= trouve.deperditions[b] ? a : b;
-      });
-      etat.dpeConnu = etat.dpeConnu || {};
-      etat.dpeConnu.posteFaible = posteMax;
-    }
-
     if (messages.length) {
       statutImport.textContent = 'Trouvé dans votre DPE : ' + messages.join(', ') +
         '. Vérifiez et complétez les champs ci-dessous, notamment l\'isolation et le chauffage, pour affiner les travaux proposés.';
@@ -1079,17 +1220,44 @@
 
   /* --- Étape 2 : boutons à choix unique par groupe --- */
 
-  function initGroupeChoix(groupe, cible) {
+  function initGroupeChoix(groupe, cible, alChangement) {
     var boutons = document.querySelectorAll('.dpe-choix[data-groupe="' + groupe + '"] button');
     boutons.forEach(function (bouton) {
       bouton.addEventListener('click', function () {
         boutons.forEach(function (b) { b.classList.remove('selectionne'); });
         bouton.classList.add('selectionne');
         etat[cible] = bouton.getAttribute('data-valeur');
+        if (alChangement) alChangement();
       });
     });
   }
 
+  /* Maison et appartement ne se décrivent pas avec les mêmes questions,
+     et surtout ne perdent pas de chaleur par les mêmes parois : un
+     appartement d'étage intermédiaire n'a ni toiture ni plancher bas
+     donnant sur l'extérieur, donc les questions correspondantes n'ont
+     pas lieu d'être posées — ni d'entrer dans le calcul. */
+
+  function estToitureDeperditive() {
+    return etat.typeBien !== 'appartement' || etat.position === 'dernier';
+  }
+
+  function estPlancherDeperditif() {
+    return etat.typeBien !== 'appartement' || etat.position === 'rdc';
+  }
+
+  function majChampsSelonBien() {
+    document.getElementById('dpe-structure-maison').hidden = etat.typeBien === 'appartement';
+    document.getElementById('dpe-structure-appartement').hidden = etat.typeBien !== 'appartement';
+    document.getElementById('dpe-champ-isolation-toiture').hidden = !estToitureDeperditive();
+    document.getElementById('dpe-champ-sous-sol').hidden = !estPlancherDeperditif();
+    document.getElementById('dpe-champ-isolation-sol').hidden = !estPlancherDeperditif();
+  }
+
+  initGroupeChoix('type-bien', 'typeBien', majChampsSelonBien);
+  initGroupeChoix('position', 'position', majChampsSelonBien);
+  initGroupeChoix('facades', 'facades');
+  initGroupeChoix('revenus', 'revenus');
   initGroupeChoix('vitrage', 'vitrage');
   initGroupeChoix('emplacement', 'emplacement');
   initGroupeChoix('forme', 'forme');
@@ -1120,6 +1288,26 @@
   initCompteur('nombrePortes');
   initCompteur('nombreFenetres');
 
+  /* Facture ou consommation réelle saisie à l'étape 2 : elle recale
+     l'estimation par une simple règle de trois, exactement comme le
+     panneau de correction de l'étape 4 (les deux écrivent dans le même
+     état, et le dernier renseigné fait foi). */
+
+  var champFactureConnue = document.getElementById('dpe-facture-connue');
+  var champConsoConnue = document.getElementById('dpe-conso-connue');
+
+  function lireConsommationsConnues() {
+    var facture = parseFloat(champFactureConnue.value);
+    var conso = parseFloat(champConsoConnue.value);
+    if (facture > 0) {
+      etat.ajustementManuel = { unite: 'euros', valeur: facture };
+    } else if (conso > 0 && etat.surface) {
+      etat.ajustementManuel = { unite: 'kwh', valeur: conso / etat.surface };
+    } else {
+      etat.ajustementManuel = null;
+    }
+  }
+
   document.getElementById('dpe-suivant-2').addEventListener('click', function () {
     etat.surface = parseFloat(document.getElementById('dpe-surface').value) || null;
     etat.periode = document.getElementById('dpe-periode').value;
@@ -1127,11 +1315,17 @@
     etat.ecs = document.getElementById('dpe-ecs').value;
     etat.ventilation = document.getElementById('dpe-ventilation').value;
     etat.zoneClimatique = document.getElementById('dpe-zone-climatique').value;
+    lireConsommationsConnues();
 
     var erreur = document.getElementById('dpe-erreur-2');
-    var complet = etat.surface && etat.periode && etat.chauffage && etat.ecs && etat.ventilation && etat.zoneClimatique &&
-      etat.emplacement && etat.forme && etat.niveaux &&
-      etat.isolationMurs && etat.isolationToiture && etat.sousSol && etat.isolationSol && etat.vitrage;
+    var structureComplete = etat.typeBien === 'appartement'
+      ? (etat.position && etat.facades)
+      : (etat.emplacement && etat.forme && etat.niveaux);
+    var complet = etat.typeBien && etat.surface && etat.periode && etat.chauffage && etat.ecs &&
+      etat.ventilation && etat.zoneClimatique && structureComplete &&
+      etat.isolationMurs && etat.vitrage &&
+      (!estToitureDeperditive() || etat.isolationToiture) &&
+      (!estPlancherDeperditif() || (etat.sousSol && etat.isolationSol));
     if (!complet) {
       erreur.hidden = false;
       return;
@@ -1208,7 +1402,6 @@
     avant1975: 5.0, rt1974: 4.5, rt1988: 3.5, rt2000: 2.9,
     rt2005: 2.0, rt2012: 1.3, re2020: 1.0
   };
-  var NIVEAUX_VITRAGE = ['simple', 'double', 'double_recent', 'triple'];
 
   var R_BASE_SOL = 0.17; // m².K/W, plancher nu
   var R_SOL_REFERENCE_PERIODE = {
@@ -1252,6 +1445,16 @@
   // Mitoyenneté : un mur commun avec le voisin n'est pas exposé à
   // l'extérieur et ne déperd donc pas de chaleur.
   var EMPLACEMENT_FACTEUR = { isolee: 1.0, mitoyenne1: 0.93, mitoyenne2: 0.86 };
+
+  // Appartement : c'est le même principe de mitoyenneté, poussé beaucoup
+  // plus loin. Un étage intermédiaire est entouré de logements chauffés
+  // au-dessus et en dessous : il ne perd ni par la toiture ni par le
+  // plancher bas, ce qui explique l'écart de consommation par m² observé
+  // en France entre maisons individuelles et logements collectifs. Le
+  // rez-de-chaussée et le dernier étage n'exposent qu'une de ces deux
+  // parois.
+  var POSITION_FACTEUR = { rdc: 0.85, intermediaire: 0.70, dernier: 0.88 };
+  var FACADES_FACTEUR = { '1': 0.90, '2': 1.0, '3': 1.12 };
 
   // Ventilation : une VMC double flux récupère une bonne partie de la
   // chaleur de l'air extrait, une ventilation naturelle ou l'absence de
@@ -1382,8 +1585,38 @@
     return VENTILATION_FACTEUR[type] || 1.0;
   }
 
-  function facteurCompacite(forme, niveaux, emplacement) {
-    return (FORME_FACTEUR[forme] || 1.0) * (NIVEAUX_FACTEUR[niveaux] || 1.0) * (EMPLACEMENT_FACTEUR[emplacement] || 1.0);
+  function facteurCompacite(v) {
+    if (v.typeBien === 'appartement') {
+      return (POSITION_FACTEUR[v.position] || 0.80) * (FACADES_FACTEUR[v.facades] || 1.0);
+    }
+    return (FORME_FACTEUR[v.forme] || 1.0) * (NIVEAUX_FACTEUR[v.niveaux] || 1.0) *
+      (EMPLACEMENT_FACTEUR[v.emplacement] || 1.0);
+  }
+
+  // Répartition des déperditions entre postes : celle d'une maison sert
+  // de référence, mais les parois qui ne donnent pas sur l'extérieur ne
+  // déperdent rien du tout (toiture et plancher bas d'un appartement
+  // d'étage intermédiaire). Le reste est renormalisé pour que la somme
+  // des parts fasse toujours 1 : c'est la composition des pertes qui
+  // change ici, leur niveau total étant porté par le facteur de
+  // compacité ci-dessus.
+  function partsDeperdition(v) {
+    var parts = {
+      murs: PART_DEPERDITION.murs, toiture: PART_DEPERDITION.toiture,
+      vitrage: PART_DEPERDITION.vitrage, sol: PART_DEPERDITION.sol,
+      ventilation: PART_DEPERDITION.ventilation
+    };
+    if (v.typeBien === 'appartement') {
+      if (v.position !== 'dernier') parts.toiture = 0;
+      if (v.position !== 'rdc') parts.sol = 0;
+      // Un appartement mono-orienté n'expose qu'une façade sur quatre :
+      // les murs pèsent alors bien moins dans ses pertes qu'un logement
+      // traversant ou d'angle. Le cas à deux façades sert de référence.
+      parts.murs = parts.murs * (PART_MUR_EXPOSE_APPARTEMENT[v.facades] || 0.5) / 0.5;
+    }
+    var somme = parts.murs + parts.toiture + parts.vitrage + parts.sol + parts.ventilation;
+    Object.keys(parts).forEach(function (cle) { parts[cle] = parts[cle] / somme; });
+    return parts;
   }
 
   function calculerConsommation(valeurs) {
@@ -1402,12 +1635,13 @@
     // exploser le résultat de façon irréaliste, alors qu'en réalité les
     // déperditions de chaque poste s'additionnent, elles ne se multiplient
     // pas entre elles.
-    var facteurGlobal = PART_DEPERDITION.murs * fMur + PART_DEPERDITION.toiture * fToiture +
-      PART_DEPERDITION.vitrage * fVitrage + PART_DEPERDITION.sol * fSol +
-      PART_DEPERDITION.ventilation * fVentilation;
+    var parts = partsDeperdition(valeurs);
+    var facteurGlobal = parts.murs * fMur + parts.toiture * fToiture +
+      parts.vitrage * fVitrage + parts.sol * fSol +
+      parts.ventilation * fVentilation;
 
     var facteurZone = ZONE_CLIMATIQUE_FACTEUR[valeurs.zoneClimatique] || 1.0;
-    var facteurForme = facteurCompacite(valeurs.forme, valeurs.niveaux, valeurs.emplacement);
+    var facteurForme = facteurCompacite(valeurs);
     var besoinChauffage = BESOIN_CHAUFFAGE_PERIODE[valeurs.periode] * facteurGlobal * facteurZone * facteurForme;
     var chauffageFinale = besoinChauffage / RENDEMENT_CHAUFFAGE[valeurs.chauffage];
 
@@ -1432,6 +1666,7 @@
     return {
       primaire: primaire, ges: ges, factureParM2: factureParM2,
       fMur: fMur, fToiture: fToiture, fVitrage: fVitrage, fSol: fSol, fVentilation: fVentilation,
+      parts: parts,
       coutChauffage: coutChauffage, coutEcs: coutEcs, coutAux: coutAux
     };
   }
@@ -1468,15 +1703,185 @@
     return ORDRE_CLASSES.indexOf(classeGes) > ORDRE_CLASSES.indexOf(classeEnergie) ? classeGes : classeEnergie;
   }
 
-  function ameliorerVitrage(niveau) {
-    var i = NIVEAUX_VITRAGE.indexOf(niveau);
-    return i < NIVEAUX_VITRAGE.length - 1 ? NIVEAUX_VITRAGE[i + 1] : niveau;
-  }
-
   function afficherEtiquette(id, classe) {
     var el = document.getElementById(id);
     el.textContent = classe;
     el.className = 'dpe-etiquette-classe dpe-classe-' + classe.toLowerCase();
+  }
+
+  /* --- Chiffrage des travaux, aides et rentabilité ---
+     Pour chiffrer des travaux au m², il faut une surface de paroi : or
+     personne ne connaît par cœur sa surface de murs ou de toiture. On
+     la reconstruit à partir des réponses déjà données (surface
+     habitable, niveaux, forme, mitoyenneté, nombre de fenêtres), avec
+     une emprise au sol supposée carrée et une hauteur sous plafond
+     conventionnelle de 2,5 m. C'est une approximation assumée, mais
+     elle suffit pour donner un ordre de grandeur de devis, et elle
+     reste cohérente avec le reste du modèle. */
+
+  var HAUTEUR_ETAGE = 2.5;
+  var SURFACE_PAR_FENETRE = 1.8;
+  var MAJORATION_PENTE_TOITURE = 1.15;
+  var FORME_PERIMETRE = { carree: 1.0, rectangulaire: 1.10, l: 1.25 };
+  var PART_MUR_MITOYEN = { isolee: 0, mitoyenne1: 0.25, mitoyenne2: 0.5 };
+  var PART_MUR_EXPOSE_APPARTEMENT = { '1': 0.25, '2': 0.5, '3': 0.75 };
+
+  function geometrie(v) {
+    var surface = v.surface || 100;
+    var appartement = v.typeBien === 'appartement';
+    var niveaux = appartement ? 1 : (parseInt(v.niveaux, 10) || 1);
+    var emprise = surface / niveaux;
+    var perimetre = 4 * Math.sqrt(emprise) * (appartement ? 1 : (FORME_PERIMETRE[v.forme] || 1));
+    var partExposee = appartement
+      ? (PART_MUR_EXPOSE_APPARTEMENT[v.facades] || 0.5)
+      : 1 - (PART_MUR_MITOYEN[v.emplacement] || 0);
+    var fenetres = v.nombreFenetres || 8;
+    var mursExposes = perimetre * HAUTEUR_ETAGE * niveaux * partExposee;
+    // Le vitrage se déduit de la surface de mur à isoler, mais il ne peut
+    // pas occuper toute la façade : au-delà d'environ 40 %, on serait sur
+    // un mur-rideau, pas sur un logement courant.
+    var vitree = Math.min(fenetres * SURFACE_PAR_FENETRE, mursExposes * 0.4);
+    return {
+      murs: Math.max(10, mursExposes - vitree),
+      toiture: (appartement && v.position !== 'dernier') ? 0 : emprise * MAJORATION_PENTE_TOITURE,
+      plancher: (appartement && v.position !== 'rdc') ? 0 : emprise,
+      fenetres: fenetres
+    };
+  }
+
+  // Fourchettes de prix du marché français observées en 2025, fourniture
+  // et pose comprises, TTC. Les postes au m² portent sur la surface de
+  // paroi traitée (mur, toiture, plancher), pas sur la surface habitable.
+  // En appartement, l'isolation des murs se fait presque toujours par
+  // l'intérieur (moins chère que par l'extérieur, mais qui fait perdre
+  // un peu de surface), et les équipements sont plus petits.
+  var COUTS_TRAVAUX = {
+    isolationToiture: { base: 'toiture', maison: [25, 70], appartement: [25, 70] },
+    isolationMurs: { base: 'murs', maison: [90, 190], appartement: [50, 110] },
+    isolationSol: { base: 'plancher', maison: [30, 75], appartement: [30, 75] },
+    vitrage: { base: 'fenetres', maison: [450, 900], appartement: [450, 900] },
+    ventilation: { base: 'forfait', maison: [4500, 9000], appartement: [3500, 7000] },
+    chauffage: { base: 'forfait', maison: [12000, 18000], appartement: [8000, 14000] },
+    ecs: { base: 'forfait', maison: [3000, 5000], appartement: [3000, 5000] }
+  };
+
+  // Forfaits MaPrimeRénov' « rénovation par geste », par catégorie de
+  // ressources de l'Anah (très modestes, modestes, intermédiaires,
+  // supérieures). Pour l'isolation des murs, on retient volontairement le
+  // forfait de l'isolation par l'intérieur, le plus bas des deux : mieux
+  // vaut annoncer une aide prudente qu'une aide que le dossier ne
+  // confirmera pas. Ces barèmes sont révisés chaque année.
+  var AIDES_GESTE = {
+    isolationToiture: { tres_modeste: 25, modeste: 20, intermediaire: 15, superieur: 0 },
+    isolationMurs: { tres_modeste: 25, modeste: 20, intermediaire: 15, superieur: 7 },
+    isolationSol: { tres_modeste: 25, modeste: 20, intermediaire: 15, superieur: 0 },
+    vitrage: { tres_modeste: 100, modeste: 80, intermediaire: 40, superieur: 0 },
+    ventilation: { tres_modeste: 2500, modeste: 2000, intermediaire: 1500, superieur: 0 },
+    chauffage: { tres_modeste: 5000, modeste: 4000, intermediaire: 3000, superieur: 0 },
+    ecs: { tres_modeste: 1200, modeste: 800, intermediaire: 400, superieur: 0 }
+  };
+
+  // L'aide par geste ne peut jamais dépasser une part du montant des
+  // travaux, elle-même fonction de la catégorie de ressources.
+  var PART_MAX_AIDE_GESTE = { tres_modeste: 0.90, modeste: 0.75, intermediaire: 0.60, superieur: 0.40 };
+
+  // Rénovation d'ampleur (parcours accompagné) : l'aide est un
+  // pourcentage du montant des travaux, dans la limite d'un plafond de
+  // travaux subventionnables qui dépend du nombre de classes gagnées.
+  // Elle suppose au moins deux classes gagnées et un accompagnement par
+  // un Accompagnateur Rénov'. Bonus de 10 points pour la sortie de
+  // passoire énergétique (F ou G vers D ou mieux).
+  var TAUX_AIDE_AMPLEUR = { tres_modeste: 0.80, modeste: 0.60, intermediaire: 0.45, superieur: 0.30 };
+  var PLAFOND_AMPLEUR = { 2: 40000, 3: 55000, 4: 70000 };
+  var BONUS_SORTIE_PASSOIRE = 0.10;
+
+  var LIBELLE_PROFIL = {
+    tres_modeste: 'très modestes', modeste: 'modestes',
+    intermediaire: 'intermédiaires', superieur: 'supérieures'
+  };
+
+  var CATALOGUE_GESTES = [
+    {
+      cle: 'isolationToiture', label: 'Isolation de la toiture / des combles',
+      applicable: function (v, geo) { return geo.toiture > 0 && v.isolationToiture !== 'recente'; },
+      mutation: function () { return { isolationToiture: 'recente' }; }
+    },
+    {
+      cle: 'isolationMurs', label: 'Isolation des murs',
+      applicable: function (v) { return v.isolationMurs !== 'recente'; },
+      mutation: function () { return { isolationMurs: 'recente' }; }
+    },
+    {
+      cle: 'isolationSol', label: 'Isolation du plancher bas',
+      applicable: function (v, geo) { return geo.plancher > 0 && v.isolationSol !== 'recente'; },
+      mutation: function () { return { isolationSol: 'recente' }; }
+    },
+    {
+      cle: 'vitrage', label: 'Remplacement des fenêtres',
+      applicable: function (v) { return v.vitrage !== 'triple'; },
+      mutation: function (v) { return { vitrage: v.vitrage === 'double_recent' ? 'triple' : 'double_recent' }; }
+    },
+    {
+      cle: 'ventilation', label: 'Ventilation double flux',
+      applicable: function (v) { return v.ventilation !== 'double_flux'; },
+      mutation: function () { return { ventilation: 'double_flux' }; }
+    },
+    {
+      cle: 'chauffage', label: 'Pompe à chaleur',
+      applicable: function (v) { return v.chauffage !== 'pac'; },
+      mutation: function () { return { chauffage: 'pac' }; }
+    },
+    {
+      cle: 'ecs', label: 'Eau chaude thermodynamique',
+      applicable: function (v) { return v.ecs !== 'pac_int' && v.ecs !== 'ballon_thermo'; },
+      mutation: function () { return { ecs: 'ballon_thermo' }; }
+    }
+  ];
+
+  function coutGeste(cle, v, geo) {
+    var definition = COUTS_TRAVAUX[cle];
+    var fourchette = v.typeBien === 'appartement' ? definition.appartement : definition.maison;
+    var quantite = definition.base === 'forfait' ? 1 : geo[definition.base];
+    return {
+      min: fourchette[0] * quantite, max: fourchette[1] * quantite,
+      quantite: quantite, forfaitaire: definition.base === 'forfait'
+    };
+  }
+
+  function aideGeste(cle, cout, profil) {
+    var forfait = AIDES_GESTE[cle][profil];
+    var montant = cout.forfaitaire ? forfait : forfait * cout.quantite;
+    var moyenne = (cout.min + cout.max) / 2;
+    return Math.min(montant, moyenne * PART_MAX_AIDE_GESTE[profil]);
+  }
+
+  function aideAmpleur(coutMoyen, profil, classeAvant, classeApres) {
+    var sauts = ORDRE_CLASSES.indexOf(classeAvant) - ORDRE_CLASSES.indexOf(classeApres);
+    if (sauts < 2) return null; // le parcours accompagné exige deux classes gagnées
+    var plafond = PLAFOND_AMPLEUR[Math.min(4, sauts)];
+    var taux = TAUX_AIDE_AMPLEUR[profil];
+    var sortiePassoire = (classeAvant === 'F' || classeAvant === 'G') &&
+      ORDRE_CLASSES.indexOf(classeApres) <= ORDRE_CLASSES.indexOf('D');
+    if (sortiePassoire) taux = Math.min(1, taux + BONUS_SORTIE_PASSOIRE);
+    return Math.min(coutMoyen, plafond) * taux;
+  }
+
+  function arrondiCentaine(valeur) {
+    return Math.round(valeur / 100) * 100;
+  }
+
+  function euros(valeur) {
+    return Math.round(valeur).toLocaleString('fr-FR') + ' €';
+  }
+
+  function fourchetteEuros(min, max) {
+    return euros(arrondiCentaine(min)) + ' à ' + euros(arrondiCentaine(max));
+  }
+
+  function texteRetour(annees) {
+    if (!isFinite(annees) || annees <= 0) return 'Non calculable';
+    if (annees > 40) return 'Plus de 40 ans';
+    return Math.round(annees) + ' ans';
   }
 
   /* --- Tableau des déperditions par poste ---
@@ -1502,8 +1907,14 @@
   }
 
   function afficherDeperditions(resultat) {
-    var poids = POSTE_DEPERDITION_LABELS.map(function (poste) {
-      return PART_DEPERDITION[poste.part] * resultat[poste.facteur];
+    // Les postes qui ne donnent pas sur l'extérieur (toiture et plancher
+    // bas d'un appartement d'étage intermédiaire) ont une part nulle :
+    // ils ne sont pas affichés du tout plutôt que listés à 0 %.
+    var postes = POSTE_DEPERDITION_LABELS.filter(function (poste) {
+      return resultat.parts[poste.part] > 0;
+    });
+    var poids = postes.map(function (poste) {
+      return resultat.parts[poste.part] * resultat[poste.facteur];
     });
     var total = poids.reduce(function (a, b) { return a + b; }, 0);
     var pourcentages = poids.map(function (p) { return Math.round(p / total * 100); });
@@ -1516,13 +1927,159 @@
 
     var corps = document.getElementById('dpe-deperditions-corps');
     corps.innerHTML = '';
-    POSTE_DEPERDITION_LABELS.forEach(function (poste, i) {
+    postes.forEach(function (poste, i) {
       var niveau = niveauDeperdition(resultat[poste.facteur]);
       var tr = document.createElement('tr');
       tr.innerHTML =
         '<td>' + poste.label + '</td>' +
         '<td><div class="dpe-part-barre"><span style="width:' + pourcentages[i] + '%"></span></div><b>' + pourcentages[i] + ' %</b></td>' +
         '<td><span class="dpe-tag dpe-tag-' + niveau.classe + '">' + niveau.texte + '</span></td>';
+      corps.appendChild(tr);
+    });
+  }
+
+  /* --- Deux scénarios chiffrés, et classement des gestes par rentabilité ---
+     Chaque geste est réellement simulé : on rejoue le calcul de
+     consommation avec ce seul poste amélioré, ce qui donne l'économie
+     qu'il apporte sur ce logement précis, et non un pourcentage
+     forfaitaire. Le coût vient de la géométrie estimée du logement,
+     l'aide du barème correspondant à la catégorie de ressources, et le
+     temps de retour du rapport entre reste à charge et économie
+     annuelle — c'est ce rapport qui classe les travaux du plus rentable
+     au moins rentable, comme demandé par un ratio coût/efficacité. */
+
+  function afficherEtiquetteMini(id, classe) {
+    var el = document.getElementById(id);
+    el.textContent = classe;
+    el.className = 'dpe-etiquette-mini dpe-classe-' + classe.toLowerCase();
+  }
+
+  function texteValeurFonciere(classeAvant, classeApres) {
+    var ecart = VALEUR_FONCIERE_PAR_CLASSE[classeApres] - VALEUR_FONCIERE_PAR_CLASSE[classeAvant];
+    return (ecart >= 0 ? '+' : '') + ecart + ' %';
+  }
+
+  function afficherScenarios(resultat, consoAffichee, gesAffichee, factureAffichee, classeAffichee) {
+    var geo = geometrie(etat);
+    var profil = etat.revenus || 'intermediaire';
+
+    function texte(id, valeur) { document.getElementById(id).textContent = valeur; }
+
+    function evaluer(valeurs) {
+      var apres = calculerConsommation(valeurs);
+      return {
+        gain: Math.round((1 - apres.primaire / resultat.primaire) * 100),
+        economie: factureAffichee * (1 - apres.factureParM2 / resultat.factureParM2),
+        classe: classeFinale(consoAffichee * (apres.primaire / resultat.primaire),
+          gesAffichee * (apres.ges / resultat.ges))
+      };
+    }
+
+    var gestes = CATALOGUE_GESTES.filter(function (definition) {
+      return definition.applicable(etat, geo);
+    }).map(function (definition) {
+      var mutation = definition.mutation(etat);
+      var effet = evaluer(Object.assign({}, etat, mutation));
+      var cout = coutGeste(definition.cle, etat, geo);
+      var coutMoyen = (cout.min + cout.max) / 2;
+      var aide = aideGeste(definition.cle, cout, profil);
+      var reste = Math.max(0, coutMoyen - aide);
+      return {
+        label: definition.label, mutation: mutation, cout: cout, coutMoyen: coutMoyen,
+        aide: aide, reste: reste, gain: effet.gain, economie: effet.economie,
+        classe: effet.classe, retour: effet.economie > 0 ? reste / effet.economie : Infinity
+      };
+    });
+
+    texte('dpe-scenarios-profil', 'Aides estimées pour un foyer aux ressources ' +
+      LIBELLE_PROFIL[profil] + (etat.revenus ? '' : ' (catégorie par défaut, à préciser à l\'étape précédente)') + '.');
+
+    // Option A : le geste le plus rentable, celui par lequel commencer.
+    var rentables = gestes.filter(function (g) { return g.economie >= 1; })
+      .sort(function (a, b) { return a.retour - b.retour; });
+    var meilleur = rentables[0];
+
+    if (meilleur) {
+      texte('dpe-sa-travaux', meilleur.label);
+      afficherEtiquetteMini('dpe-sa-avant', classeAffichee);
+      afficherEtiquetteMini('dpe-sa-apres', meilleur.classe);
+      texte('dpe-sa-gain', '− ' + meilleur.gain + ' % d\'énergie');
+      texte('dpe-sa-economie', euros(meilleur.economie) + ' / an');
+      texte('dpe-sa-cout', fourchetteEuros(meilleur.cout.min, meilleur.cout.max));
+      texte('dpe-sa-aides', euros(arrondiCentaine(meilleur.aide)));
+      texte('dpe-sa-reste', euros(arrondiCentaine(meilleur.reste)));
+      texte('dpe-sa-roi', texteRetour(meilleur.retour));
+      texte('dpe-sa-valeur', texteValeurFonciere(classeAffichee, meilleur.classe));
+    } else {
+      ['dpe-sa-travaux', 'dpe-sa-gain', 'dpe-sa-economie', 'dpe-sa-cout', 'dpe-sa-aides',
+        'dpe-sa-reste', 'dpe-sa-roi', 'dpe-sa-valeur'].forEach(function (id) { texte(id, '—'); });
+      texte('dpe-sa-travaux', 'Aucun geste isolé pertinent : les postes analysés sont déjà performants.');
+      afficherEtiquetteMini('dpe-sa-avant', classeAffichee);
+      afficherEtiquetteMini('dpe-sa-apres', classeAffichee);
+    }
+
+    // Option B : tous les postes améliorables traités ensemble. C'est ce
+    // que recouvre une rénovation globale dans les dispositifs d'aide,
+    // enveloppe et systèmes compris — et c'est aussi ce qui permet
+    // d'atteindre le saut de deux classes qu'exige le parcours accompagné.
+    if (gestes.length) {
+      var valeursAmpleur = Object.assign({}, etat);
+      var coutMinAmpleur = 0;
+      var coutMaxAmpleur = 0;
+      var aidesGestesCumulees = 0;
+      gestes.forEach(function (g) {
+        Object.assign(valeursAmpleur, g.mutation);
+        coutMinAmpleur += g.cout.min;
+        coutMaxAmpleur += g.cout.max;
+        aidesGestesCumulees += g.aide;
+      });
+      var effetAmpleur = evaluer(valeursAmpleur);
+      var coutMoyenAmpleur = (coutMinAmpleur + coutMaxAmpleur) / 2;
+
+      // Le parcours accompagné n'est ouvert qu'à partir de deux classes
+      // gagnées ; en dessous, les travaux restent finançables geste par
+      // geste, ce qui est alors la meilleure estimation disponible.
+      var aideParcours = aideAmpleur(coutMoyenAmpleur, profil, classeAffichee, effetAmpleur.classe);
+      var aideRetenue = aideParcours === null ? aidesGestesCumulees : Math.max(aideParcours, aidesGestesCumulees);
+      var resteAmpleur = Math.max(0, coutMoyenAmpleur - aideRetenue);
+      var retourAmpleur = effetAmpleur.economie > 0 ? resteAmpleur / effetAmpleur.economie : Infinity;
+
+      texte('dpe-sb-travaux', gestes.map(function (g) { return g.label; }).join(', ') + '.');
+      afficherEtiquetteMini('dpe-sb-avant', classeAffichee);
+      afficherEtiquetteMini('dpe-sb-apres', effetAmpleur.classe);
+      texte('dpe-sb-gain', '− ' + effetAmpleur.gain + ' % d\'énergie');
+      texte('dpe-sb-economie', euros(effetAmpleur.economie) + ' / an');
+      texte('dpe-sb-cout', fourchetteEuros(coutMinAmpleur, coutMaxAmpleur));
+      texte('dpe-sb-aides', euros(arrondiCentaine(aideRetenue)) +
+        (aideParcours === null ? ' (aides par geste)' : ' (parcours accompagné)'));
+      texte('dpe-sb-reste', euros(arrondiCentaine(resteAmpleur)));
+      texte('dpe-sb-roi', texteRetour(retourAmpleur));
+      texte('dpe-sb-valeur', texteValeurFonciere(classeAffichee, effetAmpleur.classe));
+    } else {
+      ['dpe-sb-gain', 'dpe-sb-economie', 'dpe-sb-cout', 'dpe-sb-aides', 'dpe-sb-reste',
+        'dpe-sb-roi', 'dpe-sb-valeur'].forEach(function (id) { texte(id, '—'); });
+      texte('dpe-sb-travaux', 'Le logement est déjà au meilleur niveau sur tous les postes analysés.');
+      afficherEtiquetteMini('dpe-sb-avant', classeAffichee);
+      afficherEtiquetteMini('dpe-sb-apres', classeAffichee);
+    }
+
+    // Détail poste par poste, dans l'ordre de rentabilité.
+    var corps = document.getElementById('dpe-gestes-corps');
+    corps.innerHTML = '';
+    if (!rentables.length) {
+      corps.innerHTML = '<tr><td colspan="7">Aucun travaux supplémentaire ne ressort comme rentable sur les postes analysés.</td></tr>';
+      return;
+    }
+    rentables.forEach(function (g) {
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td>' + g.label + '</td>' +
+        '<td>' + fourchetteEuros(g.cout.min, g.cout.max) + '</td>' +
+        '<td>' + euros(arrondiCentaine(g.aide)) + '</td>' +
+        '<td><b>' + euros(arrondiCentaine(g.reste)) + '</b></td>' +
+        '<td>' + euros(g.economie) + '</td>' +
+        '<td><b>' + texteRetour(g.retour) + '</b></td>' +
+        '<td><span class="dpe-etiquette-mini dpe-classe-' + g.classe.toLowerCase() + '">' + g.classe + '</span></td>';
       corps.appendChild(tr);
     });
   }
@@ -1621,101 +2178,7 @@
     document.getElementById('dpe-pourcent-ecs').textContent = pctEcs + ' %';
     document.getElementById('dpe-pourcent-aux').textContent = pctAux + ' %';
 
-    // Point le plus faible : la répartition réelle des déperditions du
-    // DPE importé prime sur la déduction du modèle, quand elle existe.
-    // Sinon, on teste chaque levier disponible (isolation, vitrage,
-    // ventilation, chauffage, eau chaude) un par un et on retient celui
-    // qui fait le plus baisser la consommation calculée : une mesure
-    // directe de l'effet réel, qui reste valable même en comparant des
-    // leviers de nature différente (un mur mal isolé face à une
-    // chaudière vétuste, par exemple).
-    var libellesEtape = {
-      isolationMurs: 'Isolation des murs',
-      isolationToiture: 'Isolation de la toiture',
-      isolationSol: 'Isolation du sol / plancher bas',
-      vitrage: 'Remplacement du vitrage',
-      ventilation: 'Installation d\'une VMC double flux',
-      chauffage: 'Remplacement du système de chauffage par une pompe à chaleur',
-      ecs: 'Passage à une production d\'eau chaude thermodynamique'
-    };
-    var pointFaible;
-    if (etat.dpeConnu && etat.dpeConnu.posteFaible) {
-      var correspondance = {
-        'Façades': 'isolationMurs', 'Toiture': 'isolationToiture', 'Fenêtres': 'vitrage',
-        'Sols': 'isolationSol', 'Ventilation': 'ventilation'
-      };
-      pointFaible = correspondance[etat.dpeConnu.posteFaible] || 'isolationMurs';
-    } else {
-      var candidatsLevier = [];
-      if (etat.isolationMurs !== 'recente') candidatsLevier.push({ cle: 'isolationMurs', valeurs: Object.assign({}, etat, { isolationMurs: 'recente' }) });
-      if (etat.isolationToiture !== 'recente') candidatsLevier.push({ cle: 'isolationToiture', valeurs: Object.assign({}, etat, { isolationToiture: 'recente' }) });
-      if (etat.isolationSol !== 'recente') candidatsLevier.push({ cle: 'isolationSol', valeurs: Object.assign({}, etat, { isolationSol: 'recente' }) });
-      if (etat.vitrage !== 'triple') candidatsLevier.push({ cle: 'vitrage', valeurs: Object.assign({}, etat, { vitrage: ameliorerVitrage(etat.vitrage) }) });
-      if (etat.ventilation !== 'double_flux') candidatsLevier.push({ cle: 'ventilation', valeurs: Object.assign({}, etat, { ventilation: 'double_flux' }) });
-      if (etat.chauffage !== 'pac') candidatsLevier.push({ cle: 'chauffage', valeurs: Object.assign({}, etat, { chauffage: 'pac' }) });
-      if (etat.ecs !== 'pac_int') candidatsLevier.push({ cle: 'ecs', valeurs: Object.assign({}, etat, { ecs: 'pac_int' }) });
-
-      if (candidatsLevier.length) {
-        pointFaible = candidatsLevier.reduce(function (meilleur, candidat) {
-          var gainMeilleur = resultat.primaire - calculerConsommation(meilleur.valeurs).primaire;
-          var gainCandidat = resultat.primaire - calculerConsommation(candidat.valeurs).primaire;
-          return gainCandidat > gainMeilleur ? candidat : meilleur;
-        }).cle;
-      } else {
-        pointFaible = 'isolationMurs'; // déjà au meilleur niveau partout
-      }
-    }
-
-    var valeursEtape1 = Object.assign({}, etat);
-    if (pointFaible === 'vitrage') {
-      valeursEtape1.vitrage = ameliorerVitrage(etat.vitrage);
-    } else if (pointFaible === 'ventilation') {
-      valeursEtape1.ventilation = 'double_flux';
-    } else if (pointFaible === 'chauffage') {
-      valeursEtape1.chauffage = 'pac';
-    } else if (pointFaible === 'ecs') {
-      valeursEtape1.ecs = 'pac_int';
-    } else {
-      valeursEtape1[pointFaible] = 'recente'; // isolationMurs, isolationToiture ou isolationSol
-    }
-    var resultatEtape1 = calculerConsommation(valeursEtape1);
-    var economieEtape1 = Math.round((1 - resultatEtape1.primaire / resultat.primaire) * 100);
-    var consoEtape1Affichee = consoAffichee * (resultatEtape1.primaire / resultat.primaire);
-    var gesEtape1Affichee = gesAffichee * (resultatEtape1.ges / resultat.ges);
-    var classeEtape1 = classeFinale(consoEtape1Affichee, gesEtape1Affichee);
-
-    document.getElementById('dpe-premiere-etape-pourcent').textContent = economieEtape1 + ' %';
-    afficherEtiquette('dpe-premiere-etape-avant', classeAffichee);
-    afficherEtiquette('dpe-premiere-etape-apres', classeEtape1);
-    document.getElementById('dpe-premiere-etape-detail').textContent = libellesEtape[pointFaible];
-
-    // Rénovation d'ampleur : tous les leviers au meilleur niveau, y
-    // compris le système de chauffage et l'eau chaude — c'est ce que
-    // recouvre une rénovation globale dans les dispositifs d'aide
-    // (MaPrimeRénov' Sérénité, par exemple), pas seulement l'enveloppe.
-    var valeursAmpleur = Object.assign({}, etat, {
-      isolationMurs: 'recente', isolationToiture: 'recente', isolationSol: 'recente',
-      vitrage: 'triple', ventilation: 'double_flux', chauffage: 'pac', ecs: 'pac_int'
-    });
-    var resultatAmpleur = calculerConsommation(valeursAmpleur);
-    var economieAmpleur = Math.round((1 - resultatAmpleur.primaire / resultat.primaire) * 100);
-    var consoAmpleurAffichee = consoAffichee * (resultatAmpleur.primaire / resultat.primaire);
-    var gesAmpleurAffichee = gesAffichee * (resultatAmpleur.ges / resultat.ges);
-    var classeAmpleur = classeFinale(consoAmpleurAffichee, gesAmpleurAffichee);
-
-    document.getElementById('dpe-ampleur-pourcent').textContent = economieAmpleur + ' %';
-    afficherEtiquette('dpe-ampleur-avant', classeAffichee);
-    afficherEtiquette('dpe-ampleur-apres', classeAmpleur);
-
-    // Valeur foncière : écarts moyens observés par classe DPE par
-    // rapport à une classe D, pour des maisons (étude Notaires de
-    // France 2025 sur la valeur verte). A, E et G sont les valeurs
-    // publiées ; B, C et F sont interpolées entre ces points réels.
-    var valeurFonciereEtape1 = VALEUR_FONCIERE_PAR_CLASSE[classeEtape1] - VALEUR_FONCIERE_PAR_CLASSE[classeAffichee];
-    var valeurFonciereAmpleur = VALEUR_FONCIERE_PAR_CLASSE[classeAmpleur] - VALEUR_FONCIERE_PAR_CLASSE[classeAffichee];
-    document.getElementById('dpe-premiere-etape-valeur').textContent = (valeurFonciereEtape1 >= 0 ? '+' : '') + valeurFonciereEtape1 + ' %';
-    document.getElementById('dpe-ampleur-valeur').textContent = (valeurFonciereAmpleur >= 0 ? '+' : '') + valeurFonciereAmpleur + ' %';
-
+    afficherScenarios(resultat, consoAffichee, gesAffichee, factureAffichee, classeAffichee);
     afficherDeperditions(resultat);
     afficherBarometreConfort();
     afficherRecommandations();
@@ -1879,6 +2342,11 @@
     var valeur = parseFloat(document.getElementById('dpe-modifier-valeur').value);
     if (!valeur || valeur <= 0) return;
     etat.ajustementManuel = { unite: uniteModifier, valeur: valeur };
+    // Les champs facultatifs de l'étape 2 disent la même chose : on les
+    // tient à jour pour qu'un retour en arrière ne réaffiche pas une
+    // valeur périmée.
+    champFactureConnue.value = uniteModifier === 'euros' ? valeur : '';
+    champConsoConnue.value = uniteModifier === 'kwh' ? Math.round(valeur * (etat.surface || 1)) : '';
     panneauModifier.hidden = true;
     calculerEtAfficher();
   });
@@ -1886,6 +2354,8 @@
   document.getElementById('dpe-modifier-reinitialiser').addEventListener('click', function () {
     etat.ajustementManuel = null;
     document.getElementById('dpe-modifier-valeur').value = '';
+    champFactureConnue.value = '';
+    champConsoConnue.value = '';
     panneauModifier.hidden = true;
     calculerEtAfficher();
   });

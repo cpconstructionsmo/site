@@ -2160,76 +2160,12 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
   font-weight: 700;
 }
 
-.dpe-solutions {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
-  margin-bottom: 36px;
-}
-
-.dpe-solution {
-  border: 1px solid var(--filet);
-  border-radius: var(--r-m);
-  overflow: hidden;
-}
-
-.dpe-solution-tete {
-  padding: 12px;
-  text-align: center;
-  font-weight: 800;
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: .05em;
-  color: #fff;
-  background: #3E9E4F;
-}
-
-.dpe-solution.premiere-etape .dpe-solution-tete { background: var(--ocre); }
-
-.dpe-solution-corps { padding: 20px; text-align: center; }
-
-.dpe-solution-stats {
-  display: flex;
-  justify-content: center;
-  gap: 32px;
-}
-
-.dpe-solution-stats > div { display: flex; flex-direction: column; align-items: center; }
-
-.dpe-solution-stat-label {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .04em;
-  color: var(--gris);
-  margin-bottom: 4px;
-}
-
-.dpe-solution-stats strong { font-size: 22px; color: var(--encre); }
-
 .dpe-source-valeur {
   font-size: 12px;
   color: var(--gris);
   font-style: italic;
-  margin: -16px 0 32px;
+  margin: 4px 0 32px;
 }
-
-.dpe-solution-classes {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin: 14px 0 4px;
-}
-
-.dpe-solution-classes .dpe-etiquette-classe {
-  width: 46px;
-  height: 46px;
-  min-width: 46px;
-  font-size: 18px;
-}
-
-.dpe-solution-fleche { color: var(--gris); font-size: 18px; }
 
 .dpe-avertissement {
   padding: 20px 24px;
@@ -2472,3 +2408,108 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
 .dpe-tag-faible { background: #1E8E3E; }
 .dpe-tag-moyenne { background: var(--ocre); }
 .dpe-tag-elevee { background: var(--brique-fonce); }
+
+/* ---------- Scénarios de travaux : coûts, aides, rentabilité ---------- */
+
+.dpe-label-facultatif {
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 500;
+  color: var(--gris);
+}
+
+.dpe-champ-note {
+  margin: 8px 0 0;
+  font-size: 12px;
+  font-style: italic;
+  color: var(--gris);
+}
+
+.dpe-champ-note[hidden] { display: none; }
+
+.dpe-tableau-conteneur {
+  overflow-x: auto;
+  margin-bottom: 10px;
+}
+
+.dpe-scenarios,
+.dpe-gestes {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 620px;
+}
+
+.dpe-scenarios th,
+.dpe-gestes th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--gris);
+  padding: 10px 14px 10px 0;
+  vertical-align: top;
+}
+
+.dpe-scenarios thead th,
+.dpe-gestes thead th {
+  border-bottom: 2px solid var(--filet);
+  white-space: nowrap;
+}
+
+.dpe-scenarios thead th:not(:first-child) {
+  color: var(--brique);
+  font-size: 13px;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.dpe-scenarios td,
+.dpe-gestes td {
+  padding: 10px 14px 10px 0;
+  border-bottom: 1px solid var(--filet);
+  color: var(--encre);
+  vertical-align: middle;
+}
+
+.dpe-scenarios tbody th {
+  border-bottom: 1px solid var(--filet);
+  width: 200px;
+}
+
+.dpe-scenarios td { width: 32%; }
+
+.dpe-scenarios .dpe-ligne-forte td {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--brique);
+}
+
+.dpe-gestes td:nth-child(n+2) { white-space: nowrap; }
+.dpe-gestes tbody tr:last-child td { border-bottom: none; }
+
+.dpe-etiquette-mini {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+  background: var(--gris);
+}
+
+.dpe-fleche-mini { color: var(--gris); margin: 0 6px; }
+
+@media (max-width: 780px) {
+  .dpe-scenarios { min-width: 520px; }
+  .dpe-scenarios tbody th { width: 128px; }
+  .dpe-scenarios th,
+  .dpe-scenarios td,
+  .dpe-gestes th,
+  .dpe-gestes td { padding-right: 10px; }
+  .dpe-gestes { min-width: 560px; }
+}
