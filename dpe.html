@@ -7,8 +7,8 @@
   <meta name="description" content="Estimez le DPE de votre logement et découvrez les travaux prioritaires pour gagner des classes énergétiques.">
   <link rel="icon" href="assets/logo-icon.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-  <link rel="stylesheet" href="css/style.css?v=22">
-  <script src="js/anim.js?v=22" defer></script>
+  <link rel="stylesheet" href="css/style.css?v=23">
+  <script src="js/anim.js?v=23" defer></script>
 </head>
 <body>
 
@@ -181,6 +181,42 @@
         </div>
       </div>
 
+      <p class="dpe-section-titre">Structure du bâti</p>
+
+      <div class="dpe-grille-champs dpe-grille-3">
+        <div class="form-group">
+          <label>Emplacement de la maison</label>
+          <div class="dpe-choix" data-groupe="emplacement">
+            <button type="button" data-valeur="isolee">Isolée</button>
+            <button type="button" data-valeur="mitoyenne1">Mitoyenne sur 1 côté</button>
+            <button type="button" data-valeur="mitoyenne2">Mitoyenne sur 2 côtés</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Forme de la maison</label>
+          <div class="dpe-choix" data-groupe="forme">
+            <button type="button" data-valeur="carree">Carrée / compacte</button>
+            <button type="button" data-valeur="rectangulaire">Rectangulaire</button>
+            <button type="button" data-valeur="l">En L</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Nombre de niveaux</label>
+          <div class="dpe-choix" data-groupe="niveaux">
+            <button type="button" data-valeur="1">1 niveau (plain-pied)</button>
+            <button type="button" data-valeur="2">2 niveaux</button>
+            <button type="button" data-valeur="3">3 niveaux ou plus</button>
+          </div>
+        </div>
+      </div>
+      <p class="dpe-astuce">
+        Une maison compacte (carrée, plusieurs niveaux) expose moins de
+        murs et de toiture par rapport à sa surface habitable qu'une
+        maison en L de plain-pied : à isolation égale, elle perd moins
+        de chaleur. Être mitoyen réduit aussi les déperditions, le mur
+        commun n'étant pas exposé à l'extérieur.
+      </p>
+
       <p class="dpe-section-titre">Informations complémentaires</p>
 
       <div class="dpe-grille-champs">
@@ -212,32 +248,51 @@
         H2 correspond à la majorité du territoire.
       </p>
 
+      <p class="dpe-section-titre">Isolation du bâti</p>
+
       <div class="dpe-grille-champs dpe-grille-3">
         <div class="form-group">
-          <label>Isolation des murs</label>
+          <label>Dernière isolation des murs</label>
           <div class="dpe-choix" data-groupe="isolation-murs">
-            <button type="button" data-valeur="aucune">Aucune</button>
-            <button type="button" data-valeur="ancienne">&gt; 10 ans</button>
             <button type="button" data-valeur="recente">&lt; 10 ans</button>
+            <button type="button" data-valeur="ancienne">&gt; 10 ans</button>
+            <button type="button" data-valeur="aucune">Aucun travaux</button>
           </div>
         </div>
         <div class="form-group">
-          <label>Isolation de votre toiture</label>
+          <label>Dernière isolation de la toiture</label>
           <div class="dpe-choix" data-groupe="isolation-toiture">
-            <button type="button" data-valeur="aucune">Aucune</button>
-            <button type="button" data-valeur="ancienne">&gt; 10 ans</button>
             <button type="button" data-valeur="recente">&lt; 10 ans</button>
+            <button type="button" data-valeur="ancienne">&gt; 10 ans</button>
+            <button type="button" data-valeur="aucune">Aucun travaux</button>
           </div>
         </div>
         <div class="form-group">
-          <label>Isolation du sol / plancher bas</label>
-          <div class="dpe-choix" data-groupe="isolation-sol">
-            <button type="button" data-valeur="aucune">Aucune</button>
-            <button type="button" data-valeur="ancienne">&gt; 10 ans</button>
-            <button type="button" data-valeur="recente">&lt; 10 ans</button>
+          <label>Type de sous-sol</label>
+          <div class="dpe-choix" data-groupe="sous-sol">
+            <button type="button" data-valeur="terre_plein">Terre-plein</button>
+            <button type="button" data-valeur="vide_sanitaire">Vide sanitaire</button>
+            <button type="button" data-valeur="sous_sol_non_chauffe">Sous-sol non chauffé</button>
           </div>
         </div>
       </div>
+      <div class="dpe-grille-champs dpe-grille-3">
+        <div class="form-group">
+          <label>Dernière isolation du plancher bas</label>
+          <div class="dpe-choix" data-groupe="isolation-sol">
+            <button type="button" data-valeur="recente">&lt; 10 ans</button>
+            <button type="button" data-valeur="ancienne">&gt; 10 ans</button>
+            <button type="button" data-valeur="aucune">Aucun travaux</button>
+          </div>
+        </div>
+      </div>
+      <p class="dpe-astuce">
+        « Aucun travaux » signifie que l'isolation n'a jamais été
+        refaite depuis la construction : le simulateur utilise alors le
+        niveau typique de la période de construction indiquée plus
+        haut (proche de zéro pour une maison d'avant 1975, déjà correct
+        pour une maison très récente).
+      </p>
 
       <div class="form-group">
         <label>Type de vitrage</label>
@@ -395,6 +450,11 @@
         </p>
       </div>
 
+      <div class="dpe-recommandations" id="dpe-recommandations" hidden>
+        <h3 style="color: var(--brique); margin-bottom: 14px;">Nos recommandations pour ce logement</h3>
+        <ul id="dpe-recommandations-liste"></ul>
+      </div>
+
       <h3 style="color: var(--brique); margin-bottom: 18px;">Découvrez vos solutions de travaux</h3>
       <div class="dpe-solutions">
         <div class="dpe-solution premiere-etape">
@@ -519,8 +579,12 @@
     ecs: '',
     ventilation: '',
     zoneClimatique: '',
+    emplacement: '',
+    forme: '',
+    niveaux: '',
     isolationMurs: '',
     isolationToiture: '',
+    sousSol: '',
     isolationSol: '',
     vitrage: '',
     occupation: '',
@@ -979,8 +1043,12 @@
   }
 
   initGroupeChoix('vitrage', 'vitrage');
+  initGroupeChoix('emplacement', 'emplacement');
+  initGroupeChoix('forme', 'forme');
+  initGroupeChoix('niveaux', 'niveaux');
   initGroupeChoix('isolation-murs', 'isolationMurs');
   initGroupeChoix('isolation-toiture', 'isolationToiture');
+  initGroupeChoix('sous-sol', 'sousSol');
   initGroupeChoix('isolation-sol', 'isolationSol');
   initGroupeChoix('occupation', 'occupation');
   initGroupeChoix('delai', 'delai');
@@ -995,7 +1063,8 @@
 
     var erreur = document.getElementById('dpe-erreur-2');
     var complet = etat.surface && etat.periode && etat.chauffage && etat.ecs && etat.ventilation && etat.zoneClimatique &&
-      etat.isolationMurs && etat.isolationToiture && etat.isolationSol && etat.vitrage;
+      etat.emplacement && etat.forme && etat.niveaux &&
+      etat.isolationMurs && etat.isolationToiture && etat.sousSol && etat.isolationSol && etat.vitrage;
     if (!complet) {
       erreur.hidden = false;
       return;
@@ -1082,18 +1151,40 @@
 
   // Plutôt que de demander une épaisseur ou une résistance précise (peu
   // de propriétaires les connaissent), on demande simplement depuis
-  // quand l'isolant est en place : « aucune », posée il y a plus de
-  // 10 ans (standard plus ancien), ou moins de 10 ans (standard actuel).
-  // Chaque réponse vaut une résistance thermique représentative, comparée
-  // ensuite à la référence de l'époque de construction — même principe
-  // qu'avant, avec une saisie beaucoup plus simple.
+  // quand l'isolant a été posé ou refait : moins de 10 ans (standard
+  // actuel), plus de 10 ans (standard plus ancien), ou « aucun
+  // travaux » — auquel cas le logement est resté au niveau typique de
+  // sa période de construction (ni mieux, ni moins bien que la
+  // référence de son époque, qui peut déjà être correcte pour une
+  // maison récente ou très faible pour une maison ancienne). C'est ce
+  // dernier cas qui a été corrigé : il valait auparavant un mur nu
+  // quelle que soit l'époque, ce qui pénalisait à tort les maisons
+  // récentes construites avec une isolation obligatoire.
   var R_MUR_CATEGORIE = {
-    aucune: R_BASE_MUR,
     ancienne: R_BASE_MUR + 80 / 1000 / LAMBDA_ISOLANT,
     recente: R_BASE_MUR + 180 / 1000 / LAMBDA_ISOLANT
   };
-  var R_TOITURE_CATEGORIE = { aucune: R_BASE_TOITURE, ancienne: 3.0, recente: 8.5 };
-  var R_SOL_CATEGORIE = { aucune: R_BASE_SOL, ancienne: 1.0, recente: 3.0 };
+  var R_TOITURE_CATEGORIE = { ancienne: 3.0, recente: 8.5 };
+  var R_SOL_CATEGORIE = { ancienne: 1.0, recente: 3.0 };
+
+  // Sans travaux sur le plancher bas, sa performance dépend surtout du
+  // type de sous-sol d'origine : un vide sanitaire non isolé perd par
+  // en dessous comme une façade, une dalle sur terre-plein est un peu
+  // protégée par l'inertie du sol, un sous-sol non chauffé fait tampon
+  // (température intermédiaire entre intérieur et extérieur).
+  var R_SOL_TYPE_ORIGINE = { terre_plein: 0.34, vide_sanitaire: 0.17, sous_sol_non_chauffe: 0.55 };
+
+  // Compacité du bâti : à surface habitable égale, une forme compacte
+  // et plusieurs niveaux exposent moins de murs/toiture/plancher à
+  // l'extérieur qu'une forme en L de plain-pied — un vrai facteur du
+  // calcul réglementaire (coefficient de forme), qui n'était pas du
+  // tout pris en compte jusqu'ici.
+  var FORME_FACTEUR = { carree: 0.95, rectangulaire: 1.0, l: 1.08 };
+  var NIVEAUX_FACTEUR = { '1': 1.10, '2': 1.0, '3': 0.95 };
+
+  // Mitoyenneté : un mur commun avec le voisin n'est pas exposé à
+  // l'extérieur et ne déperd donc pas de chaleur.
+  var EMPLACEMENT_FACTEUR = { isolee: 1.0, mitoyenne1: 0.93, mitoyenne2: 0.86 };
 
   // Ventilation : une VMC double flux récupère une bonne partie de la
   // chaleur de l'air extrait, une ventilation naturelle ou l'absence de
@@ -1167,12 +1258,14 @@
   }
 
   function facteurMur(categorie, periode) {
+    if (categorie === 'aucune') return 1; // pas de travaux : au niveau typique de l'époque
     var rActuel = R_MUR_CATEGORIE[categorie] || R_BASE_MUR;
     var rReference = R_BASE_MUR + EPAISSEUR_MUR_REFERENCE_PERIODE[periode] / 1000 / LAMBDA_ISOLANT;
     return facteurBorne(rReference / rActuel);
   }
 
   function facteurToiture(categorie, periode) {
+    if (categorie === 'aucune') return 1;
     var rActuel = R_TOITURE_CATEGORIE[categorie] || R_BASE_TOITURE;
     return facteurBorne(R_TOITURE_REFERENCE_PERIODE[periode] / rActuel);
   }
@@ -1181,8 +1274,13 @@
     return facteurBorne(UW_VITRAGE[typeVitrage] / UW_REFERENCE_PERIODE[periode]);
   }
 
-  function facteurSol(categorie, periode) {
-    var rActuel = R_SOL_CATEGORIE[categorie] || R_BASE_SOL;
+  function facteurSol(categorie, periode, sousSol) {
+    // Sans travaux, la performance dépend du type de sous-sol d'origine
+    // plutôt que d'un mur nu par défaut — une précision que la question
+    // sur le type de sous-sol permet d'apporter.
+    var rActuel = categorie === 'aucune'
+      ? (R_SOL_TYPE_ORIGINE[sousSol] || R_BASE_SOL)
+      : (R_SOL_CATEGORIE[categorie] || R_BASE_SOL);
     return facteurBorne(R_SOL_REFERENCE_PERIODE[periode] / rActuel);
   }
 
@@ -1190,11 +1288,15 @@
     return VENTILATION_FACTEUR[type] || 1.0;
   }
 
+  function facteurCompacite(forme, niveaux, emplacement) {
+    return (FORME_FACTEUR[forme] || 1.0) * (NIVEAUX_FACTEUR[niveaux] || 1.0) * (EMPLACEMENT_FACTEUR[emplacement] || 1.0);
+  }
+
   function calculerConsommation(valeurs) {
     var fMur = facteurMur(valeurs.isolationMurs, valeurs.periode);
     var fToiture = facteurToiture(valeurs.isolationToiture, valeurs.periode);
     var fVitrage = facteurVitrage(valeurs.vitrage, valeurs.periode);
-    var fSol = facteurSol(valeurs.isolationSol, valeurs.periode);
+    var fSol = facteurSol(valeurs.isolationSol, valeurs.periode, valeurs.sousSol);
     var fVentilation = facteurVentilation(valeurs.ventilation);
 
     // Chaque poste ne pèse que sa propre part des déperditions totales
@@ -1211,7 +1313,8 @@
       PART_DEPERDITION.ventilation * fVentilation;
 
     var facteurZone = ZONE_CLIMATIQUE_FACTEUR[valeurs.zoneClimatique] || 1.0;
-    var besoinChauffage = BESOIN_CHAUFFAGE_PERIODE[valeurs.periode] * facteurGlobal * facteurZone;
+    var facteurForme = facteurCompacite(valeurs.forme, valeurs.niveaux, valeurs.emplacement);
+    var besoinChauffage = BESOIN_CHAUFFAGE_PERIODE[valeurs.periode] * facteurGlobal * facteurZone * facteurForme;
     var chauffageFinale = besoinChauffage / RENDEMENT_CHAUFFAGE[valeurs.chauffage];
 
     var ecsInfo = ECS_INFO[valeurs.ecs];
@@ -1472,6 +1575,85 @@
     document.getElementById('dpe-ampleur-valeur').textContent = (valeurFonciereAmpleur >= 0 ? '+' : '') + valeurFonciereAmpleur + ' %';
 
     afficherBarometreConfort();
+    afficherRecommandations();
+  }
+
+  /* --- Recommandations concrètes ---
+     Une liste à puces qui traduit directement les réponses données en
+     actions : un poste clairement faible (jamais isolé, simple vitrage,
+     chauffage fioul...) devient une phrase de conseil, plutôt qu'un
+     pourcentage abstrait. Rien n'est inventé : chaque règle correspond
+     à une pratique de rénovation reconnue (l'isolation de la toiture et
+     le remplacement d'un chauffage fioul sont parmi les travaux les
+     plus fréquemment recommandés dans les audits énergétiques réels). */
+
+  // « Aucun travaux » ne signifie une isolation insuffisante que pour
+  // les logements construits avant que l'isolation ne soit vraiment
+  // exigée par la réglementation : à partir de RT2005, le niveau de
+  // construction d'origine est déjà globalement correct, donc ne pas
+  // avoir fait de travaux depuis n'est pas en soi un point faible.
+  var PERIODE_ISOLATION_ORIGINE_FAIBLE = {
+    avant1975: true, rt1974: true, rt1988: true, rt2000: true,
+    rt2005: false, rt2012: false, re2020: false
+  };
+
+  function afficherRecommandations() {
+    var conseils = [];
+    var origineFaible = PERIODE_ISOLATION_ORIGINE_FAIBLE[etat.periode];
+
+    if (etat.isolationMurs === 'aucune' && origineFaible) {
+      conseils.push('<strong>Isolation des murs</strong> : à prévoir en priorité, par l\'intérieur ou par l\'extérieur selon la configuration du logement.');
+    } else if (etat.isolationMurs === 'ancienne') {
+      conseils.push('<strong>Isolation des murs</strong> : votre isolation a plus de 10 ans, un renforcement peut encore apporter un vrai gain.');
+    }
+
+    if (etat.isolationToiture === 'aucune' && origineFaible) {
+      conseils.push('<strong>Isolation de la toiture ou des combles</strong> : c\'est souvent le poste le plus rentable, la chaleur s\'échappant en priorité par le haut du logement.');
+    } else if (etat.isolationToiture === 'ancienne') {
+      conseils.push('<strong>Isolation de la toiture</strong> : à renforcer, les standards actuels sont nettement plus exigeants qu\'il y a 10 ans.');
+    }
+
+    if (etat.isolationSol === 'aucune' && origineFaible) {
+      var libellesSousSol = { terre_plein: 'la dalle sur terre-plein', vide_sanitaire: 'le vide sanitaire', sous_sol_non_chauffe: 'le sous-sol non chauffé' };
+      conseils.push('<strong>Isolation du plancher bas</strong> : à prévoir, notamment au-dessus de ' + (libellesSousSol[etat.sousSol] || 'votre sous-sol') + '.');
+    }
+
+    if (etat.vitrage === 'simple') {
+      conseils.push('<strong>Remplacement du vitrage</strong> : le simple vitrage est le point faible le plus net de ce logement, le double (voire triple) vitrage apporte un gain de confort immédiat.');
+    } else if (etat.vitrage === 'double') {
+      conseils.push('<strong>Vitrage</strong> : un double vitrage récent ou un triple vitrage améliorerait encore le confort, notamment en hiver.');
+    }
+
+    if (etat.ventilation === 'aucune' || etat.ventilation === 'naturelle') {
+      conseils.push('<strong>Ventilation</strong> : l\'installation d\'une VMC (simple ou double flux) améliore la qualité de l\'air intérieur et limite les déperditions liées au renouvellement d\'air.');
+    }
+
+    if (etat.chauffage === 'fioul') {
+      conseils.push('<strong>Chauffage</strong> : le fioul est à la fois coûteux et fortement carboné (voir les émissions de GES ci-dessus) — le remplacement par une pompe à chaleur est la solution la plus efficace.');
+    } else if (etat.chauffage === 'electrique') {
+      conseils.push('<strong>Chauffage</strong> : un chauffage électrique direct consomme davantage qu\'une pompe à chaleur pour un même confort ; une PAC air/eau ou air/air divise généralement la consommation de chauffage par 3.');
+    }
+
+    if (etat.ecs === 'ballon_elec' && etat.chauffage !== 'pac') {
+      conseils.push('<strong>Eau chaude sanitaire</strong> : un ballon thermodynamique consomme 2 à 3 fois moins qu\'un ballon électrique classique pour le même usage.');
+    }
+
+    var bloc = document.getElementById('dpe-recommandations');
+    var liste = document.getElementById('dpe-recommandations-liste');
+    liste.innerHTML = '';
+
+    if (!conseils.length) {
+      bloc.hidden = false;
+      liste.innerHTML = '<li>Votre logement présente déjà de bonnes performances sur les postes analysés ici. Une rénovation d\'ampleur reste à étudier au cas par cas pour aller plus loin.</li>';
+      return;
+    }
+
+    conseils.forEach(function (conseil) {
+      var li = document.createElement('li');
+      li.innerHTML = conseil;
+      liste.appendChild(li);
+    });
+    bloc.hidden = false;
   }
 
   /* --- Baromètre du confort (estimation indicative) ---
