@@ -1615,6 +1615,49 @@
   // périodes intermédiaires, ce qui suffisait à faire basculer d'une
   // classe à l'autre, surtout en chauffage électrique où l'écart est
   // ensuite multiplié par le coefficient d'énergie primaire.
+  /* --- Mesures relevées sur la base ADEME des DPE (septembre 2026) ---
+     Jeu « DPE Logements existants », 15,5 millions de logements. Maisons
+     individuelles, mille par période, médianes. Deux populations : tout
+     le parc, et les seuls logements dont l'enveloppe est jugée
+     insuffisante — restés au niveau de leur construction.
+
+     Besoin de chauffage (kWh/m²/an), zone H2 isolée pour que le climat
+     n'entre pas deux fois, et coefficient Ubat W/(m².K) :
+
+       période      besoin parc / jamais rénové   Ubat parc / jamais rénové
+       avant 1975       158  /  218                  0,96  /  1,24
+       1975-1988        117  /  150                  0,69  /  0,96
+       1989-2000        104  /  131                  0,61  /  0,93
+       2001-2005         96  /  110                  0,54  /  0,90
+       2006-2012         76  /   85                  0,49  /  0,91
+       2013-2021         51  /   53                  0,43  /  0,71
+       après 2021        44  /   -                   0,39  /   -
+     (après 2021 jamais rénové : 1 269 logements seulement, non retenu)
+
+     Répartition des déperditions sur tout le parc, en % (baies et portes
+     réunies), à comparer aux parts du modèle :
+
+       période      murs toiture vitrage  sol  ponts th.  ventilation
+       avant 1975    32     6      13     10       9          30
+       1975-1988     25     6      15     11      10          33
+       1989-2000     19     6      18     10      12          35
+       2001-2005     18     6      17      9      13          37
+       2006-2012     18     6      17      9      16          34
+       2013-2021     16     5      21     10      20          29
+       après 2021    15     6      22     10      16          31
+
+     Ces mesures ne sont pas encore câblées dans le calcul, et c'est
+     délibéré : les facteurs par poste ci-dessous se rapportent au
+     logement tel que construit (R_MUR_REFERENCE_PERIODE et ses
+     voisins), tandis que ces médianes décrivent le logement médian
+     d'aujourd'hui, souvent partiellement rénové. Mélanger les deux a été
+     essayé et mesuré : avec les médianes du parc, une passoire de 1960
+     jamais isolée ressortait en classe D ; avec celles des logements
+     jamais rénovés, un audit réel passait de 287 à 443 kWh/m²/an. Il
+     manque, pour rendre les deux comparables, la répartition des
+     déperditions par poste selon la qualité d'isolation de ce poste-là,
+     qui fixerait les références poste par poste sur la même base. */
+
   var BESOIN_CHAUFFAGE_PERIODE = {
     avant1975: 250, rt1974: 115, rt1988: 95, rt2000: 78,
     rt2005: 57, rt2012: 36, re2020: 28
