@@ -7,8 +7,8 @@
   <meta name="description" content="Estimez le DPE de votre logement et découvrez les travaux prioritaires pour gagner des classes énergétiques.">
   <link rel="icon" href="assets/logo-icon.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-  <link rel="stylesheet" href="css/style.css?v=30">
-  <script src="js/anim.js?v=30" defer></script>
+  <link rel="stylesheet" href="css/style.css?v=31">
+  <script src="js/anim.js?v=31" defer></script>
 </head>
 <body>
 
@@ -916,6 +916,28 @@
     return null;
   }
 
+  /* La base ne porte aucun champ donnant simplement la surface du
+     logement : « surface_habitable_immeuble » est vide pour une maison
+     et vaut, pour un appartement, la surface de tout l'immeuble — la
+     reprendre telle quelle remplirait le formulaire avec un millier de
+     mètres carrés. On retient donc la plus petite valeur plausible
+     parmi les surfaces disponibles, celle qui a le plus de chances de
+     décrire le logement lui-même plutôt que le bâtiment entier. */
+
+  var CHAMPS_SURFACE = [
+    'surface_habitable_logement',
+    'surface_chauffee_installation_chauffage_n1',
+    'surface_habitable_desservie_par_installation_ecs_n1',
+    'surface_habitable_immeuble'
+  ];
+
+  function surfaceLogement(ligne) {
+    var candidates = CHAMPS_SURFACE
+      .map(function (c) { return parseFloat(ligne[c]); })
+      .filter(function (v) { return isFinite(v) && v >= 8 && v <= 1000; });
+    return candidates.length ? Math.min.apply(null, candidates) : null;
+  }
+
   /* L'ADEME a déjà renommé ce jeu de données deux fois : « dpe-france »
      avant la réforme de 2021, puis « dpe-v2-logements-existants », et
      aujourd'hui un identifiant technique (« dpe03existant » n'étant que
@@ -1005,8 +1027,7 @@
           // Les émissions en kg CO2/m²/an, une valeur numérique — à ne
           // pas confondre avec l'étiquette GES, qui est une lettre.
           ges: premiereValeur(ligne, ['emission_ges_5_usages_par_m2']),
-          surface: premiereValeur(ligne, ['surface_habitable_immeuble', 'surface_habitable_logement',
-            'surface_chauffee_installation_chauffage_n1']),
+          surface: surfaceLogement(ligne),
           periode: premiereValeur(ligne, ['periode_construction']),
           zone: premiereValeur(ligne, ['zone_climatique']),
           typeBien: premiereValeur(ligne, ['type_batiment']),

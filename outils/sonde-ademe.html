@@ -344,8 +344,21 @@
     this.disabled = true;
 
     var champBesoin = champ(['besoin_chauffage']) || champParMotif([/besoin.*chauffage/i]);
-    var champSurface = champ(['surface_habitable_immeuble', 'surface_habitable_logement']) ||
-      champParMotif([/surface.*habitable/i]);
+    // « surface_habitable_immeuble » est vide pour une maison et vaut la
+    // surface du bâtiment entier pour un appartement : on prend la plus
+    // petite surface plausible parmi celles disponibles.
+    var CHAMPS_SURFACE = ['surface_habitable_logement',
+      'surface_chauffee_installation_chauffage_n1',
+      'surface_habitable_desservie_par_installation_ecs_n1',
+      'surface_habitable_immeuble'].filter(function (c) {
+        return champsDisponibles.indexOf(c) !== -1;
+      });
+    function surfaceDe(r) {
+      var v = CHAMPS_SURFACE.map(function (c) { return nombre(r[c]); })
+        .filter(function (x) { return x !== null && x >= 15 && x <= 1000; });
+      return v.length ? Math.min.apply(null, v) : null;
+    }
+    var champSurface = CHAMPS_SURFACE.join(' | ');
     var champConso = champ(['conso_5_usages_par_m2_ep']) ||
       champParMotif([/conso.*5.*usages.*m2.*ep/i], [/_ef$|finale/i]);
     var champPeriode = champ(['periode_construction']) || champParMotif([/periode.*construction/i]);
@@ -404,12 +417,24 @@
       });
       Object.keys(postesPresents).forEach(function (cle) { champs.push(postesPresents[cle]); });
 
-      var url = BASE() + '?size=1000&qs=' + encodeURIComponent(qs) +
-        '&select=' + encodeURIComponent(champs.join(','));
+      /* Deux prélèvements par période. Le second ne retient que les
+         logements dont l'enveloppe est jugée « insuffisante », c'est-à-dire
+         restés au niveau de leur construction : c'est cette population-là
+         qui correspond à la référence du simulateur, quand la personne
+         répond « aucun travaux ». Confondre les deux fausserait tout —
+         la médiane du parc inclut des maisons dont les combles ont été
+         isolés depuis, ce qui écrase la part de la toiture. */
 
-      recuperer(url)
-        .then(function (d) {
-          var l = lignes(d);
+      var champQualite = champ(['qualite_isolation_enveloppe']);
+      if (champQualite) champs.push(champQualite);
+
+      function prelever(filtre) {
+        var url = BASE() + '?size=1000&qs=' + encodeURIComponent(filtre) +
+          '&select=' + encodeURIComponent(champs.join(','));
+        return recuperer(url).then(function (d) { return analyser(lignes(d), d.total); });
+      }
+
+      function analyser(l, total) {
           var besoins = [], consos = [], ubats = [];
           var parEnergie = {}, parZone = {}, partsPoste = {};
           Object.keys(postesPresents).forEach(function (cle) { partsPoste[cle] = []; });
@@ -420,7 +445,7 @@
 
             // Le besoin de chauffage est un total annuel : c'est sa
             // valeur au m² qui se compare aux paramètres du simulateur.
-            var surface = champSurface ? nombre(r[champSurface]) : null;
+            var surface = surfaceDe(r);
             var besoin = champBesoin ? nombre(r[champBesoin]) : null;
             var besoinParM2 = null;
             if (besoin !== null && surface && surface > 15 && surface < 1000) {
@@ -468,18 +493,27 @@
             if (partsPoste[cle].length >= 20) parts[cle] = arrondi(mediane(partsPoste[cle]), 1);
           });
 
-          resultats[p.cle] = {
-            tranches: p.tranches.join(' / '),
-            n: l.length,
-            total_disponible: d.total,
-            mediane_besoin_chauffage_par_m2: arrondi(mediane(besoins)),
-            n_besoin: besoins.length,
-            mediane_conso_5_usages_ep: arrondi(mediane(consos)),
-            mediane_ubat: arrondi(mediane(ubats), 2),
-            parts_deperdition_pct: parts,
-            besoin_par_zone_climatique: medianesDe(parZone),
-            conso_par_energie: medianesDe(parEnergie)
-          };
+        return {
+          n: l.length,
+          total_disponible: total,
+          mediane_besoin_chauffage_par_m2: arrondi(mediane(besoins)),
+          n_besoin: besoins.length,
+          mediane_conso_5_usages_ep: arrondi(mediane(consos)),
+          mediane_ubat: arrondi(mediane(ubats), 2),
+          parts_deperdition_pct: parts,
+          besoin_par_zone_climatique: medianesDe(parZone),
+          conso_par_energie: medianesDe(parEnergie)
+        };
+      }
+
+      prelever(qs)
+        .then(function (ensemble) {
+          resultats[p.cle] = { tranches: p.tranches.join(' / '), ensemble: ensemble };
+          if (!champQualite) return null;
+          return prelever(qs + ' AND ' + champQualite + ':"insuffisante"');
+        })
+        .then(function (sansTravaux) {
+          if (sansTravaux) resultats[p.cle].enveloppe_insuffisante = sansTravaux;
           index++;
           setTimeout(suivante, 400); // on ménage le service public
         })
