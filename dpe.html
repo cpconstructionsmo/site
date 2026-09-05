@@ -7,8 +7,8 @@
   <meta name="description" content="Estimez le DPE de votre logement et découvrez les travaux prioritaires pour gagner des classes énergétiques.">
   <link rel="icon" href="assets/logo-icon.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-  <link rel="stylesheet" href="css/style.css?v=17">
-  <script src="js/anim.js?v=17" defer></script>
+  <link rel="stylesheet" href="css/style.css?v=18">
+  <script src="js/anim.js?v=18" defer></script>
 </head>
 <body>
 
@@ -150,17 +150,39 @@
         <div class="form-group">
           <label for="dpe-epaisseur-murs">Épaisseur d'isolant des murs (mm)</label>
           <input type="number" id="dpe-epaisseur-murs" min="0" max="400" step="10" placeholder="Ex : 120, 0 si aucune">
+          <label class="dpe-inconnu"><input type="checkbox" id="dpe-murs-inconnu"> Je ne sais pas</label>
         </div>
         <div class="form-group">
           <label for="dpe-r-toiture">Résistance thermique R du plafond/toiture (m².K/W)</label>
           <input type="number" id="dpe-r-toiture" min="0" max="12" step="0.5" placeholder="Ex : 7">
+          <label class="dpe-inconnu"><input type="checkbox" id="dpe-toiture-inconnu"> Je ne sais pas</label>
         </div>
       </div>
       <p class="dpe-astuce">
         Astuce : la résistance R figure sur l'emballage de l'isolant. À
         défaut, comptez environ R = 1 tous les 3,5 cm de laine de verre ou
-        de roche (par exemple 240 mm ≈ R7).
+        de roche (par exemple 240 mm ≈ R7). Si vous ne savez pas, cochez «
+        Je ne sais pas » : nous utiliserons une valeur moyenne pour
+        l'année de construction de votre logement.
       </p>
+
+      <div class="dpe-grille-champs">
+        <div class="form-group">
+          <label for="dpe-sol">Isolation du sol / plancher bas</label>
+          <select id="dpe-sol">
+            <option value="">Choisir...</option>
+            <option value="terre_plein">Dalle sur terre-plein</option>
+            <option value="vide_sanitaire_non_isole">Vide sanitaire non isolé</option>
+            <option value="vide_sanitaire_isole">Vide sanitaire isolé</option>
+            <option value="plancher_isole">Plancher isolé par-dessous (isolation rapportée)</option>
+            <option value="ne_sait_pas">Je ne sais pas</option>
+          </select>
+        </div>
+        <div class="form-group" id="dpe-sol-epaisseur-groupe" hidden>
+          <label for="dpe-epaisseur-sol">Épaisseur de l'isolant sous plancher (mm)</label>
+          <input type="number" id="dpe-epaisseur-sol" min="0" max="300" step="10" placeholder="Ex : 56, 80...">
+        </div>
+      </div>
 
       <div class="form-group">
         <label>Type de vitrage</label>
@@ -362,7 +384,11 @@
     chauffage: '',
     ecs: '',
     epaisseurMurs: null,
+    mursInconnu: false,
     rToiture: null,
+    toitureInconnu: false,
+    sol: '',
+    epaisseurSol: null,
     vitrage: '',
     occupation: '',
     delai: '',
@@ -646,19 +672,53 @@
   initGroupeChoix('occupation', 'occupation');
   initGroupeChoix('delai', 'delai');
 
+  /* Case « Je ne sais pas » : elle désactive le champ chiffré associé
+     plutôt que de laisser deviner une valeur qui fausserait le calcul
+     (un 0 saisi par défaut serait interprété comme « aucun isolant »). */
+  function initCaseInconnu(idCase, idChamp) {
+    var caseACocher = document.getElementById(idCase);
+    var champ = document.getElementById(idChamp);
+    caseACocher.addEventListener('change', function () {
+      champ.disabled = caseACocher.checked;
+      if (caseACocher.checked) champ.value = '';
+    });
+  }
+
+  initCaseInconnu('dpe-murs-inconnu', 'dpe-epaisseur-murs');
+  initCaseInconnu('dpe-toiture-inconnu', 'dpe-r-toiture');
+
+  var champSol = document.getElementById('dpe-sol');
+  var groupeEpaisseurSol = document.getElementById('dpe-sol-epaisseur-groupe');
+  var champEpaisseurSol = document.getElementById('dpe-epaisseur-sol');
+  champSol.addEventListener('change', function () {
+    var afficher = champSol.value === 'plancher_isole';
+    groupeEpaisseurSol.hidden = !afficher;
+    if (!afficher) champEpaisseurSol.value = '';
+  });
+
   document.getElementById('dpe-suivant-2').addEventListener('click', function () {
     etat.surface = parseFloat(document.getElementById('dpe-surface').value) || null;
     etat.periode = document.getElementById('dpe-periode').value;
     etat.chauffage = document.getElementById('dpe-chauffage').value;
     etat.ecs = document.getElementById('dpe-ecs').value;
-    etat.epaisseurMurs = document.getElementById('dpe-epaisseur-murs').value === ''
+
+    etat.mursInconnu = document.getElementById('dpe-murs-inconnu').checked;
+    etat.epaisseurMurs = (etat.mursInconnu || document.getElementById('dpe-epaisseur-murs').value === '')
       ? null : parseFloat(document.getElementById('dpe-epaisseur-murs').value);
-    etat.rToiture = document.getElementById('dpe-r-toiture').value === ''
+
+    etat.toitureInconnu = document.getElementById('dpe-toiture-inconnu').checked;
+    etat.rToiture = (etat.toitureInconnu || document.getElementById('dpe-r-toiture').value === '')
       ? null : parseFloat(document.getElementById('dpe-r-toiture').value);
 
+    etat.sol = champSol.value;
+    etat.epaisseurSol = champEpaisseurSol.value === '' ? null : parseFloat(champEpaisseurSol.value);
+
     var erreur = document.getElementById('dpe-erreur-2');
-    var complet = etat.surface && etat.periode && etat.chauffage && etat.ecs &&
-      etat.epaisseurMurs !== null && etat.rToiture !== null && etat.vitrage;
+    var complet = etat.surface && etat.periode && etat.chauffage && etat.ecs && etat.sol &&
+      (etat.mursInconnu || etat.epaisseurMurs !== null) &&
+      (etat.toitureInconnu || etat.rToiture !== null) &&
+      (etat.sol !== 'plancher_isole' || etat.epaisseurSol !== null) &&
+      etat.vitrage;
     if (!complet) {
       erreur.hidden = false;
       return;
@@ -737,6 +797,22 @@
   };
   var NIVEAUX_VITRAGE = ['simple', 'double', 'double_recent', 'triple'];
 
+  // Isolation du sol / plancher bas : les deux premiers cas ont une
+  // résistance thermique typique connue (le vide sanitaire non isolé
+  // perd par-dessous comme par-dessus, la dalle sur terre-plein est un
+  // peu protégée par l'inertie du sol) ; le plancher isolé se calcule
+  // comme les murs, à partir de l'épaisseur réellement posée.
+  var R_BASE_SOL = 0.17; // m².K/W, plancher nu
+  var R_SOL_TYPE = {
+    terre_plein: 0.34,
+    vide_sanitaire_non_isole: 0.17,
+    vide_sanitaire_isole: 2.0
+  };
+  var R_SOL_REFERENCE_PERIODE = {
+    avant1975: 0.17, rt1974: 0.34, rt1988: 0.6, rt2000: 1.0,
+    rt2005: 1.5, rt2012: 2.5, re2020: 3.0
+  };
+
   var RENDEMENT_CHAUFFAGE = { gaz: 0.92, fioul: 0.85, bois: 0.80, electrique: 1.0, pac: 3.2 };
   var COEFFICIENT_PRIMAIRE = { gaz: 1, fioul: 1, bois: 1, electrique: 2.58, pac: 2.58 };
   var PRIX_KWH = { gaz: 0.10, fioul: 0.12, electrique: 0.21, bois: 0.08, pac: 0.21 };
@@ -768,13 +844,15 @@
     return Math.max(0.4, Math.min(2.5, valeur));
   }
 
-  function facteurMur(epaisseurMm, periode) {
+  function facteurMur(epaisseurMm, periode, inconnu) {
+    if (inconnu) return 1; // valeur moyenne de l'époque, ni bonus ni malus
     var rActuel = R_BASE_MUR + (epaisseurMm || 0) / 1000 / LAMBDA_ISOLANT;
     var rReference = R_BASE_MUR + EPAISSEUR_MUR_REFERENCE_PERIODE[periode] / 1000 / LAMBDA_ISOLANT;
     return facteurBorne(rReference / rActuel);
   }
 
-  function facteurToiture(rToiture, periode) {
+  function facteurToiture(rToiture, periode, inconnu) {
+    if (inconnu) return 1;
     var rActuel = Math.max(R_BASE_TOITURE, rToiture || R_BASE_TOITURE);
     return facteurBorne(R_TOITURE_REFERENCE_PERIODE[periode] / rActuel);
   }
@@ -783,12 +861,24 @@
     return facteurBorne(UW_VITRAGE[typeVitrage] / UW_REFERENCE_PERIODE[periode]);
   }
 
-  function calculerConsommation(valeurs) {
-    var fMur = facteurMur(valeurs.epaisseurMurs, valeurs.periode);
-    var fToiture = facteurToiture(valeurs.rToiture, valeurs.periode);
-    var fVitrage = facteurVitrage(valeurs.vitrage, valeurs.periode);
+  function facteurSol(typeSol, epaisseurSolMm, periode) {
+    if (!typeSol || typeSol === 'ne_sait_pas') return 1;
+    var rActuel;
+    if (typeSol === 'plancher_isole') {
+      rActuel = R_BASE_SOL + (epaisseurSolMm || 0) / 1000 / LAMBDA_ISOLANT;
+    } else {
+      rActuel = R_SOL_TYPE[typeSol] || R_BASE_SOL;
+    }
+    return facteurBorne(R_SOL_REFERENCE_PERIODE[periode] / rActuel);
+  }
 
-    var besoinChauffage = BESOIN_CHAUFFAGE_PERIODE[valeurs.periode] * fMur * fToiture * fVitrage;
+  function calculerConsommation(valeurs) {
+    var fMur = facteurMur(valeurs.epaisseurMurs, valeurs.periode, valeurs.mursInconnu);
+    var fToiture = facteurToiture(valeurs.rToiture, valeurs.periode, valeurs.toitureInconnu);
+    var fVitrage = facteurVitrage(valeurs.vitrage, valeurs.periode);
+    var fSol = facteurSol(valeurs.sol, valeurs.epaisseurSol, valeurs.periode);
+
+    var besoinChauffage = BESOIN_CHAUFFAGE_PERIODE[valeurs.periode] * fMur * fToiture * fVitrage * fSol;
     var chauffageFinale = besoinChauffage / RENDEMENT_CHAUFFAGE[valeurs.chauffage];
 
     var ecsInfo = ECS_INFO[valeurs.ecs];
@@ -804,7 +894,7 @@
       ecsFinale * PRIX_KWH[ecsInfo.vecteur] +
       AUX_ECLAIRAGE_FINALE * PRIX_KWH.electrique;
 
-    return { primaire: primaire, factureParM2: factureParM2, fMur: fMur, fToiture: fToiture, fVitrage: fVitrage };
+    return { primaire: primaire, factureParM2: factureParM2, fMur: fMur, fToiture: fToiture, fVitrage: fVitrage, fSol: fSol };
   }
 
   function classeDepuisConso(conso) {
@@ -874,16 +964,20 @@
     var libellesEtape = {
       isolationMurs: 'Isolation des murs',
       isolationToiture: 'Isolation de la toiture',
+      isolationSol: 'Isolation du sol / plancher bas',
       vitrage: 'Remplacement du vitrage'
     };
     var pointFaible;
     if (etat.dpeConnu && etat.dpeConnu.posteFaible) {
       var correspondance = {
-        'Façades': 'isolationMurs', 'Toiture': 'isolationToiture', 'Fenêtres': 'vitrage'
+        'Façades': 'isolationMurs', 'Toiture': 'isolationToiture', 'Fenêtres': 'vitrage', 'Sols': 'isolationSol'
       };
       pointFaible = correspondance[etat.dpeConnu.posteFaible] || 'isolationMurs';
     } else {
-      var facteursActuels = { isolationMurs: resultat.fMur, isolationToiture: resultat.fToiture, vitrage: resultat.fVitrage };
+      var facteursActuels = {
+        isolationMurs: resultat.fMur, isolationToiture: resultat.fToiture,
+        vitrage: resultat.fVitrage, isolationSol: resultat.fSol
+      };
       pointFaible = Object.keys(facteursActuels).reduce(function (a, b) {
         return facteursActuels[a] >= facteursActuels[b] ? a : b;
       });
@@ -894,8 +988,13 @@
       valeursEtape1.vitrage = ameliorerVitrage(etat.vitrage);
     } else if (pointFaible === 'isolationMurs') {
       valeursEtape1.epaisseurMurs = (etat.epaisseurMurs || 0) + 100;
-    } else {
+      valeursEtape1.mursInconnu = false;
+    } else if (pointFaible === 'isolationToiture') {
       valeursEtape1.rToiture = (etat.rToiture || 0) + 4;
+      valeursEtape1.toitureInconnu = false;
+    } else {
+      valeursEtape1.sol = 'plancher_isole';
+      valeursEtape1.epaisseurSol = (etat.sol === 'plancher_isole' ? (etat.epaisseurSol || 0) : 0) + 100;
     }
     var resultatEtape1 = calculerConsommation(valeursEtape1);
     var economieEtape1 = Math.round((1 - resultatEtape1.primaire / resultat.primaire) * 100);
@@ -909,7 +1008,10 @@
 
     // Rénovation d'ampleur : tous les postes au meilleur niveau.
     var valeursAmpleur = Object.assign({}, etat, {
-      epaisseurMurs: 160, rToiture: 8, vitrage: 'triple'
+      epaisseurMurs: 160, mursInconnu: false,
+      rToiture: 8, toitureInconnu: false,
+      sol: 'plancher_isole', epaisseurSol: 140,
+      vitrage: 'triple'
     });
     var resultatAmpleur = calculerConsommation(valeursAmpleur);
     var economieAmpleur = Math.round((1 - resultatAmpleur.primaire / resultat.primaire) * 100);
