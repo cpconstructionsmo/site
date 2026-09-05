@@ -1843,3 +1843,55 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
 
 .dpe-form-lead h3 { color: var(--brique); margin: 0 0 6px; }
 .dpe-form-lead > p { color: var(--gris); margin: 0 0 22px; }
+
+.dpe-import {
+  background: var(--fond-tiede);
+  border: 1px dashed var(--filet);
+  border-radius: var(--r-m);
+  padding: 24px;
+  margin-bottom: 36px;
+}
+
+.dpe-import h3 { color: var(--brique); margin: 0 0 8px; font-size: 16px; }
+.dpe-import > p { color: var(--gris); margin: 0 0 16px; font-size: 14px; }
+
+.dpe-import-bouton {
+  display: inline-block;
+  padding: 11px 22px;
+  border-radius: var(--pilule);
+  background: var(--surface);
+  border: 1.5px solid var(--brique);
+  color: var(--brique);
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition);
+}
+
+.dpe-import-bouton:hover { background: var(--brique); color: #fff; }
+
+.dpe-import-statut {
+  margin: 14px 0 0;
+  font-size: 13px;
+  color: var(--gris);
+}
+
+.dpe-import-statut:empty { margin: 0; }
+.dpe-import-statut.dpe-import-ok { color: #1E8E3E; font-weight: 600; }
+.dpe-import-statut.dpe-import-echec { color: var(--brique-fonce); font-weight: 600; }
+
+.dpe-astuce {
+  margin: -14px 0 24px;
+  font-size: 12px;
+  color: var(--gris);
+  font-style: italic;
+}
+
+.dpe-source-dpe {
+  margin: -10px 0 24px;
+  padding: 12px 16px;
+  border-radius: var(--r-s);
+  background: var(--fond-tiede);
+  font-size: 13px;
+  color: var(--gris);
+}
