@@ -1091,6 +1091,17 @@
   var COEFFICIENT_PRIMAIRE = { gaz: 1, fioul: 1, bois: 1, electrique: 2.58, pac: 2.58 };
   var PRIX_KWH = { gaz: 0.10, fioul: 0.12, electrique: 0.21, bois: 0.08, pac: 0.21 };
 
+  // Émissions de gaz à effet de serre par kWh d'énergie finale (facteurs
+  // d'émission usuels, kg CO2eq/kWh) : le fioul et, dans une moindre
+  // mesure, le gaz sont bien plus carbonés que l'électricité (mix très
+  // décarboné en France) ou le bois (comptabilisé comme biomasse). Sert
+  // à appliquer le même double seuil que la vraie méthode 3CL depuis sa
+  // réforme de 2021 : la classe DPE retenue est la moins bonne des deux
+  // entre l'énergie primaire et les émissions, pas seulement l'énergie —
+  // un chauffage au fioul ne peut donc plus afficher une bonne classe
+  // simplement parce que le bâti est bien isolé.
+  var FACTEUR_GES = { gaz: 0.227, fioul: 0.324, bois: 0.030, electrique: 0.079, pac: 0.079 };
+
   var ECS_INFO = {
     pac_int: { rendement: 2.5, vecteur: 'electrique' },
     ballon_thermo: { rendement: 2.8, vecteur: 'electrique' },
@@ -1174,13 +1185,17 @@
       ecsFinale * COEFFICIENT_PRIMAIRE[ecsInfo.vecteur] +
       AUX_ECLAIRAGE_FINALE * COEFFICIENT_PRIMAIRE.electrique;
 
+    var ges = chauffageFinale * FACTEUR_GES[valeurs.chauffage] +
+      ecsFinale * FACTEUR_GES[ecsInfo.vecteur] +
+      AUX_ECLAIRAGE_FINALE * FACTEUR_GES.electrique;
+
     var coutChauffage = chauffageFinale * PRIX_KWH[valeurs.chauffage];
     var coutEcs = ecsFinale * PRIX_KWH[ecsInfo.vecteur];
     var coutAux = AUX_ECLAIRAGE_FINALE * PRIX_KWH.electrique;
     var factureParM2 = coutChauffage + coutEcs + coutAux;
 
     return {
-      primaire: primaire, factureParM2: factureParM2,
+      primaire: primaire, ges: ges, factureParM2: factureParM2,
       fMur: fMur, fToiture: fToiture, fVitrage: fVitrage, fSol: fSol,
       coutChauffage: coutChauffage, coutEcs: coutEcs, coutAux: coutAux
     };
@@ -1196,6 +1211,28 @@
     return 'G';
   }
 
+  // Seuils officiels de la classe GES (kg CO2eq/m²/an).
+  function classeDepuisGes(ges) {
+    if (ges <= 6) return 'A';
+    if (ges <= 11) return 'B';
+    if (ges <= 30) return 'C';
+    if (ges <= 50) return 'D';
+    if (ges <= 70) return 'E';
+    if (ges <= 100) return 'F';
+    return 'G';
+  }
+
+  var ORDRE_CLASSES = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+
+  // Double seuil de la méthode 3CL depuis sa réforme de 2021 : la classe
+  // DPE retenue est la moins bonne des deux entre l'énergie primaire et
+  // les émissions de gaz à effet de serre.
+  function classeFinale(conso, ges) {
+    var classeEnergie = classeDepuisConso(conso);
+    var classeGes = classeDepuisGes(ges);
+    return ORDRE_CLASSES.indexOf(classeGes) > ORDRE_CLASSES.indexOf(classeEnergie) ? classeGes : classeEnergie;
+  }
+
   function ameliorerVitrage(niveau) {
     var i = NIVEAUX_VITRAGE.indexOf(niveau);
     return i < NIVEAUX_VITRAGE.length - 1 ? NIVEAUX_VITRAGE[i + 1] : niveau;
@@ -1209,19 +1246,18 @@
 
   function calculerEtAfficher() {
     var resultat = calculerConsommation(etat);
-    var classeCalculee = classeDepuisConso(resultat.primaire);
 
     // Si un DPE réel a été importé, on l'utilise comme référence pour la
-    // classe et la consommation affichées ; le modèle ci-dessus ne sert
-    // plus qu'à estimer l'effet relatif des travaux.
+    // classe, la consommation et les émissions affichées ; le modèle
+    // ci-dessus ne sert plus qu'à estimer l'effet relatif des travaux.
     var consoAffichee = resultat.primaire;
-    var classeAffichee = classeCalculee;
+    var gesAffichee = resultat.ges;
     var factureAffichee = resultat.factureParM2 * etat.surface;
     var sourceDpe = document.getElementById('dpe-source-dpe');
 
     if (etat.dpeConnu && etat.dpeConnu.conso) {
       consoAffichee = etat.dpeConnu.conso;
-      classeAffichee = classeDepuisConso(consoAffichee);
+      if (etat.dpeConnu.ges) gesAffichee = etat.dpeConnu.ges;
       if (etat.dpeConnu.facture) factureAffichee = etat.dpeConnu.facture;
       sourceDpe.hidden = false;
       sourceDpe.textContent = 'Classe et consommation reprises de votre DPE importé. Les travaux ci-dessous sont estimés en appliquant l\'effet relatif calculé par notre modèle à cette valeur réelle.';
@@ -1231,19 +1267,33 @@
 
     // Un ajustement manuel (facture ou consommation réelle connue) prime
     // sur tout le reste : c'est la correction la plus fiable possible,
-    // directement fournie par la personne. On la reporte sur l'autre
-    // valeur affichée par une simple règle de trois, comme pour l'effet
-    // relatif des travaux plus bas.
+    // directement fournie par la personne. On la reporte sur les autres
+    // valeurs affichées (facture, émissions) par une simple règle de
+    // trois, comme pour l'effet relatif des travaux plus bas — sans
+    // cela, une facture réelle bien plus basse que l'estimation
+    // laisserait des émissions de GES inchangées, ce qui pourrait
+    // plafonner artificiellement la classe affichée à un niveau trop
+    // pessimiste par rapport à la nouvelle consommation connue.
     if (etat.ajustementManuel) {
+      var ratioAjustement;
       if (etat.ajustementManuel.unite === 'euros') {
-        consoAffichee = consoAffichee * (etat.ajustementManuel.valeur / factureAffichee);
+        ratioAjustement = etat.ajustementManuel.valeur / factureAffichee;
+        consoAffichee = consoAffichee * ratioAjustement;
         factureAffichee = etat.ajustementManuel.valeur;
       } else {
-        factureAffichee = factureAffichee * (etat.ajustementManuel.valeur / consoAffichee);
+        ratioAjustement = etat.ajustementManuel.valeur / consoAffichee;
+        factureAffichee = factureAffichee * ratioAjustement;
         consoAffichee = etat.ajustementManuel.valeur;
       }
-      classeAffichee = classeDepuisConso(consoAffichee);
+      gesAffichee = gesAffichee * ratioAjustement;
     }
+
+    // Double seuil, comme la vraie méthode 3CL depuis 2021 : la classe
+    // affichée est la moins bonne des deux entre l'énergie primaire et
+    // les émissions de gaz à effet de serre (un chauffage très carboné,
+    // au fioul par exemple, ne peut donc plus afficher une bonne classe
+    // uniquement parce que le bâti est bien isolé).
+    var classeAffichee = classeFinale(consoAffichee, gesAffichee);
 
     document.getElementById('dpe-adresse-resultat').textContent =
       etat.adresseTexte ? etat.adresseTexte : 'Logement renseigné à l\'étape précédente';
@@ -1252,13 +1302,8 @@
     document.getElementById('dpe-classe-texte').textContent = 'Classe ' + classeAffichee;
     document.getElementById('dpe-conso-texte').textContent = Math.round(consoAffichee) + ' kWh/m²/an (énergie primaire)';
 
-    var ligneGes = document.getElementById('dpe-ges-ligne');
-    if (etat.dpeConnu && etat.dpeConnu.ges) {
-      ligneGes.hidden = false;
-      document.getElementById('dpe-ges-texte').textContent = etat.dpeConnu.ges + ' kg éqCO2/m²/an';
-    } else {
-      ligneGes.hidden = true;
-    }
+    document.getElementById('dpe-ges-ligne').hidden = false;
+    document.getElementById('dpe-ges-texte').textContent = (etat.dpeConnu && etat.dpeConnu.ges ? etat.dpeConnu.ges : Math.round(gesAffichee)) + ' kg éqCO2/m²/an';
 
     document.getElementById('dpe-stat-facture').textContent = Math.round(factureAffichee).toLocaleString('fr-FR') + ' €';
     document.getElementById('dpe-stat-surface').textContent = etat.surface + ' m²';
@@ -1339,7 +1384,8 @@
     var resultatEtape1 = calculerConsommation(valeursEtape1);
     var economieEtape1 = Math.round((1 - resultatEtape1.primaire / resultat.primaire) * 100);
     var consoEtape1Affichee = consoAffichee * (resultatEtape1.primaire / resultat.primaire);
-    var classeEtape1 = classeDepuisConso(consoEtape1Affichee);
+    var gesEtape1Affichee = gesAffichee * (resultatEtape1.ges / resultat.ges);
+    var classeEtape1 = classeFinale(consoEtape1Affichee, gesEtape1Affichee);
 
     document.getElementById('dpe-premiere-etape-pourcent').textContent = economieEtape1 + ' %';
     afficherEtiquette('dpe-premiere-etape-avant', classeAffichee);
@@ -1357,7 +1403,8 @@
     var resultatAmpleur = calculerConsommation(valeursAmpleur);
     var economieAmpleur = Math.round((1 - resultatAmpleur.primaire / resultat.primaire) * 100);
     var consoAmpleurAffichee = consoAffichee * (resultatAmpleur.primaire / resultat.primaire);
-    var classeAmpleur = classeDepuisConso(consoAmpleurAffichee);
+    var gesAmpleurAffichee = gesAffichee * (resultatAmpleur.ges / resultat.ges);
+    var classeAmpleur = classeFinale(consoAmpleurAffichee, gesAmpleurAffichee);
 
     document.getElementById('dpe-ampleur-pourcent').textContent = economieAmpleur + ' %';
     afficherEtiquette('dpe-ampleur-avant', classeAffichee);
