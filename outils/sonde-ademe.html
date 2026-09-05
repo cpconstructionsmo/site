@@ -104,6 +104,7 @@
   var rapport = { date: new Date().toISOString().slice(0, 10) };
   var champsDisponibles = [];
   var datasetRetenu = null;
+  var prelevementEnCours = false;
 
   function BASE() { return RACINE + '/' + datasetRetenu + '/lines'; }
 
@@ -117,11 +118,18 @@
     document.getElementById('sortie').value = JSON.stringify(rapport, null, 1);
   }
 
-  function recuperer(url) {
-    return fetch(url).then(function (r) {
+  // Une requête sans réponse doit échouer franchement : sans délai de
+  // garde, une seule requête muette suffisait à figer tout le
+  // prélèvement, sans message ni résultat.
+  function recuperer(url, delaiMax) {
+    var requete = fetch(url).then(function (r) {
       if (!r.ok) throw new Error('HTTP ' + r.status + ' ' + r.statusText);
       return r.json();
     });
+    var garde = new Promise(function (_, rejeter) {
+      setTimeout(function () { rejeter(new Error('délai dépassé')); }, delaiMax || 30000);
+    });
+    return Promise.race([requete, garde]);
   }
 
   function lignes(donnees) {
@@ -396,15 +404,27 @@
     var resultats = {};
     var index = 0;
 
+    // Le rapport est réécrit après chaque période, et porte son propre
+    // état d'avancement : recopié trop tôt, il ne se contentait pas
+    // d'être incomplet, il ne disait pas qu'il l'était.
+    rapport.echantillon_maisons_par_periode = resultats;
+    rapport.statut_echantillon = 'en cours';
+    prelevementEnCours = true;
+    majSortie();
+
     function suivante() {
       if (index >= PERIODES.length) {
-        rapport.echantillon_maisons_par_periode = resultats;
+        rapport.statut_echantillon = 'terminé';
+        prelevementEnCours = false;
         afficher('etat-calib', 'Terminé. Copiez le bloc ci-dessous.', 'ok');
         majSortie();
         return;
       }
       var p = PERIODES[index];
-      afficher('etat-calib', 'Période ' + p.cle + ' (' + (index + 1) + '/' + PERIODES.length + ')...');
+      rapport.statut_echantillon = 'en cours (' + (index + 1) + '/' + PERIODES.length + ')';
+      majSortie();
+      afficher('etat-calib', 'Période ' + p.cle + ' (' + (index + 1) + '/' + PERIODES.length +
+        ') — laissez la page ouverte jusqu\'au message « Terminé ».');
 
       // On énumère les tranches exactes, entre guillemets : ce sont des
       // libellés, pas des nombres.
@@ -514,18 +534,21 @@
       prelever(qs)
         .then(function (ensemble) {
           resultats[p.cle] = { tranches: p.tranches.join(' / '), ensemble: ensemble };
+          majSortie();
           if (!champQualite) return null;
           return prelever(qs + ' AND ' + champQualite + ':"insuffisante"');
         })
         .then(function (sansTravaux) {
           if (sansTravaux) resultats[p.cle].enveloppe_insuffisante = sansTravaux;
           index++;
-          setTimeout(suivante, 400); // on ménage le service public
+          majSortie();
+          setTimeout(suivante, 250); // on ménage le service public
         })
         .catch(function (e) {
           resultats[p.cle] = { erreur: e.message };
           index++;
-          setTimeout(suivante, 400);
+          majSortie();
+          setTimeout(suivante, 250);
         });
     }
     suivante();
@@ -534,6 +557,11 @@
   /* --- 5. Copie --- */
 
   document.getElementById('btn-copier').addEventListener('click', function () {
+    if (prelevementEnCours) {
+      afficher('etat-copie', 'Prélèvement encore en cours : attendez le message « Terminé » ' +
+        'sous le bouton de l\'étape 4, sinon le rapport sera incomplet.', 'ko');
+      return;
+    }
     var zone = document.getElementById('sortie');
     zone.removeAttribute('readonly');
     zone.select();
