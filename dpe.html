@@ -7,8 +7,8 @@
   <meta name="description" content="Estimez le DPE de votre logement et découvrez les travaux prioritaires pour gagner des classes énergétiques.">
   <link rel="icon" href="assets/logo-icon.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-  <link rel="stylesheet" href="css/style.css?v=19">
-  <script src="js/anim.js?v=19" defer></script>
+  <link rel="stylesheet" href="css/style.css?v=20">
+  <script src="js/anim.js?v=20" defer></script>
 </head>
 <body>
 
@@ -45,7 +45,7 @@
   Répondez à quelques questions pour obtenir une estimation détaillée de
   votre diagnostic de performance énergétique, et découvrez les travaux
   qui amélioreraient le plus votre logement. Vous avez déjà un DPE ?
-  Importez-le à l'étape 1 pour gagner du temps.
+  Chargez-le à l'étape 1 (numéro ou fichier) pour gagner du temps.
 </p>
 
 <section class="mt-4">
@@ -71,26 +71,52 @@
     <!-- Étape 1 : adresse + import DPE -->
     <div class="dpe-panneau actif" data-panneau="1">
 
-      <div class="dpe-import">
+      <div class="dpe-etape1-tete">
+        <div>
+          <h2>Votre adresse</h2>
+          <p class="dpe-soustitre">Elle nous sert uniquement à situer votre logement, elle n'est pas enregistrée.</p>
+        </div>
+        <button type="button" class="dpe-lien-charger" id="dpe-bouton-charger-dpe">Charger un DPE</button>
+      </div>
+
+      <div class="dpe-import" id="dpe-import" hidden>
+        <button type="button" class="dpe-import-fermer" id="dpe-import-fermer" aria-label="Fermer">×</button>
         <h3>Vous avez déjà un DPE ?</h3>
-        <p>Importez le PDF : nous en extrayons la surface, l'année de construction, la consommation et les émissions pour gagner du temps.</p>
-        <label for="dpe-fichier" class="dpe-import-bouton">Choisir un fichier PDF</label>
-        <input type="file" id="dpe-fichier" accept="application/pdf" hidden>
+        <div class="dpe-import-options">
+          <div class="dpe-import-option">
+            <label for="dpe-numero">Numéro de DPE ou d'audit (13 caractères)</label>
+            <div class="dpe-import-ligne">
+              <input type="text" id="dpe-numero" maxlength="13" placeholder="Ex : 2275E1242094U">
+              <button type="button" class="btn" id="dpe-numero-chercher">Rechercher</button>
+            </div>
+          </div>
+          <div class="dpe-import-option">
+            <label for="dpe-fichier">Importer un fichier HTML du DPE</label>
+            <label for="dpe-fichier" class="dpe-import-bouton">Choisir un fichier .html</label>
+            <input type="file" id="dpe-fichier" accept=".html,.htm,text/html" hidden>
+          </div>
+        </div>
         <p class="dpe-import-statut" id="dpe-import-statut"></p>
       </div>
 
-      <h2>Votre adresse</h2>
-      <p class="dpe-soustitre">Elle nous sert uniquement à situer votre logement sur la carte, elle n'est pas enregistrée.</p>
-
-      <div class="dpe-recherche form-group">
-        <label for="dpe-adresse">Adresse du logement</label>
-        <input type="text" id="dpe-adresse" autocomplete="off" placeholder="Numéro, rue, commune...">
-        <div class="dpe-suggestions" id="dpe-suggestions" hidden></div>
-      </div>
-
-      <div class="dpe-carte">
+      <div class="dpe-carte-pleine">
         <div id="dpe-carte-conteneur"></div>
+        <div class="dpe-carte-fonds">
+          <button type="button" class="dpe-fonds-bouton selectionne" data-fond="plan">Par défaut</button>
+          <button type="button" class="dpe-fonds-bouton" data-fond="satellite">Vue satellite</button>
+        </div>
+        <div class="dpe-carte-recherche">
+          <p class="dpe-carte-recherche-titre">Saisissez votre adresse pour obtenir une estimation de votre logement.</p>
+          <div class="dpe-recherche">
+            <input type="text" id="dpe-adresse" autocomplete="off" placeholder="Saisissez votre adresse">
+            <div class="dpe-suggestions" id="dpe-suggestions" hidden></div>
+          </div>
+        </div>
       </div>
+
+      <p class="dpe-carte-astuce" id="dpe-carte-astuce" hidden>
+        Cliquez sur votre logement sur la vue satellite pour le repérer précisément (facultatif).
+      </p>
 
       <div class="dpe-ademe-trouve" id="dpe-ademe-trouve" hidden>
         <p id="dpe-ademe-texte"></p>
@@ -155,41 +181,45 @@
         </div>
       </div>
 
-      <div class="dpe-grille-champs">
-        <div class="form-group">
-          <label for="dpe-epaisseur-murs">Épaisseur d'isolant des murs (mm)</label>
-          <input type="number" id="dpe-epaisseur-murs" min="0" max="400" step="10" placeholder="Ex : 120, 0 si aucune">
-          <label class="dpe-inconnu"><input type="checkbox" id="dpe-murs-inconnu"> Je ne sais pas</label>
-        </div>
-        <div class="form-group">
-          <label for="dpe-r-toiture">Résistance thermique R du plafond/toiture (m².K/W)</label>
-          <input type="number" id="dpe-r-toiture" min="0" max="12" step="0.5" placeholder="Ex : 7">
-          <label class="dpe-inconnu"><input type="checkbox" id="dpe-toiture-inconnu"> Je ne sais pas</label>
-        </div>
-      </div>
-      <p class="dpe-astuce">
-        Astuce : la résistance R figure sur l'emballage de l'isolant. À
-        défaut, comptez environ R = 1 tous les 3,5 cm de laine de verre ou
-        de roche (par exemple 240 mm ≈ R7). Si vous ne savez pas, cochez «
-        Je ne sais pas » : nous utiliserons une valeur moyenne pour
-        l'année de construction de votre logement.
-      </p>
+      <p class="dpe-section-titre">Informations complémentaires</p>
 
       <div class="dpe-grille-champs">
         <div class="form-group">
-          <label for="dpe-sol">Isolation du sol / plancher bas</label>
-          <select id="dpe-sol">
+          <label for="dpe-ventilation">Type de ventilation</label>
+          <select id="dpe-ventilation">
             <option value="">Choisir...</option>
-            <option value="terre_plein">Dalle sur terre-plein</option>
-            <option value="vide_sanitaire_non_isole">Vide sanitaire non isolé</option>
-            <option value="vide_sanitaire_isole">Vide sanitaire isolé</option>
-            <option value="plancher_isole">Plancher isolé par-dessous (isolation rapportée)</option>
-            <option value="ne_sait_pas">Je ne sais pas</option>
+            <option value="aucune">Pas de ventilation</option>
+            <option value="naturelle">Naturelle (grilles, aération)</option>
+            <option value="simple_flux">VMC simple flux</option>
+            <option value="double_flux">VMC double flux</option>
           </select>
         </div>
-        <div class="form-group" id="dpe-sol-epaisseur-groupe" hidden>
-          <label for="dpe-epaisseur-sol">Épaisseur de l'isolant sous plancher (mm)</label>
-          <input type="number" id="dpe-epaisseur-sol" min="0" max="300" step="10" placeholder="Ex : 56, 80...">
+      </div>
+
+      <div class="dpe-grille-champs dpe-grille-3">
+        <div class="form-group">
+          <label>Isolation des murs</label>
+          <div class="dpe-choix" data-groupe="isolation-murs">
+            <button type="button" data-valeur="aucune">Aucune</button>
+            <button type="button" data-valeur="ancienne">&gt; 10 ans</button>
+            <button type="button" data-valeur="recente">&lt; 10 ans</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Isolation de votre toiture</label>
+          <div class="dpe-choix" data-groupe="isolation-toiture">
+            <button type="button" data-valeur="aucune">Aucune</button>
+            <button type="button" data-valeur="ancienne">&gt; 10 ans</button>
+            <button type="button" data-valeur="recente">&lt; 10 ans</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Isolation du sol / plancher bas</label>
+          <div class="dpe-choix" data-groupe="isolation-sol">
+            <button type="button" data-valeur="aucune">Aucune</button>
+            <button type="button" data-valeur="ancienne">&gt; 10 ans</button>
+            <button type="button" data-valeur="recente">&lt; 10 ans</button>
+          </div>
         </div>
       </div>
 
@@ -263,6 +293,7 @@
         <div class="dpe-stat">
           <span class="dpe-stat-valeur" id="dpe-stat-facture">-</span>
           <span class="dpe-stat-label">Facture énergie estimée / an</span>
+          <button type="button" class="dpe-modifier-lien" id="dpe-modifier-facture-bouton">Modifier</button>
         </div>
         <div class="dpe-stat">
           <span class="dpe-stat-valeur" id="dpe-stat-surface">-</span>
@@ -271,6 +302,28 @@
         <div class="dpe-stat">
           <span class="dpe-stat-valeur" id="dpe-stat-conso">-</span>
           <span class="dpe-stat-label">kWh/m²/an (énergie primaire)</span>
+        </div>
+      </div>
+
+      <div class="dpe-modifier-panneau" id="dpe-modifier-panneau" hidden>
+        <div class="dpe-modifier-onglets">
+          <button type="button" class="selectionne" data-unite="euros">Euros (€/an)</button>
+          <button type="button" data-unite="kwh">Consommation (kWh/m²/an)</button>
+        </div>
+        <p class="dpe-modifier-texte">
+          Notre méthode, inspirée de la 3CL, estime une consommation
+          théorique du logement et ne tient pas compte des habitudes
+          réelles des occupants. En ajustant la facture ou la
+          consommation avec une vraie valeur connue (facture EDF, DPE...),
+          vous obtenez une estimation plus proche de votre situation.
+        </p>
+        <div class="dpe-modifier-ligne">
+          <input type="number" id="dpe-modifier-valeur" min="0" step="1" placeholder="Ex : 1200">
+          <span id="dpe-modifier-unite-texte">€/an</span>
+        </div>
+        <div class="dpe-modifier-actions">
+          <button type="button" class="dpe-ademe-ignorer" id="dpe-modifier-reinitialiser">Réinitialiser</button>
+          <button type="button" class="btn" id="dpe-modifier-enregistrer">Enregistrer</button>
         </div>
       </div>
 
@@ -324,8 +377,8 @@
         elle ne remplace pas un diagnostic de performance énergétique
         réglementaire réalisé par un diagnostiqueur certifié, qui s'appuie
         sur la méthode 3CL et prend en compte des éléments que ce
-        simulateur ne mesure pas (ventilation, forme et compacité du
-        bâtiment, orientation, ponts thermiques, zone climatique...). Les
+        simulateur ne mesure pas (forme et compacité du bâtiment,
+        orientation, ponts thermiques, zone climatique...). Les
         travaux proposés sont des pistes de réflexion, pas un devis. Elle
         ne constitue ni une offre, ni un engagement de CP Constructions.
       </div>
@@ -377,25 +430,6 @@
 <script>
 (function () {
   'use strict';
-  var basesPdfJs = [
-    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/',
-    'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.16.105/build/'
-  ];
-  window.dpeBasePdfJs = basesPdfJs[0];
-  function essayer(index) {
-    if (index >= basesPdfJs.length) return;
-    var script = document.createElement('script');
-    script.src = basesPdfJs[index] + 'pdf.min.js';
-    script.onload = function () { window.dpeBasePdfJs = basesPdfJs[index]; };
-    script.onerror = function () { essayer(index + 1); };
-    document.head.appendChild(script);
-  }
-  essayer(0);
-})();
-</script>
-<script>
-(function () {
-  'use strict';
 
   /* --- État du simulateur --- */
   var etat = {
@@ -406,16 +440,15 @@
     periode: '',
     chauffage: '',
     ecs: '',
-    epaisseurMurs: null,
-    mursInconnu: false,
-    rToiture: null,
-    toitureInconnu: false,
-    sol: '',
-    epaisseurSol: null,
+    ventilation: '',
+    isolationMurs: '',
+    isolationToiture: '',
+    isolationSol: '',
     vitrage: '',
     occupation: '',
     delai: '',
-    dpeConnu: null // { conso, ges, facture, deperditionMax } si un DPE a été importé
+    dpeConnu: null, // { conso, ges, facture, deperditionMax } si un DPE a été importé
+    ajustementManuel: null // { unite: 'euros'|'kwh', valeur } si corrigé à la main à l'étape 4
   };
 
   /* --- Navigation entre les 4 étapes --- */
@@ -448,26 +481,60 @@
   var carte = null;
   var marqueur = null;
   var minuteur = null;
+  var coucheFondPlan = null;
+  var coucheFondSatellite = null;
+  var fondActuel = 'plan';
 
   function initCarte() {
     var conteneur = document.getElementById('dpe-carte-conteneur');
     if (!conteneur || carte || typeof L === 'undefined') return;
     try {
       carte = L.map(conteneur, { scrollWheelZoom: false }).setView([46.6, 2.4], 5);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+
+      coucheFondPlan = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors',
         maxZoom: 19
-      }).addTo(carte);
+      });
+      // Photos aériennes IGN (Géoplateforme), en accès libre et sans clé —
+      // le même fond que la plupart des simulateurs de rénovation
+      // énergétique français utilisent pour la vue satellite.
+      coucheFondSatellite = L.tileLayer(
+        'https://data.geopf.fr/wmts?SERVICE=WMTS&VERSION=1.0.0&REQUEST=GetTile&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&STYLE=normal&TILEMATRIXSET=PM&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&FORMAT=image/jpeg',
+        { attribution: '&copy; IGN-F/Géoportail', maxZoom: 19 }
+      );
+
+      coucheFondPlan.addTo(carte);
     } catch (err) {
       // Sans carte, le simulateur reste utilisable : l'adresse tapée suffit.
     }
   }
 
+  function choisirFond(fond) {
+    if (!carte || fond === fondActuel) return;
+    if (fond === 'satellite') {
+      carte.removeLayer(coucheFondPlan);
+      coucheFondSatellite.addTo(carte);
+    } else {
+      carte.removeLayer(coucheFondSatellite);
+      coucheFondPlan.addTo(carte);
+    }
+    fondActuel = fond;
+  }
+
+  document.querySelectorAll('.dpe-fonds-bouton').forEach(function (bouton) {
+    bouton.addEventListener('click', function () {
+      document.querySelectorAll('.dpe-fonds-bouton').forEach(function (b) { b.classList.remove('selectionne'); });
+      bouton.classList.add('selectionne');
+      choisirFond(bouton.getAttribute('data-fond'));
+    });
+  });
+
   function placerMarqueur(lat, lon) {
     if (!carte) return;
-    carte.setView([lat, lon], 17);
+    carte.setView([lat, lon], 18);
     if (marqueur) carte.removeLayer(marqueur);
     marqueur = L.marker([lat, lon]).addTo(carte);
+    document.getElementById('dpe-carte-astuce').hidden = false;
   }
 
   function masquerSuggestions() {
@@ -544,19 +611,22 @@
       });
   }
 
-  document.getElementById('dpe-ademe-utiliser').addEventListener('click', function () {
-    if (!dpeAdemeTrouve) return;
-
+  function appliquerDpeAdeme(trouve) {
     etat.dpeConnu = etat.dpeConnu || {};
-    if (dpeAdemeTrouve.conso) etat.dpeConnu.conso = dpeAdemeTrouve.conso;
-    if (dpeAdemeTrouve.ges) etat.dpeConnu.ges = dpeAdemeTrouve.ges;
+    if (trouve.conso) etat.dpeConnu.conso = trouve.conso;
+    if (trouve.ges) etat.dpeConnu.ges = trouve.ges;
 
-    if (dpeAdemeTrouve.surface) document.getElementById('dpe-surface').value = dpeAdemeTrouve.surface;
-    if (dpeAdemeTrouve.annee) {
-      var periode = periodeDepuisAnnee(parseInt(dpeAdemeTrouve.annee, 10));
+    if (trouve.surface) document.getElementById('dpe-surface').value = trouve.surface;
+    if (trouve.annee) {
+      var periode = periodeDepuisAnnee(parseInt(trouve.annee, 10));
       document.getElementById('dpe-periode').value = periode;
       etat.periode = periode;
     }
+  }
+
+  document.getElementById('dpe-ademe-utiliser').addEventListener('click', function () {
+    if (!dpeAdemeTrouve) return;
+    appliquerDpeAdeme(dpeAdemeTrouve);
 
     banniereAdeme.hidden = true;
     statutAdeme.hidden = false;
@@ -651,14 +721,28 @@
     });
   });
 
-  /* --- Import d'un DPE existant (PDF) ---
-     Lecture du texte du PDF côté navigateur (pdf.js), puis recherche des
-     champs standardisés du DPE (surface, année de construction,
-     consommation, émissions, répartition des déperditions si présente).
-     C'est une lecture « au mieux » : la mise en page varie selon le
-     logiciel du diagnostiqueur, donc les champs non trouvés restent à
-     compléter à la main. Rien n'est jamais appliqué sans être montré à
-     l'écran. */
+  /* --- Charger un DPE existant : par numéro ou par fichier HTML ---
+     Deux façons d'éviter de ressaisir ce qui est déjà connu :
+       1. Rechercher son numéro de DPE/audit dans la même base ADEME que
+          la recherche automatique par adresse (voir plus haut).
+       2. Importer le fichier HTML du DPE (l'export généré par la plupart
+          des logiciels de diagnostic) : on le lit avec l'analyseur HTML
+          natif du navigateur (DOMParser), sans dépendance externe, puis
+          on cherche les mêmes champs standardisés dans le texte obtenu.
+     Dans les deux cas, c'est une lecture « au mieux » : rien n'est
+     jamais appliqué sans être montré à l'écran, et si rien n'est
+     exploitable, le simulateur reste utilisable en saisie manuelle. */
+
+  var boutonChargerDpe = document.getElementById('dpe-bouton-charger-dpe');
+  var panneauImport = document.getElementById('dpe-import');
+  var boutonFermerImport = document.getElementById('dpe-import-fermer');
+
+  boutonChargerDpe.addEventListener('click', function () {
+    panneauImport.hidden = !panneauImport.hidden;
+  });
+  boutonFermerImport.addEventListener('click', function () {
+    panneauImport.hidden = true;
+  });
 
   var champFichier = document.getElementById('dpe-fichier');
   var statutImport = document.getElementById('dpe-import-statut');
@@ -759,42 +843,48 @@
     statutImport.textContent = 'Lecture du fichier en cours...';
     statutImport.className = 'dpe-import-statut';
 
-    if (typeof pdfjsLib === 'undefined') {
-      statutImport.textContent = 'La lecture automatique n\'est pas disponible pour le moment. Complétez les champs manuellement ci-dessous.';
-      statutImport.className = 'dpe-import-statut dpe-import-echec';
-      return;
-    }
-
-    pdfjsLib.GlobalWorkerOptions.workerSrc = (window.dpeBasePdfJs || 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/') + 'pdf.worker.min.js';
-
     var lecteur = new FileReader();
     lecteur.onload = function () {
-      var donnees = new Uint8Array(this.result);
-      pdfjsLib.getDocument({ data: donnees }).promise.then(function (pdf) {
-        var pagesTexte = [];
-        var i = 1;
-        function lirePage() {
-          if (i > pdf.numPages) {
-            appliquerDonneesDPE(analyserTexteDPE(pagesTexte.join(' ')));
-            return;
-          }
-          pdf.getPage(i).then(function (page) {
-            return page.getTextContent();
-          }).then(function (contenu) {
-            pagesTexte.push(contenu.items.map(function (it) { return it.str; }).join(' '));
-            i++;
-            lirePage();
-          }).catch(function () {
-            appliquerDonneesDPE(analyserTexteDPE(pagesTexte.join(' ')));
-          });
-        }
-        lirePage();
-      }).catch(function () {
+      try {
+        var document_ = new DOMParser().parseFromString(String(this.result), 'text/html');
+        var texte = document_.body ? document_.body.textContent : String(this.result);
+        appliquerDonneesDPE(analyserTexteDPE(texte));
+      } catch (err) {
         statutImport.textContent = 'Ce fichier n\'a pas pu être lu. Complétez les champs manuellement ci-dessous.';
         statutImport.className = 'dpe-import-statut dpe-import-echec';
-      });
+      }
     };
-    lecteur.readAsArrayBuffer(fichier);
+    lecteur.onerror = function () {
+      statutImport.textContent = 'Ce fichier n\'a pas pu être lu. Complétez les champs manuellement ci-dessous.';
+      statutImport.className = 'dpe-import-statut dpe-import-echec';
+    };
+    lecteur.readAsText(fichier);
+  });
+
+  /* Recherche par numéro de DPE : même service ADEME, même fonction de
+     recherche que l'adresse — seul le texte interrogé change. */
+  var champNumeroDpe = document.getElementById('dpe-numero');
+
+  document.getElementById('dpe-numero-chercher').addEventListener('click', function () {
+    var numero = champNumeroDpe.value.trim();
+    if (!numero) return;
+
+    statutImport.textContent = 'Recherche en cours...';
+    statutImport.className = 'dpe-import-statut';
+    derniereRechercheAdeme = ''; // on force la recherche même si l'adresse a déjà été cherchée
+
+    chercherDpeAdeme(numero).then(function () {
+      if (!dpeAdemeTrouve) {
+        statutImport.textContent = 'Aucun DPE trouvé pour ce numéro. Vérifiez la saisie ou complétez les champs manuellement.';
+        statutImport.className = 'dpe-import-statut dpe-import-echec';
+        return;
+      }
+      banniereAdeme.hidden = true;
+      appliquerDpeAdeme(dpeAdemeTrouve);
+      statutImport.textContent = 'DPE trouvé et appliqué' + (dpeAdemeTrouve.classe ? ' (classe ' + dpeAdemeTrouve.classe + ')' : '') + '.';
+      statutImport.className = 'dpe-import-statut dpe-import-ok';
+      dpeAdemeTrouve = null;
+    });
   });
 
   /* --- Étape 2 : boutons à choix unique par groupe --- */
@@ -811,56 +901,22 @@
   }
 
   initGroupeChoix('vitrage', 'vitrage');
+  initGroupeChoix('isolation-murs', 'isolationMurs');
+  initGroupeChoix('isolation-toiture', 'isolationToiture');
+  initGroupeChoix('isolation-sol', 'isolationSol');
   initGroupeChoix('occupation', 'occupation');
   initGroupeChoix('delai', 'delai');
-
-  /* Case « Je ne sais pas » : elle désactive le champ chiffré associé
-     plutôt que de laisser deviner une valeur qui fausserait le calcul
-     (un 0 saisi par défaut serait interprété comme « aucun isolant »). */
-  function initCaseInconnu(idCase, idChamp) {
-    var caseACocher = document.getElementById(idCase);
-    var champ = document.getElementById(idChamp);
-    caseACocher.addEventListener('change', function () {
-      champ.disabled = caseACocher.checked;
-      if (caseACocher.checked) champ.value = '';
-    });
-  }
-
-  initCaseInconnu('dpe-murs-inconnu', 'dpe-epaisseur-murs');
-  initCaseInconnu('dpe-toiture-inconnu', 'dpe-r-toiture');
-
-  var champSol = document.getElementById('dpe-sol');
-  var groupeEpaisseurSol = document.getElementById('dpe-sol-epaisseur-groupe');
-  var champEpaisseurSol = document.getElementById('dpe-epaisseur-sol');
-  champSol.addEventListener('change', function () {
-    var afficher = champSol.value === 'plancher_isole';
-    groupeEpaisseurSol.hidden = !afficher;
-    if (!afficher) champEpaisseurSol.value = '';
-  });
 
   document.getElementById('dpe-suivant-2').addEventListener('click', function () {
     etat.surface = parseFloat(document.getElementById('dpe-surface').value) || null;
     etat.periode = document.getElementById('dpe-periode').value;
     etat.chauffage = document.getElementById('dpe-chauffage').value;
     etat.ecs = document.getElementById('dpe-ecs').value;
-
-    etat.mursInconnu = document.getElementById('dpe-murs-inconnu').checked;
-    etat.epaisseurMurs = (etat.mursInconnu || document.getElementById('dpe-epaisseur-murs').value === '')
-      ? null : parseFloat(document.getElementById('dpe-epaisseur-murs').value);
-
-    etat.toitureInconnu = document.getElementById('dpe-toiture-inconnu').checked;
-    etat.rToiture = (etat.toitureInconnu || document.getElementById('dpe-r-toiture').value === '')
-      ? null : parseFloat(document.getElementById('dpe-r-toiture').value);
-
-    etat.sol = champSol.value;
-    etat.epaisseurSol = champEpaisseurSol.value === '' ? null : parseFloat(champEpaisseurSol.value);
+    etat.ventilation = document.getElementById('dpe-ventilation').value;
 
     var erreur = document.getElementById('dpe-erreur-2');
-    var complet = etat.surface && etat.periode && etat.chauffage && etat.ecs && etat.sol &&
-      (etat.mursInconnu || etat.epaisseurMurs !== null) &&
-      (etat.toitureInconnu || etat.rToiture !== null) &&
-      (etat.sol !== 'plancher_isole' || etat.epaisseurSol !== null) &&
-      etat.vitrage;
+    var complet = etat.surface && etat.periode && etat.chauffage && etat.ecs && etat.ventilation &&
+      etat.isolationMurs && etat.isolationToiture && etat.isolationSol && etat.vitrage;
     if (!complet) {
       erreur.hidden = false;
       return;
@@ -939,21 +995,39 @@
   };
   var NIVEAUX_VITRAGE = ['simple', 'double', 'double_recent', 'triple'];
 
-  // Isolation du sol / plancher bas : les deux premiers cas ont une
-  // résistance thermique typique connue (le vide sanitaire non isolé
-  // perd par-dessous comme par-dessus, la dalle sur terre-plein est un
-  // peu protégée par l'inertie du sol) ; le plancher isolé se calcule
-  // comme les murs, à partir de l'épaisseur réellement posée.
   var R_BASE_SOL = 0.17; // m².K/W, plancher nu
-  var R_SOL_TYPE = {
-    terre_plein: 0.34,
-    vide_sanitaire_non_isole: 0.17,
-    vide_sanitaire_isole: 2.0
-  };
   var R_SOL_REFERENCE_PERIODE = {
     avant1975: 0.17, rt1974: 0.34, rt1988: 0.6, rt2000: 1.0,
     rt2005: 1.5, rt2012: 2.5, re2020: 3.0
   };
+
+  // Plutôt que de demander une épaisseur ou une résistance précise (peu
+  // de propriétaires les connaissent), on demande simplement depuis
+  // quand l'isolant est en place : « aucune », posée il y a plus de
+  // 10 ans (standard plus ancien), ou moins de 10 ans (standard actuel).
+  // Chaque réponse vaut une résistance thermique représentative, comparée
+  // ensuite à la référence de l'époque de construction — même principe
+  // qu'avant, avec une saisie beaucoup plus simple.
+  var R_MUR_CATEGORIE = {
+    aucune: R_BASE_MUR,
+    ancienne: R_BASE_MUR + 80 / 1000 / LAMBDA_ISOLANT,
+    recente: R_BASE_MUR + 180 / 1000 / LAMBDA_ISOLANT
+  };
+  var R_TOITURE_CATEGORIE = { aucune: R_BASE_TOITURE, ancienne: 3.0, recente: 8.5 };
+  var R_SOL_CATEGORIE = { aucune: R_BASE_SOL, ancienne: 1.0, recente: 3.0 };
+
+  // Ventilation : une VMC double flux récupère une bonne partie de la
+  // chaleur de l'air extrait, une ventilation naturelle ou l'absence de
+  // ventilation contrôlée laisse plus de déperditions par renouvellement
+  // d'air (poste déjà cité dans l'avertissement affiché à l'écran).
+  var VENTILATION_FACTEUR = { aucune: 1.05, naturelle: 1.05, simple_flux: 1.0, double_flux: 0.85 };
+
+  // Part moyenne de chaque poste dans les déperditions totales d'un
+  // logement (ordre de grandeur réaliste, pas propre à un logement en
+  // particulier) : sert à pondérer l'effet de chaque poste plutôt que de
+  // multiplier des facteurs entre eux, ce qui ferait exploser le résultat
+  // si plusieurs postes sont mauvais à la fois.
+  var PART_DEPERDITION = { murs: 0.25, toiture: 0.25, vitrage: 0.15, sol: 0.10, ventilation: 0.25 };
 
   var RENDEMENT_CHAUFFAGE = { gaz: 0.92, fioul: 0.85, bois: 0.80, electrique: 1.0, pac: 3.2 };
   var COEFFICIENT_PRIMAIRE = { gaz: 1, fioul: 1, bois: 1, electrique: 2.58, pac: 2.58 };
@@ -986,16 +1060,14 @@
     return Math.max(0.4, Math.min(2.5, valeur));
   }
 
-  function facteurMur(epaisseurMm, periode, inconnu) {
-    if (inconnu) return 1; // valeur moyenne de l'époque, ni bonus ni malus
-    var rActuel = R_BASE_MUR + (epaisseurMm || 0) / 1000 / LAMBDA_ISOLANT;
+  function facteurMur(categorie, periode) {
+    var rActuel = R_MUR_CATEGORIE[categorie] || R_BASE_MUR;
     var rReference = R_BASE_MUR + EPAISSEUR_MUR_REFERENCE_PERIODE[periode] / 1000 / LAMBDA_ISOLANT;
     return facteurBorne(rReference / rActuel);
   }
 
-  function facteurToiture(rToiture, periode, inconnu) {
-    if (inconnu) return 1;
-    var rActuel = Math.max(R_BASE_TOITURE, rToiture || R_BASE_TOITURE);
+  function facteurToiture(categorie, periode) {
+    var rActuel = R_TOITURE_CATEGORIE[categorie] || R_BASE_TOITURE;
     return facteurBorne(R_TOITURE_REFERENCE_PERIODE[periode] / rActuel);
   }
 
@@ -1003,24 +1075,36 @@
     return facteurBorne(UW_VITRAGE[typeVitrage] / UW_REFERENCE_PERIODE[periode]);
   }
 
-  function facteurSol(typeSol, epaisseurSolMm, periode) {
-    if (!typeSol || typeSol === 'ne_sait_pas') return 1;
-    var rActuel;
-    if (typeSol === 'plancher_isole') {
-      rActuel = R_BASE_SOL + (epaisseurSolMm || 0) / 1000 / LAMBDA_ISOLANT;
-    } else {
-      rActuel = R_SOL_TYPE[typeSol] || R_BASE_SOL;
-    }
+  function facteurSol(categorie, periode) {
+    var rActuel = R_SOL_CATEGORIE[categorie] || R_BASE_SOL;
     return facteurBorne(R_SOL_REFERENCE_PERIODE[periode] / rActuel);
   }
 
-  function calculerConsommation(valeurs) {
-    var fMur = facteurMur(valeurs.epaisseurMurs, valeurs.periode, valeurs.mursInconnu);
-    var fToiture = facteurToiture(valeurs.rToiture, valeurs.periode, valeurs.toitureInconnu);
-    var fVitrage = facteurVitrage(valeurs.vitrage, valeurs.periode);
-    var fSol = facteurSol(valeurs.sol, valeurs.epaisseurSol, valeurs.periode);
+  function facteurVentilation(type) {
+    return VENTILATION_FACTEUR[type] || 1.0;
+  }
 
-    var besoinChauffage = BESOIN_CHAUFFAGE_PERIODE[valeurs.periode] * fMur * fToiture * fVitrage * fSol;
+  function calculerConsommation(valeurs) {
+    var fMur = facteurMur(valeurs.isolationMurs, valeurs.periode);
+    var fToiture = facteurToiture(valeurs.isolationToiture, valeurs.periode);
+    var fVitrage = facteurVitrage(valeurs.vitrage, valeurs.periode);
+    var fSol = facteurSol(valeurs.isolationSol, valeurs.periode);
+    var fVentilation = facteurVentilation(valeurs.ventilation);
+
+    // Chaque poste ne pèse que sa propre part des déperditions totales
+    // (répartition moyenne réaliste : toiture et murs autour d'un quart
+    // chacun, vitrage et ventilation significatifs, sol plus modeste) :
+    // une somme pondérée, pas un produit. Un produit de plusieurs
+    // facteurs individuellement plausibles (mur très mal isolé ET
+    // toiture très mal isolée ET sol très mal isolé, par exemple) ferait
+    // exploser le résultat de façon irréaliste, alors qu'en réalité les
+    // déperditions de chaque poste s'additionnent, elles ne se multiplient
+    // pas entre elles.
+    var facteurGlobal = PART_DEPERDITION.murs * fMur + PART_DEPERDITION.toiture * fToiture +
+      PART_DEPERDITION.vitrage * fVitrage + PART_DEPERDITION.sol * fSol +
+      PART_DEPERDITION.ventilation * fVentilation;
+
+    var besoinChauffage = BESOIN_CHAUFFAGE_PERIODE[valeurs.periode] * facteurGlobal;
     var chauffageFinale = besoinChauffage / RENDEMENT_CHAUFFAGE[valeurs.chauffage];
 
     var ecsInfo = ECS_INFO[valeurs.ecs];
@@ -1087,6 +1171,22 @@
       sourceDpe.hidden = true;
     }
 
+    // Un ajustement manuel (facture ou consommation réelle connue) prime
+    // sur tout le reste : c'est la correction la plus fiable possible,
+    // directement fournie par la personne. On la reporte sur l'autre
+    // valeur affichée par une simple règle de trois, comme pour l'effet
+    // relatif des travaux plus bas.
+    if (etat.ajustementManuel) {
+      if (etat.ajustementManuel.unite === 'euros') {
+        consoAffichee = consoAffichee * (etat.ajustementManuel.valeur / factureAffichee);
+        factureAffichee = etat.ajustementManuel.valeur;
+      } else {
+        factureAffichee = factureAffichee * (etat.ajustementManuel.valeur / consoAffichee);
+        consoAffichee = etat.ajustementManuel.valeur;
+      }
+      classeAffichee = classeDepuisConso(consoAffichee);
+    }
+
     document.getElementById('dpe-adresse-resultat').textContent =
       etat.adresseTexte ? etat.adresseTexte : 'Logement renseigné à l\'étape précédente';
 
@@ -1136,27 +1236,25 @@
       };
       pointFaible = correspondance[etat.dpeConnu.posteFaible] || 'isolationMurs';
     } else {
-      var facteursActuels = {
-        isolationMurs: resultat.fMur, isolationToiture: resultat.fToiture,
-        vitrage: resultat.fVitrage, isolationSol: resultat.fSol
+      // Pondéré par le poids de chaque poste dans les déperditions
+      // totales : un mur très mal isolé (poids 25 %) pèse davantage
+      // qu'un sol très mal isolé (poids 10 %), même à facteur égal.
+      var contributionsActuelles = {
+        isolationMurs: resultat.fMur * PART_DEPERDITION.murs,
+        isolationToiture: resultat.fToiture * PART_DEPERDITION.toiture,
+        vitrage: resultat.fVitrage * PART_DEPERDITION.vitrage,
+        isolationSol: resultat.fSol * PART_DEPERDITION.sol
       };
-      pointFaible = Object.keys(facteursActuels).reduce(function (a, b) {
-        return facteursActuels[a] >= facteursActuels[b] ? a : b;
+      pointFaible = Object.keys(contributionsActuelles).reduce(function (a, b) {
+        return contributionsActuelles[a] >= contributionsActuelles[b] ? a : b;
       });
     }
 
     var valeursEtape1 = Object.assign({}, etat);
     if (pointFaible === 'vitrage') {
       valeursEtape1.vitrage = ameliorerVitrage(etat.vitrage);
-    } else if (pointFaible === 'isolationMurs') {
-      valeursEtape1.epaisseurMurs = (etat.epaisseurMurs || 0) + 100;
-      valeursEtape1.mursInconnu = false;
-    } else if (pointFaible === 'isolationToiture') {
-      valeursEtape1.rToiture = (etat.rToiture || 0) + 4;
-      valeursEtape1.toitureInconnu = false;
     } else {
-      valeursEtape1.sol = 'plancher_isole';
-      valeursEtape1.epaisseurSol = (etat.sol === 'plancher_isole' ? (etat.epaisseurSol || 0) : 0) + 100;
+      valeursEtape1[pointFaible] = 'recente'; // isolationMurs, isolationToiture ou isolationSol
     }
     var resultatEtape1 = calculerConsommation(valeursEtape1);
     var economieEtape1 = Math.round((1 - resultatEtape1.primaire / resultat.primaire) * 100);
@@ -1170,9 +1268,7 @@
 
     // Rénovation d'ampleur : tous les postes au meilleur niveau.
     var valeursAmpleur = Object.assign({}, etat, {
-      epaisseurMurs: 160, mursInconnu: false,
-      rToiture: 8, toitureInconnu: false,
-      sol: 'plancher_isole', epaisseurSol: 140,
+      isolationMurs: 'recente', isolationToiture: 'recente', isolationSol: 'recente',
       vitrage: 'triple'
     });
     var resultatAmpleur = calculerConsommation(valeursAmpleur);
@@ -1184,6 +1280,45 @@
     afficherEtiquette('dpe-ampleur-avant', classeAffichee);
     afficherEtiquette('dpe-ampleur-apres', classeAmpleur);
   }
+
+  /* --- Ajuster la facture ou la consommation avec une valeur réelle ---
+     Notre méthode, comme la 3CL réglementaire, calcule une consommation
+     théorique et ne connaît pas les habitudes réelles des occupants.
+     Cette correction manuelle permet de recaler l'estimation sur une
+     vraie facture ou un vrai relevé, sans jamais rien recalculer tout
+     seul en cachette : la valeur reste affichée telle quelle jusqu'à
+     réinitialisation. */
+
+  var panneauModifier = document.getElementById('dpe-modifier-panneau');
+  var uniteModifier = 'euros';
+
+  document.getElementById('dpe-modifier-facture-bouton').addEventListener('click', function () {
+    panneauModifier.hidden = !panneauModifier.hidden;
+  });
+
+  document.querySelectorAll('.dpe-modifier-onglets button').forEach(function (bouton) {
+    bouton.addEventListener('click', function () {
+      document.querySelectorAll('.dpe-modifier-onglets button').forEach(function (b) { b.classList.remove('selectionne'); });
+      bouton.classList.add('selectionne');
+      uniteModifier = bouton.getAttribute('data-unite');
+      document.getElementById('dpe-modifier-unite-texte').textContent = uniteModifier === 'euros' ? '€/an' : 'kWh/m²/an';
+    });
+  });
+
+  document.getElementById('dpe-modifier-enregistrer').addEventListener('click', function () {
+    var valeur = parseFloat(document.getElementById('dpe-modifier-valeur').value);
+    if (!valeur || valeur <= 0) return;
+    etat.ajustementManuel = { unite: uniteModifier, valeur: valeur };
+    panneauModifier.hidden = true;
+    calculerEtAfficher();
+  });
+
+  document.getElementById('dpe-modifier-reinitialiser').addEventListener('click', function () {
+    etat.ajustementManuel = null;
+    document.getElementById('dpe-modifier-valeur').value = '';
+    panneauModifier.hidden = true;
+    calculerEtAfficher();
+  });
 
   /* --- Formulaire de recontact (même principe que la page Contact) --- */
 
