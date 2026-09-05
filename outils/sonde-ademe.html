@@ -90,7 +90,19 @@
 <div class="etat" id="etat-calib"></div>
 <div id="res-calib"></div>
 
-<h2>5. À renvoyer</h2>
+<h2>5. Déperdition de chaque poste selon son isolation</h2>
+<p style="font-size:14px;">
+  Le prélèvement qui manque. Pour chaque paroi — murs, toiture, plancher bas,
+  menuiseries — il mesure la déperdition au mètre carré selon que son isolation
+  est jugée insuffisante, moyenne, bonne ou très bonne. Le rapport entre ces
+  valeurs donne directement les coefficients du simulateur, mesurés au lieu
+  d'être déduits de résistances théoriques. Comptez une minute.
+</p>
+<button id="btn-facteurs" disabled>Prélever les facteurs par poste</button>
+<div class="etat" id="etat-facteurs"></div>
+<div id="res-facteurs"></div>
+
+<h2>6. À renvoyer</h2>
 <p style="font-size:14px;">Appuyez sur copier, puis collez le tout dans la conversation.</p>
 <button id="btn-copier" style="margin-bottom:12px;">Copier le résultat</button>
 <div class="etat" id="etat-copie"></div>
@@ -222,8 +234,10 @@
           '<p style="font-size:13px;margin-bottom:4px;"><strong>' + interessants.length +
           '</strong> champs utiles à un calcul thermique :</p><pre>' +
           interessants.join('\n') + '</pre>';
+        initChampsSurface();
         document.getElementById('btn-champs').disabled = false;
         document.getElementById('btn-calib').disabled = false;
+        document.getElementById('btn-facteurs').disabled = false;
         majSortie();
       })
       .catch(function (e) {
@@ -316,6 +330,28 @@
     return Math.round(valeur * f) / f;
   }
 
+  /* « surface_habitable_immeuble » est vide pour une maison et vaut la
+     surface du bâtiment entier pour un appartement : on retient la plus
+     petite surface plausible parmi celles disponibles, celle qui décrit
+     le logement plutôt que le bâtiment. Partagé par les étapes 4 et 5. */
+
+  var CHAMPS_SURFACE = [];
+
+  function initChampsSurface() {
+    CHAMPS_SURFACE = ['surface_habitable_logement',
+      'surface_chauffee_installation_chauffage_n1',
+      'surface_habitable_desservie_par_installation_ecs_n1',
+      'surface_habitable_immeuble'].filter(function (c) {
+        return champsDisponibles.indexOf(c) !== -1;
+      });
+  }
+
+  function surfaceDe(r) {
+    var v = CHAMPS_SURFACE.map(function (c) { return nombre(r[c]); })
+      .filter(function (x) { return x !== null && x >= 15 && x <= 1000; });
+    return v.length ? Math.min.apply(null, v) : null;
+  }
+
   function nombre(v) {
     var n = parseFloat(v);
     return isFinite(n) ? n : null;
@@ -352,20 +388,6 @@
     this.disabled = true;
 
     var champBesoin = champ(['besoin_chauffage']) || champParMotif([/besoin.*chauffage/i]);
-    // « surface_habitable_immeuble » est vide pour une maison et vaut la
-    // surface du bâtiment entier pour un appartement : on prend la plus
-    // petite surface plausible parmi celles disponibles.
-    var CHAMPS_SURFACE = ['surface_habitable_logement',
-      'surface_chauffee_installation_chauffage_n1',
-      'surface_habitable_desservie_par_installation_ecs_n1',
-      'surface_habitable_immeuble'].filter(function (c) {
-        return champsDisponibles.indexOf(c) !== -1;
-      });
-    function surfaceDe(r) {
-      var v = CHAMPS_SURFACE.map(function (c) { return nombre(r[c]); })
-        .filter(function (x) { return x !== null && x >= 15 && x <= 1000; });
-      return v.length ? Math.min.apply(null, v) : null;
-    }
     var champSurface = CHAMPS_SURFACE.join(' | ');
     var champConso = champ(['conso_5_usages_par_m2_ep']) ||
       champParMotif([/conso.*5.*usages.*m2.*ep/i], [/_ef$|finale/i]);
@@ -554,7 +576,150 @@
     suivante();
   });
 
-  /* --- 5. Copie --- */
+  /* --- 5. Déperdition de chaque poste selon la qualité de son isolation ---
+     C'est la mesure qui manque pour caler le simulateur d'un bloc. Ses
+     coefficients par poste sont aujourd'hui déduits de résistances
+     thermiques théoriques, rapportées au logement tel que construit,
+     alors que les médianes de déperdition décrivent le logement médian
+     d'aujourd'hui : deux références différentes, qu'on ne peut pas
+     mélanger sans fausser un bout de l'échelle.
+
+     En mesurant la déperdition d'une paroi au mètre carré selon la seule
+     qualité de son isolation, on obtient des rapports qui reposent sur
+     la même population que les médianes. Ils remplaceront les
+     coefficients déduits, et les deux jeux deviendront comparables. */
+
+  var POSTES_QUALITE = [
+    { cle: 'murs', deperdition: 'deperditions_murs', qualite: 'qualite_isolation_murs' },
+    { cle: 'toiture', deperdition: 'deperditions_planchers_hauts',
+      qualite: 'qualite_isolation_plancher_haut_comble_perdu' },
+    { cle: 'sol', deperdition: 'deperditions_planchers_bas', qualite: 'qualite_isolation_plancher_bas' },
+    { cle: 'vitrage', deperdition: 'deperditions_baies_vitrees', deperdition2: 'deperditions_portes',
+      qualite: 'qualite_isolation_menuiseries' }
+  ];
+
+  // Les quatre appréciations de la base, dans l'ordre croissant. Elles se
+  // rattachent aux trois réponses du formulaire : « aucun travaux » pour
+  // insuffisante, « plus de 10 ans » pour moyenne, « moins de 10 ans »
+  // pour bonne et très bonne.
+  var QUALITES = ['insuffisante', 'moyenne', 'bonne', 'très bonne'];
+
+  document.getElementById('btn-facteurs').addEventListener('click', function () {
+    this.disabled = true;
+    var resultats = {};
+    rapport.deperdition_par_qualite = resultats;
+    rapport.statut_facteurs = 'en cours';
+    prelevementEnCours = true;
+    majSortie();
+
+    // Toutes les combinaisons poste × qualité, à plat : plus simple à
+    // enchaîner et à suivre qu'une double boucle imbriquée.
+    var taches = [];
+    POSTES_QUALITE.forEach(function (poste) {
+      if (champsDisponibles.indexOf(poste.deperdition) === -1) return;
+      if (champsDisponibles.indexOf(poste.qualite) === -1) return;
+      QUALITES.forEach(function (q) { taches.push({ poste: poste, qualite: q }); });
+    });
+
+    if (!taches.length) {
+      afficher('etat-facteurs', 'Champs de qualité d\'isolation introuvables.', 'ko');
+      rapport.statut_facteurs = 'échec';
+      prelevementEnCours = false;
+      majSortie();
+      return;
+    }
+
+    var i = 0;
+
+    function suivante() {
+      if (i >= taches.length) {
+        rapport.statut_facteurs = 'terminé';
+        prelevementEnCours = false;
+        afficher('etat-facteurs', 'Terminé. Copiez le bloc ci-dessous.', 'ok');
+        rendreFacteurs(resultats);
+        majSortie();
+        return;
+      }
+      var t = taches[i];
+      rapport.statut_facteurs = 'en cours (' + (i + 1) + '/' + taches.length + ')';
+      afficher('etat-facteurs', t.poste.cle + ' / ' + t.qualite +
+        ' (' + (i + 1) + '/' + taches.length + ') — laissez la page ouverte.');
+      majSortie();
+
+      var champs = [t.poste.deperdition, t.poste.qualite, 'periode_construction']
+        .concat(CHAMPS_SURFACE);
+      if (t.poste.deperdition2) champs.push(t.poste.deperdition2);
+      var qs = 'type_batiment:"maison" AND ' + t.poste.qualite + ':"' + t.qualite + '"';
+
+      recuperer(BASE() + '?size=1000&qs=' + encodeURIComponent(qs) +
+        '&select=' + encodeURIComponent(champs.join(',')))
+        .then(function (d) {
+          var valeurs = [], parPeriode = {};
+          lignes(d).forEach(function (r) {
+            var surface = surfaceDe(r);
+            var dep = nombre(r[t.poste.deperdition]);
+            if (t.poste.deperdition2) {
+              var d2 = nombre(r[t.poste.deperdition2]);
+              if (dep !== null && d2 !== null) dep += d2;
+            }
+            if (dep === null || !surface) return;
+            // Déperdition ramenée au m² habitable : seule forme
+            // comparable d'un logement à l'autre.
+            var parM2 = dep / surface;
+            if (parM2 <= 0 || parM2 > 10) return;
+            valeurs.push(parM2);
+            var p = r.periode_construction;
+            if (p) (parPeriode[p] = parPeriode[p] || []).push(parM2);
+          });
+          var detail = {};
+          Object.keys(parPeriode).forEach(function (p) {
+            if (parPeriode[p].length >= 30) {
+              detail[p] = { n: parPeriode[p].length, mediane: arrondi(mediane(parPeriode[p]), 3) };
+            }
+          });
+          resultats[t.poste.cle] = resultats[t.poste.cle] || {};
+          resultats[t.poste.cle][t.qualite] = {
+            n: valeurs.length,
+            total_disponible: d.total,
+            mediane_deperdition_w_par_k_par_m2: arrondi(mediane(valeurs), 3),
+            par_periode: detail
+          };
+          i++;
+          majSortie();
+          setTimeout(suivante, 250);
+        })
+        .catch(function (e) {
+          resultats[t.poste.cle] = resultats[t.poste.cle] || {};
+          resultats[t.poste.cle][t.qualite] = { erreur: e.message };
+          i++;
+          majSortie();
+          setTimeout(suivante, 250);
+        });
+    }
+    suivante();
+  });
+
+  // Affiche les rapports à la référence « moyenne », qui est ce que le
+  // simulateur utilisera comme coefficients.
+  function rendreFacteurs(resultats) {
+    var html = '<div class="tableau-scroll"><table><tr><th>Poste</th>' +
+      QUALITES.map(function (q) { return '<th>' + q + '</th>'; }).join('') + '</tr>';
+    Object.keys(resultats).forEach(function (poste) {
+      var reference = (resultats[poste]['moyenne'] || {}).mediane_deperdition_w_par_k_par_m2;
+      html += '<tr><td><strong>' + poste + '</strong></td>';
+      QUALITES.forEach(function (q) {
+        var v = (resultats[poste][q] || {}).mediane_deperdition_w_par_k_par_m2;
+        html += '<td>' + (v === null || v === undefined ? '—'
+          : v + (reference ? ' <b>(×' + arrondi(v / reference, 2) + ')</b>' : '')) + '</td>';
+      });
+      html += '</tr>';
+    });
+    document.getElementById('res-facteurs').innerHTML = html + '</table></div>' +
+      '<p style="font-size:12px;color:#6E7B84;">Déperdition en W/K par m² habitable, ' +
+      'et entre parenthèses le rapport à une isolation « moyenne ».</p>';
+  }
+
+  /* --- 6. Copie --- */
 
   document.getElementById('btn-copier').addEventListener('click', function () {
     if (prelevementEnCours) {
