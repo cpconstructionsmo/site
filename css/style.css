@@ -144,6 +144,37 @@ nav.main a.active { color: var(--nuit); background: var(--ocre); }
   text-decoration: none;
 }
 
+/* Bouton hamburger : masqué sur grand écran, ne sert qu'en dessous de
+   860px pour replier le menu (voir media query plus bas). */
+.menu-toggle {
+  display: none;
+  flex: 0 0 auto;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: none;
+  border-radius: var(--pilule);
+  background: rgba(255,255,255,.1);
+  cursor: pointer;
+}
+
+.menu-toggle span {
+  display: block;
+  width: 20px;
+  height: 2px;
+  border-radius: 2px;
+  background: #fff;
+  transition: transform var(--transition), opacity var(--transition);
+}
+
+.menu-toggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.menu-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+.menu-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
 
 /* ---------- Héros ---------- */
 
@@ -901,11 +932,37 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
 
 @media (max-width: 860px) {
   header { top: 10px; padding: 0 12px; margin-bottom: -70px; }
-  .header-inner { flex-wrap: wrap; justify-content: center; border-radius: var(--r-l); padding: 10px; }
+  .header-inner { flex-wrap: nowrap; justify-content: space-between; border-radius: var(--r-l); padding: 10px; position: relative; }
   .logo { height: 36px; }
-  nav.main { order: 3; width: 100%; gap: 1px; }
-  nav.main a { padding: 8px 11px; font-size: 12.5px; }
-  .nav-cta { padding: 10px 16px; font-size: 12.5px; }
+  .menu-toggle { display: flex; order: 2; }
+  .nav-cta { order: 3; padding: 10px 16px; font-size: 12.5px; }
+
+  /* Le menu se replie derrière le bouton hamburger : plus rien ne
+     recouvre la page tant qu'on ne l'a pas ouvert. */
+  nav.main {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    gap: 2px;
+    background: rgba(36,19,16,.97);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: var(--r-l);
+    padding: 10px;
+    box-shadow: 0 20px 40px rgba(0,0,0,.35);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: opacity var(--transition), transform var(--transition), visibility var(--transition);
+  }
+  nav.main.ouvert {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+  nav.main a { padding: 13px 16px; font-size: 14.5px; text-align: center; }
 
   /* Les panneaux passent en bandeau unique sous le texte. */
   .hero {
