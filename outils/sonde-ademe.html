@@ -187,13 +187,26 @@
         champsDisponibles = Object.keys(l[0]).sort();
         rapport.total_dpe_base = d.total;
         rapport.nombre_champs = champsDisponibles.length;
-        rapport.champs = champsDisponibles;
+        // Liste compacte : plus facile à recopier depuis un téléphone
+        // qu'un tableau JSON d'une ligne par champ.
+        rapport.champs = champsDisponibles.join(', ');
 
         // On met en avant ce qui sert à caler un modèle thermique.
         var interessants = champsDisponibles.filter(function (c) {
           return /conso|ubat|deperdition|isolation|mur|plancher|toiture|menuiserie|vitrage|ventilation|chauffage|ecs|emission|etiquette|classe|surface|annee|periode|climat|altitude|departement|type_batiment/i.test(c);
         });
-        rapport.champs_utiles_pour_le_calcul = interessants;
+        rapport.champs_utiles_pour_le_calcul = interessants.join(', ');
+
+        // Un enregistrement complet, valeurs tronquées : indispensable
+        // pour savoir dans quelle unité et sous quelle forme chaque
+        // champ est rempli, ce que le seul nom ne dit pas.
+        var apercu = {};
+        champsDisponibles.forEach(function (c) {
+          var v = l[0][c];
+          if (v === null || v === undefined || v === '') return;
+          apercu[c] = typeof v === 'string' && v.length > 60 ? v.slice(0, 60) + '…' : v;
+        });
+        rapport.apercu_dpe_reel = apercu;
 
         afficher('etat-schema', 'Jeu « ' + datasetRetenu + ' » accessible : ' + (d.total || '?') +
           ' DPE, ' + champsDisponibles.length + ' champs par enregistrement.', 'ok');
@@ -282,18 +295,46 @@
     return null;
   }
 
+  // À défaut d'un nom exact, retrouve un champ par sa forme. L'ADEME a
+  // changé le nom de ses champs en même temps que celui du jeu de
+  // données : chercher un motif plutôt qu'un libellé exact évite de
+  // repartir à zéro à chaque révision.
+  function champParMotif(motifs, exclusions) {
+    for (var i = 0; i < motifs.length; i++) {
+      var trouves = champsDisponibles.filter(function (c) {
+        if (!motifs[i].test(c)) return false;
+        return !(exclusions || []).some(function (ex) { return ex.test(c); });
+      });
+      if (trouves.length) {
+        // le nom le plus court est en général le champ principal,
+        // les variantes étant suffixées (_ep, _finale, _initial...)
+        return trouves.sort(function (a, b) { return a.length - b.length; })[0];
+      }
+    }
+    return null;
+  }
+
   document.getElementById('btn-calib').addEventListener('click', function () {
     this.disabled = true;
-    var champConso = champ(['conso_5_usages_par_m2_ep', 'conso_5_usages_ep_m2', 'conso_5_usages_ep']);
-    var champAnnee = champ(['annee_construction']);
-    var champType = champ(['type_batiment', 'typologie_logement']);
-    var champEnergie = champ(['type_energie_principale_chauffage', 'type_energie_chauffage',
-                              'type_generateur_chauffage_principal']);
-    var champChauffage = champ(['conso_chauffage_ep', 'conso_chauffage', 'conso_chauffage_par_m2_ep']);
+    var champConso = champ(['conso_5_usages_par_m2_ep', 'conso_5_usages_ep_m2', 'conso_5_usages_ep']) ||
+      champParMotif([/conso.*5.*usages.*m2/i, /conso.*5.*usages/i, /conso.*ep.*m2/i, /^conso/i],
+                    [/finale|ef$|initial|projet|apres|avant_travaux/i]);
+    var champAnnee = champ(['annee_construction']) ||
+      champParMotif([/ann[ée]e.*construction/i, /periode.*construction/i, /construction/i]);
+    var champType = champ(['type_batiment', 'typologie_logement']) ||
+      champParMotif([/type.*b[âa]timent/i, /typologie/i]);
+    var champEnergie = champ(['type_energie_principale_chauffage', 'type_energie_chauffage']) ||
+      champParMotif([/energie.*principale.*chauffage/i, /type.*energie.*chauffage/i, /energie.*chauffage/i]);
+    var champChauffage = champ(['conso_chauffage_ep', 'conso_chauffage']) ||
+      champParMotif([/conso.*chauffage.*ep/i, /conso.*chauffage/i], [/finale|ef$|projet|apres/i]);
 
     if (!champConso || !champAnnee) {
-      afficher('etat-calib', 'Impossible : les champs consommation ou année de construction sont ' +
-        'introuvables. Renvoyez-moi d\'abord la liste des champs du test 1.', 'ko');
+      afficher('etat-calib', 'Aucun champ de consommation ou d\'année de construction reconnu, ' +
+        'même par motif. Renvoyez-moi la liste des champs (test 2) et j\'adapterai.', 'ko');
+      rapport.echec_calibration = {
+        conso_trouve: champConso, annee_trouve: champAnnee
+      };
+      majSortie();
       return;
     }
 
@@ -301,6 +342,10 @@
       conso: champConso, annee: champAnnee, type_batiment: champType,
       energie_chauffage: champEnergie, conso_chauffage: champChauffage
     };
+    document.getElementById('res-calib').innerHTML =
+      '<p style="font-size:13px;">Champs retenus : <code>' +
+      [champConso, champAnnee, champType, champEnergie, champChauffage]
+        .filter(Boolean).join('</code>, <code>') + '</code></p>';
 
     var resultats = {};
     var index = 0;
