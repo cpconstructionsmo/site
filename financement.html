@@ -6,8 +6,8 @@
   <title>Financement — CP Constructions</title>
   <meta name="description" content="Simulez la mensualité de votre prêt immobilier selon le montant, la durée et le taux d'intérêt.">
   <link rel="icon" href="assets/logo-icon.png">
-  <link rel="stylesheet" href="css/style.css?v=16">
-  <script src="js/anim.js?v=16" defer></script>
+  <link rel="stylesheet" href="css/style.css?v=17">
+  <script src="js/anim.js?v=17" defer></script>
 </head>
 <body>
 
@@ -16,7 +16,10 @@
     <a href="/" class="logo">
       <img src="assets/logo.png" alt="CP Constructions">
     </a>
-    <nav class="main">
+    <button type="button" class="menu-toggle" id="menu-toggle" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="nav-principal">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="main" id="nav-principal">
       <a href="/">Accueil</a>
       <a href="a-propos.html">À propos</a>
       <a href="services.html">Services</a>

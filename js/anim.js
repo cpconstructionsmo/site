@@ -20,6 +20,41 @@
     window.addEventListener('scroll', majEntete, { passive: true });
   }
 
+  /* --- 1bis. Menu mobile : le bouton hamburger déplie/replie la nav --- */
+
+  var boutonMenu = document.getElementById('menu-toggle');
+  var navPrincipale = document.getElementById('nav-principal');
+
+  if (boutonMenu && navPrincipale) {
+    var fermerMenu = function () {
+      navPrincipale.classList.remove('ouvert');
+      boutonMenu.setAttribute('aria-expanded', 'false');
+    };
+
+    boutonMenu.addEventListener('click', function () {
+      var ouvert = navPrincipale.classList.toggle('ouvert');
+      boutonMenu.setAttribute('aria-expanded', ouvert ? 'true' : 'false');
+    });
+
+    // Un lien choisi referme le menu, sinon il reste ouvert par-dessus
+    // la page suivante le temps qu'elle s'affiche.
+    Array.prototype.forEach.call(navPrincipale.querySelectorAll('a'), function (lien) {
+      lien.addEventListener('click', fermerMenu);
+    });
+
+    document.addEventListener('click', function (e) {
+      if (!navPrincipale.classList.contains('ouvert')) return;
+      if (navPrincipale.contains(e.target) || boutonMenu.contains(e.target)) return;
+      fermerMenu();
+    });
+
+    // Repasser en grand écran (rotation, redimensionnement) ne doit pas
+    // laisser le menu ouvert caché derrière la barre redevenue horizontale.
+    window.addEventListener('resize', function () {
+      if (window.innerWidth > 860) fermerMenu();
+    });
+  }
+
   /* --- 2. Diaporama des panneaux du héros ---
      Chaque panneau enchaîne ses diapositives en fondu. Une diapositive
      peut porter une vidéo : on ne la lit que lorsqu'elle est visible,
