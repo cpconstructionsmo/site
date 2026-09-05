@@ -2346,3 +2346,128 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
   font-size: 13px;
   color: var(--gris);
 }
+
+/* ---------- Compteurs +/- (nombre de portes, nombre de fenêtres) ---------- */
+
+.dpe-stepper {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-top: 8px;
+  border: 1.5px solid var(--filet);
+  border-radius: var(--r-xs);
+  overflow: hidden;
+  width: fit-content;
+}
+
+.dpe-stepper-bouton {
+  width: 42px;
+  height: 42px;
+  border: none;
+  background: var(--fond-tiede);
+  color: var(--brique);
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.dpe-stepper-bouton:hover { background: var(--ocre-clair); color: #fff; }
+
+.dpe-stepper-valeur {
+  display: inline-block;
+  min-width: 48px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--encre);
+}
+
+/* ---------- Tableau des déperditions par poste ---------- */
+
+.dpe-deperditions { margin-bottom: 32px; }
+
+.dpe-deperditions-titre {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--gris);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  margin: 0 0 14px;
+}
+
+.dpe-deperditions-corps {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 24px;
+}
+
+.dpe-maison-schema {
+  width: 130px;
+  height: auto;
+  flex: 0 0 auto;
+}
+
+.dpe-maison-toit { fill: var(--encre); }
+.dpe-maison-mur { fill: var(--ocre-clair); }
+.dpe-maison-porte { fill: var(--brique); }
+.dpe-maison-fenetre { fill: #fff; stroke: var(--encre); stroke-width: 1.5; }
+
+.dpe-deperditions-tableau-conteneur {
+  flex: 1 1 320px;
+  overflow-x: auto;
+}
+
+.dpe-deperditions-tableau {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.dpe-deperditions-tableau th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--gris);
+  padding: 0 10px 8px 0;
+  border-bottom: 1px solid var(--filet);
+}
+
+.dpe-deperditions-tableau td {
+  padding: 10px 10px 10px 0;
+  border-bottom: 1px solid var(--filet);
+  color: var(--encre);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.dpe-deperditions-tableau tr:last-child td { border-bottom: none; }
+
+.dpe-part-barre {
+  display: inline-block;
+  width: 90px;
+  height: 8px;
+  border-radius: var(--pilule);
+  background: var(--filet);
+  overflow: hidden;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+.dpe-part-barre span { display: block; height: 100%; background: var(--brique); }
+
+.dpe-tag {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: var(--pilule);
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.dpe-tag-faible { background: #1E8E3E; }
+.dpe-tag-moyenne { background: var(--ocre); }
+.dpe-tag-elevee { background: var(--brique-fonce); }
