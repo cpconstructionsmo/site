@@ -100,12 +100,13 @@
           <label for="dpe-periode">Période de construction</label>
           <select id="dpe-periode">
             <option value="">Choisir...</option>
-            <option value="avant1948">Avant 1948</option>
-            <option value="1948-1974">1948 - 1974</option>
-            <option value="1975-1990">1975 - 1990</option>
-            <option value="1991-2005">1991 - 2005</option>
-            <option value="2006-2012">2006 - 2012</option>
-            <option value="apres2012">Après 2012</option>
+            <option value="avant1975">Avant 1975 (sans réglementation thermique)</option>
+            <option value="rt1974">1975 - 1988 (RT 1974/1982)</option>
+            <option value="rt1988">1989 - 2000 (RT 1988)</option>
+            <option value="rt2000">2001 - 2005 (RT 2000)</option>
+            <option value="rt2005">2006 - 2012 (RT 2005)</option>
+            <option value="rt2012">2013 - 2021 (RT 2012)</option>
+            <option value="re2020">Après 2021 (RE 2020)</option>
           </select>
         </div>
         <div class="form-group">
@@ -251,8 +252,13 @@
         Cette estimation est simplifiée et indicative, à partir des
         informations que vous avez renseignées : elle ne remplace pas un
         diagnostic de performance énergétique (DPE) réglementaire réalisé
-        par un diagnostiqueur certifié. Elle ne constitue ni une offre, ni
-        un engagement de CP Constructions.
+        par un diagnostiqueur certifié, qui s'appuie sur la méthode 3CL et
+        prend en compte des éléments que ce simulateur ne mesure pas
+        (ventilation, forme et compacité du bâtiment, orientation, ponts
+        thermiques, zone climatique...). Deux logements a priori
+        similaires peuvent donc afficher des résultats réels différents
+        de cette estimation. Elle ne constitue ni une offre, ni un
+        engagement de CP Constructions.
       </div>
 
       <div class="dpe-form-lead">
@@ -479,31 +485,81 @@
   });
 
   /* --- Étape 4 : calcul de l'estimation ---
-     Modèle simplifié à but indicatif : consommation d'énergie primaire
-     par période de construction, ajustée par des coefficients reconnus
-     (conversion électricité/bois, isolation, vitrage), puis convertie en
-     classe DPE selon les seuils publiés par l'ADEME. Ce n'est pas la
-     méthode réglementaire 3CL et ne doit jamais être présentée comme
-     telle : voir l'avertissement affiché à l'écran. */
+     Modèle simplifié à but indicatif, construit en trois temps pour se
+     rapprocher de la logique réelle d'un DPE plutôt que d'un simple
+     coefficient global :
 
-  var BASE_PERIODE = {
-    'avant1948': 280, '1948-1974': 260, '1975-1990': 220,
-    '1991-2005': 180, '2006-2012': 130, 'apres2012': 80
+       1. Besoin de chauffage du bâti (kWh d'énergie finale/m²/an), selon
+          la réglementation thermique en vigueur au moment de la
+          construction, ajusté par l'isolation et le vitrage réellement
+          déclarés (une maison peut avoir été rénovée depuis, ou au
+          contraire s'être dégradée).
+       2. Ce besoin est divisé par le rendement (ou le COP, pour une
+          pompe à chaleur) du système de chauffage pour obtenir l'énergie
+          finale réellement consommée. L'eau chaude sanitaire et les
+          auxiliaires/éclairage s'ajoutent séparément, comme dans un DPE
+          réel où ils pèsent souvent une part significative.
+       3. L'énergie finale est convertie en énergie primaire via le
+          coefficient réglementaire (2,58 pour l'électricité, 1 pour les
+          énergies de combustion), pour retrouver la classe DPE selon les
+          seuils publiés par l'ADEME.
+
+     Ce n'est pas la méthode réglementaire 3CL : elle ne tient pas compte
+     de la ventilation, de la forme du bâtiment, de son orientation, des
+     ponts thermiques ni de la zone climatique. Elle ne doit jamais être
+     présentée comme un DPE officiel : voir l'avertissement à l'écran. */
+
+  // Besoin de chauffage du bâti, en kWh d'énergie finale par m² et par an.
+  var BESOIN_CHAUFFAGE_PERIODE = {
+    avant1975: 220, rt1974: 170, rt1988: 130, rt2000: 100,
+    rt2005: 70, rt2012: 35, re2020: 22
   };
-  var FACTEUR_CHAUFFAGE = { gaz: 1.0, fioul: 1.15, electrique: 1.3, bois: 0.5, pac: 0.4 };
-  var COEFFICIENT_PRIMAIRE = { gaz: 1, fioul: 1, bois: 1, electrique: 2.3, pac: 2.3 };
+
+  // Rendement du système de chauffage (COP pour la pompe à chaleur) :
+  // énergie finale = besoin / rendement.
+  var RENDEMENT_CHAUFFAGE = { gaz: 0.92, fioul: 0.85, bois: 0.80, electrique: 1.0, pac: 3.2 };
+
+  // Coefficient de conversion en énergie primaire (réglementaire : 2,58
+  // pour l'électricité, confirmé par un DPE réel ; 1 pour le gaz, le
+  // fioul et le bois).
+  var COEFFICIENT_PRIMAIRE = { gaz: 1, fioul: 1, bois: 1, electrique: 2.58, pac: 2.58 };
+
+  // Prix moyens indicatifs de l'énergie finale, en €/kWh.
   var PRIX_KWH = { gaz: 0.10, fioul: 0.12, electrique: 0.21, bois: 0.08, pac: 0.21 };
-  var FACTEUR_ISOLATION = { aucune: 1.15, sup10: 1.0, inf10: 0.85 };
-  var FACTEUR_VITRAGE = { ancien: 1.1, double: 1.0, triple: 0.9 };
+
+  // Eau chaude sanitaire et auxiliaires/éclairage : postes forfaitaires,
+  // en kWh d'énergie finale par m² et par an. L'ECS suit le même vecteur
+  // énergétique que le chauffage (cas le plus courant en maison
+  // individuelle) ; les auxiliaires et l'éclairage sont toujours
+  // électriques, quel que soit le mode de chauffage.
+  var ECS_FINALE_BASE = 18;
+  var AUX_ECLAIRAGE_FINALE = 8;
+
+  var FACTEUR_ISOLATION = { aucune: 1.20, sup10: 1.0, inf10: 0.85 };
+  var FACTEUR_VITRAGE = { ancien: 1.15, double: 1.0, triple: 0.88 };
   var NIVEAUX_ISOLATION = ['aucune', 'sup10', 'inf10'];
   var NIVEAUX_VITRAGE = ['ancien', 'double', 'triple'];
 
-  function consommationPrimaire(valeurs) {
-    return BASE_PERIODE[valeurs.periode] *
-      FACTEUR_CHAUFFAGE[valeurs.chauffage] *
+  function calculerConsommation(valeurs) {
+    var besoinChauffage = BESOIN_CHAUFFAGE_PERIODE[valeurs.periode] *
       FACTEUR_ISOLATION[valeurs.isolationMurs] *
       FACTEUR_ISOLATION[valeurs.isolationToiture] *
       FACTEUR_VITRAGE[valeurs.vitrage];
+
+    var chauffageFinale = besoinChauffage / RENDEMENT_CHAUFFAGE[valeurs.chauffage];
+    var ecsFinale = ECS_FINALE_BASE / RENDEMENT_CHAUFFAGE[valeurs.chauffage];
+
+    var primaire = chauffageFinale * COEFFICIENT_PRIMAIRE[valeurs.chauffage] +
+      ecsFinale * COEFFICIENT_PRIMAIRE[valeurs.chauffage] +
+      AUX_ECLAIRAGE_FINALE * COEFFICIENT_PRIMAIRE.electrique;
+
+    var finale = chauffageFinale + ecsFinale + AUX_ECLAIRAGE_FINALE;
+
+    var prixChauffageEcs = PRIX_KWH[valeurs.chauffage];
+    var factureParM2 = (chauffageFinale + ecsFinale) * prixChauffageEcs +
+      AUX_ECLAIRAGE_FINALE * PRIX_KWH.electrique;
+
+    return { primaire: primaire, finale: finale, factureParM2: factureParM2 };
   }
 
   function classeDepuisConso(conso) {
@@ -522,10 +578,9 @@
   }
 
   function calculerEtAfficher() {
-    var conso = consommationPrimaire(etat);
-    var classe = classeDepuisConso(conso);
-    var consoFinale = conso / COEFFICIENT_PRIMAIRE[etat.chauffage];
-    var facture = consoFinale * etat.surface * PRIX_KWH[etat.chauffage];
+    var resultat = calculerConsommation(etat);
+    var classe = classeDepuisConso(resultat.primaire);
+    var facture = resultat.factureParM2 * etat.surface;
 
     document.getElementById('dpe-adresse-resultat').textContent =
       etat.adresseTexte ? etat.adresseTexte : 'Logement renseigné à l\'étape précédente';
@@ -534,11 +589,11 @@
     etiquette.textContent = classe;
     etiquette.className = 'dpe-etiquette-classe dpe-classe-' + classe.toLowerCase();
     document.getElementById('dpe-classe-texte').textContent = 'Classe ' + classe;
-    document.getElementById('dpe-conso-texte').textContent = Math.round(conso) + ' kWh/m²/an (énergie primaire)';
+    document.getElementById('dpe-conso-texte').textContent = Math.round(resultat.primaire) + ' kWh/m²/an (énergie primaire)';
 
     document.getElementById('dpe-stat-facture').textContent = Math.round(facture).toLocaleString('fr-FR') + ' €';
     document.getElementById('dpe-stat-surface').textContent = etat.surface + ' m²';
-    document.getElementById('dpe-stat-conso').textContent = Math.round(conso);
+    document.getElementById('dpe-stat-conso').textContent = Math.round(resultat.primaire);
 
     // Solution "première étape" : on améliore le point le plus faible.
     var facteursActuels = {
@@ -560,9 +615,9 @@
     } else {
       valeursEtape1[pointFaible] = ameliorerNiveau(NIVEAUX_ISOLATION, etat[pointFaible]);
     }
-    var consoEtape1 = consommationPrimaire(valeursEtape1);
-    var classeEtape1 = classeDepuisConso(consoEtape1);
-    var economieEtape1 = Math.round((1 - consoEtape1 / conso) * 100);
+    var resultatEtape1 = calculerConsommation(valeursEtape1);
+    var classeEtape1 = classeDepuisConso(resultatEtape1.primaire);
+    var economieEtape1 = Math.round((1 - resultatEtape1.primaire / resultat.primaire) * 100);
 
     document.getElementById('dpe-premiere-etape-pourcent').textContent = economieEtape1 + ' %';
     var e1avant = document.getElementById('dpe-premiere-etape-avant');
@@ -577,9 +632,9 @@
     var valeursAmpleur = Object.assign({}, etat, {
       isolationMurs: 'inf10', isolationToiture: 'inf10', vitrage: 'triple'
     });
-    var consoAmpleur = consommationPrimaire(valeursAmpleur);
-    var classeAmpleur = classeDepuisConso(consoAmpleur);
-    var economieAmpleur = Math.round((1 - consoAmpleur / conso) * 100);
+    var resultatAmpleur = calculerConsommation(valeursAmpleur);
+    var classeAmpleur = classeDepuisConso(resultatAmpleur.primaire);
+    var economieAmpleur = Math.round((1 - resultatAmpleur.primaire / resultat.primaire) * 100);
 
     document.getElementById('dpe-ampleur-pourcent').textContent = economieAmpleur + ' %';
     var eaAvant = document.getElementById('dpe-ampleur-avant');
