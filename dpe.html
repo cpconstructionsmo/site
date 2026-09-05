@@ -7,8 +7,8 @@
   <meta name="description" content="Estimez le DPE de votre logement et découvrez les travaux prioritaires pour gagner des classes énergétiques.">
   <link rel="icon" href="assets/logo-icon.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-  <link rel="stylesheet" href="css/style.css?v=28">
-  <script src="js/anim.js?v=28" defer></script>
+  <link rel="stylesheet" href="css/style.css?v=29">
+  <script src="js/anim.js?v=29" defer></script>
 </head>
 <body>
 
@@ -918,21 +918,36 @@
 
   /* L'ADEME a déjà renommé ce jeu de données deux fois : « dpe-france »
      avant la réforme de 2021, puis « dpe-v2-logements-existants », et
-     aujourd'hui « dpe03existant ». Un identifiant écrit en dur finit
-     donc toujours par renvoyer une 404 — silencieusement, puisque cette
-     recherche est optionnelle et n'a pas le droit de bloquer le
-     simulateur. C'est précisément ce qui s'est produit : la
-     fonctionnalité était morte sans que rien ne le signale.
-     On essaie donc les identifiants connus dans l'ordre, du plus récent
-     au plus ancien, et on retient celui qui répond pour les recherches
-     suivantes. */
+     aujourd'hui un identifiant technique (« dpe03existant » n'étant que
+     l'alias du portail). Un identifiant écrit en dur finit donc toujours
+     par renvoyer une 404 — silencieusement, puisque cette recherche est
+     optionnelle et n'a pas le droit de bloquer le simulateur. C'est
+     précisément ce qui s'est produit : la fonctionnalité était morte
+     sans que rien ne le signale.
 
-  var DATASETS_ADEME = ['dpe03existant', 'dpe-v2-logements-existants'];
+     On essaie donc les identifiants connus dans l'ordre, on retient
+     celui qui répond, et si aucun ne répond on demande au catalogue de
+     l'ADEME quel jeu porte aujourd'hui les logements existants. */
+
+  var RACINE_ADEME = 'https://data.ademe.fr/data-fair/api/v1/datasets';
+  var DATASETS_ADEME = ['meg-83tjwtg8dyz4vv7h1dqe', 'dpe03existant', 'dpe-v2-logements-existants'];
   var datasetAdemeValide = null;
 
   function urlAdeme(identifiant, adresse) {
-    return 'https://data.ademe.fr/data-fair/api/v1/datasets/' + identifiant +
-      '/lines?size=3&q=' + encodeURIComponent(adresse);
+    return RACINE_ADEME + '/' + identifiant + '/lines?size=3&q=' + encodeURIComponent(adresse);
+  }
+
+  function decouvrirDatasetAdeme() {
+    return fetch(RACINE_ADEME + '?q=DPE%20logements%20existants&size=20&select=id,title,count')
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        var jeux = ((d && d.results) || []).filter(function (j) {
+          return /logements?\s+existants/i.test(j.title || '');
+        });
+        if (!jeux.length) return null;
+        return jeux.reduce(function (a, b) { return (b.count || 0) > (a.count || 0) ? b : a; }).id;
+      })
+      .catch(function () { return null; });
   }
 
   // Interroge le premier jeu de données qui répond, en mémorisant lequel.
@@ -940,7 +955,18 @@
     var candidats = datasetAdemeValide ? [datasetAdemeValide] : DATASETS_ADEME;
 
     function essayer(i) {
-      if (i >= candidats.length) return Promise.resolve(null);
+      if (i >= candidats.length) {
+        // Tous les identifiants connus sont caducs : on interroge le
+        // catalogue plutôt que d'abandonner en silence une fois de plus.
+        if (datasetAdemeValide) return Promise.resolve(null);
+        return decouvrirDatasetAdeme().then(function (id) {
+          if (!id) return null;
+          datasetAdemeValide = id;
+          return fetch(urlAdeme(id, adresse))
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .catch(function () { return null; });
+        });
+      }
       return fetch(urlAdeme(candidats[i], adresse))
         .then(function (r) {
           if (!r.ok) return essayer(i + 1);
