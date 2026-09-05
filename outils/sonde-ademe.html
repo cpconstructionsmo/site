@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Sonde base ADEME — outil interne</title>
+<style>
+  body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; max-width: 940px;
+         margin: 0 auto; padding: 20px 16px 60px; background: #F7F5F0; color: #1A2B36;
+         line-height: 1.55; -webkit-text-size-adjust: 100%; }
+  h1 { color: #7E3B2A; font-size: 22px; margin-bottom: 4px; }
+  h2 { color: #7E3B2A; font-size: 17px; margin-top: 34px; }
+  p.intro { color: #6E7B84; margin-top: 0; font-size: 14px; }
+  .avertissement { background: #F1EDE4; border-radius: 12px; padding: 12px 14px;
+                   font-size: 13px; color: #6E7B84; margin: 16px 0 24px; }
+  button { background: #D29B48; border: none; color: #1A2B36; font-weight: 700; font-size: 15px;
+           padding: 14px 22px; border-radius: 999px; cursor: pointer; font-family: inherit;
+           width: 100%; max-width: 380px; }
+  button:hover { background: #E8B966; }
+  button:disabled { opacity: .45; cursor: default; }
+  .etat { margin: 12px 0; font-size: 14px; color: #6E7B84; min-height: 20px; }
+  .ok { color: #1E8E3E; font-weight: 600; }
+  .ko { color: #C24A2E; font-weight: 600; }
+  pre { background: #fff; border: 1px solid #E6E0D4; border-radius: 12px; padding: 12px;
+        overflow-x: auto; font-size: 11.5px; max-height: 300px; }
+  textarea { width: 100%; height: 200px; font-family: ui-monospace, Menlo, monospace; font-size: 11px;
+             border: 1px solid #E6E0D4; border-radius: 12px; padding: 12px; background: #fff;
+             box-sizing: border-box; }
+  .tableau-scroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; margin-top: 10px; min-width: 380px; }
+  th, td { text-align: left; padding: 7px 10px 7px 0; border-bottom: 1px solid #E6E0D4; }
+  th { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: #6E7B84; }
+  code { background: #F1EDE4; padding: 1px 5px; border-radius: 4px; font-size: 12px;
+         word-break: break-all; }
+</style>
+</head>
+<body>
+
+<h1>Sonde de la base ADEME</h1>
+<p class="intro">
+  Cette page interroge la base publique des DPE depuis votre navigateur, pour caler
+  le simulateur de DPE du site sur des données réelles.
+</p>
+
+<div class="avertissement">
+  <strong>Outil interne et temporaire.</strong> Cette page n'est liée depuis nulle part
+  et n'est pas indexée. Elle sert à vérifier que le simulateur lit les bons champs de la
+  base ADEME, et à rassembler de quoi caler ses besoins de chauffage sur des milliers de
+  DPE réels plutôt que sur un seul audit. Rien n'est enregistré ni envoyé : tout reste
+  dans votre navigateur, et vous choisissez ce que vous recopiez.
+</div>
+
+<h2>1. Quels champs la base expose-t-elle vraiment ?</h2>
+<p style="font-size:14px;">
+  Le simulateur devine aujourd'hui des noms de champs qui n'ont jamais été validés.
+  Ce test récupère un DPE réel et liste tout ce qu'il contient.
+</p>
+<button id="btn-schema">Inspecter un DPE réel</button>
+<div class="etat" id="etat-schema"></div>
+<div id="res-schema"></div>
+
+<h2>2. Le simulateur lit-il les bons champs ?</h2>
+<p style="font-size:14px;">
+  Vérifie un par un les noms utilisés par la page d'estimation DPE pour la recherche
+  automatique par adresse et l'import par numéro.
+</p>
+<button id="btn-champs" disabled>Vérifier les champs du simulateur</button>
+<div class="etat" id="etat-champs"></div>
+<div id="res-champs"></div>
+
+<h2>3. Échantillon de calibration</h2>
+<p style="font-size:14px;">
+  Prélève des DPE de maisons individuelles par période de construction et par énergie de
+  chauffage, et calcule la consommation médiane de chaque groupe. C'est ce qu'il faut pour
+  vérifier les sept valeurs de besoin de chauffage du simulateur, dont une seule est
+  aujourd'hui adossée à une mesure réelle. Comptez une minute.
+</p>
+<button id="btn-calib" disabled>Prélever l'échantillon</button>
+<div class="etat" id="etat-calib"></div>
+<div id="res-calib"></div>
+
+<h2>4. À renvoyer</h2>
+<p style="font-size:14px;">Appuyez sur copier, puis collez le tout dans la conversation.</p>
+<button id="btn-copier" style="margin-bottom:12px;">Copier le résultat</button>
+<div class="etat" id="etat-copie"></div>
+<textarea id="sortie" readonly placeholder="Le résumé apparaîtra ici au fur et à mesure des tests."></textarea>
+
+<script>
+(function () {
+  'use strict';
+
+  var BASE = 'https://data.ademe.fr/data-fair/api/v1/datasets/dpe-v2-logements-existants/lines';
+  var rapport = { date: new Date().toISOString().slice(0, 10) };
+  var champsDisponibles = [];
+
+  function afficher(id, texte, classe) {
+    var el = document.getElementById(id);
+    el.textContent = texte;
+    el.className = 'etat' + (classe ? ' ' + classe : '');
+  }
+
+  function majSortie() {
+    document.getElementById('sortie').value = JSON.stringify(rapport, null, 1);
+  }
+
+  function recuperer(url) {
+    return fetch(url).then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status + ' ' + r.statusText);
+      return r.json();
+    });
+  }
+
+  function lignes(donnees) {
+    return (donnees && (donnees.results || donnees.lines)) || [];
+  }
+
+  /* --- 1. Schéma --- */
+
+  document.getElementById('btn-schema').addEventListener('click', function () {
+    this.disabled = true;
+    afficher('etat-schema', 'Interrogation de la base...');
+    recuperer(BASE + '?size=1')
+      .then(function (d) {
+        var l = lignes(d);
+        if (!l.length) throw new Error('la base a répondu, mais sans aucun résultat');
+        champsDisponibles = Object.keys(l[0]).sort();
+        rapport.total_dpe_base = d.total;
+        rapport.nombre_champs = champsDisponibles.length;
+        rapport.champs = champsDisponibles;
+
+        // On met en avant ce qui sert à caler un modèle thermique.
+        var interessants = champsDisponibles.filter(function (c) {
+          return /conso|ubat|deperdition|isolation|mur|plancher|toiture|menuiserie|vitrage|ventilation|chauffage|ecs|emission|etiquette|classe|surface|annee|periode|climat|altitude|departement|type_batiment/i.test(c);
+        });
+        rapport.champs_utiles_pour_le_calcul = interessants;
+
+        afficher('etat-schema', 'Base accessible : ' + (d.total || '?') + ' DPE, ' +
+          champsDisponibles.length + ' champs par enregistrement.', 'ok');
+        document.getElementById('res-schema').innerHTML =
+          '<p style="font-size:13px;margin-bottom:4px;"><strong>' + interessants.length +
+          '</strong> champs utiles à un calcul thermique :</p><pre>' +
+          interessants.join('\n') + '</pre>';
+        document.getElementById('btn-champs').disabled = false;
+        document.getElementById('btn-calib').disabled = false;
+        majSortie();
+      })
+      .catch(function (e) {
+        afficher('etat-schema', 'Échec : ' + e.message +
+          ' — base indisponible, ou requête bloquée par le navigateur.', 'ko');
+        rapport.erreur_schema = e.message;
+        majSortie();
+      });
+  });
+
+  /* --- 2. Champs utilisés par le simulateur --- */
+
+  var CHAMPS_SIMULATEUR = {
+    'classe énergie': ['etiquette_dpe', 'classe_consommation_energie', 'classe_dpe'],
+    'consommation': ['conso_5_usages_par_m2_ep', 'conso_5_usages_ep_m2', 'conso_5_usages_ep'],
+    'classe GES': ['etiquette_ges', 'classe_estimation_ges'],
+    'surface': ['surface_habitable_logement', 'surface_habitable'],
+    'année de construction': ['annee_construction'],
+    'adresse': ['adresse_ban', 'adresse_brut', 'adresse_batiment']
+  };
+
+  document.getElementById('btn-champs').addEventListener('click', function () {
+    this.disabled = true;
+    var html = '<div class="tableau-scroll"><table><tr><th>Usage</th><th>Nom essayé</th><th>Existe ?</th></tr>';
+    var bilan = {};
+    Object.keys(CHAMPS_SIMULATEUR).forEach(function (usage) {
+      var trouve = null;
+      CHAMPS_SIMULATEUR[usage].forEach(function (nom) {
+        var existe = champsDisponibles.indexOf(nom) !== -1;
+        if (existe && !trouve) trouve = nom;
+        html += '<tr><td>' + usage + '</td><td><code>' + nom + '</code></td><td>' +
+          (existe ? '<span class="ok">oui</span>' : '<span class="ko">non</span>') + '</td></tr>';
+      });
+      bilan[usage] = trouve || 'AUCUN NOM VALIDE';
+    });
+    html += '</table></div>';
+    document.getElementById('res-champs').innerHTML = html;
+    rapport.champs_du_simulateur = bilan;
+
+    var manquants = Object.keys(bilan).filter(function (u) { return bilan[u] === 'AUCUN NOM VALIDE'; });
+    afficher('etat-champs', manquants.length
+      ? manquants.length + ' usage(s) sans aucun champ valide : ' + manquants.join(', ')
+      : 'Tous les usages trouvent au moins un champ valide.',
+      manquants.length ? 'ko' : 'ok');
+    majSortie();
+  });
+
+  /* --- 3. Échantillon de calibration --- */
+
+  var PERIODES = [
+    { cle: 'avant1975', min: 1800, max: 1974 },
+    { cle: 'rt1974', min: 1975, max: 1988 },
+    { cle: 'rt1988', min: 1989, max: 2000 },
+    { cle: 'rt2000', min: 2001, max: 2005 },
+    { cle: 'rt2005', min: 2006, max: 2012 },
+    { cle: 'rt2012', min: 2013, max: 2021 },
+    { cle: 're2020', min: 2022, max: 2030 }
+  ];
+
+  function mediane(valeurs) {
+    if (!valeurs.length) return null;
+    var t = valeurs.slice().sort(function (a, b) { return a - b; });
+    var m = Math.floor(t.length / 2);
+    return Math.round(t.length % 2 ? t[m] : (t[m - 1] + t[m]) / 2);
+  }
+
+  function nombre(v) {
+    var n = parseFloat(v);
+    return isFinite(n) ? n : null;
+  }
+
+  // Retrouve le premier champ existant parmi une liste de noms possibles.
+  function champ(noms) {
+    for (var i = 0; i < noms.length; i++) {
+      if (champsDisponibles.indexOf(noms[i]) !== -1) return noms[i];
+    }
+    return null;
+  }
+
+  document.getElementById('btn-calib').addEventListener('click', function () {
+    this.disabled = true;
+    var champConso = champ(['conso_5_usages_par_m2_ep', 'conso_5_usages_ep_m2', 'conso_5_usages_ep']);
+    var champAnnee = champ(['annee_construction']);
+    var champType = champ(['type_batiment', 'typologie_logement']);
+    var champEnergie = champ(['type_energie_principale_chauffage', 'type_energie_chauffage',
+                              'type_generateur_chauffage_principal']);
+    var champChauffage = champ(['conso_chauffage_ep', 'conso_chauffage', 'conso_chauffage_par_m2_ep']);
+
+    if (!champConso || !champAnnee) {
+      afficher('etat-calib', 'Impossible : les champs consommation ou année de construction sont ' +
+        'introuvables. Renvoyez-moi d\'abord la liste des champs du test 1.', 'ko');
+      return;
+    }
+
+    rapport.champs_utilises_pour_echantillon = {
+      conso: champConso, annee: champAnnee, type_batiment: champType,
+      energie_chauffage: champEnergie, conso_chauffage: champChauffage
+    };
+
+    var resultats = {};
+    var index = 0;
+
+    function suivante() {
+      if (index >= PERIODES.length) {
+        rapport.echantillon_maisons_par_periode = resultats;
+        afficher('etat-calib', 'Terminé. Copiez le bloc ci-dessous.', 'ok');
+        majSortie();
+        return;
+      }
+      var p = PERIODES[index];
+      afficher('etat-calib', 'Période ' + p.cle + ' (' + (index + 1) + '/' + PERIODES.length + ')...');
+
+      // qs : syntaxe de requête de data-fair (Elasticsearch simplifié)
+      var qs = champAnnee + ':[' + p.min + ' TO ' + p.max + ']';
+      if (champType) qs += ' AND ' + champType + ':"maison"';
+      var champs = [champConso, champAnnee];
+      if (champEnergie) champs.push(champEnergie);
+      if (champChauffage) champs.push(champChauffage);
+
+      var url = BASE + '?size=1000&qs=' + encodeURIComponent(qs) +
+        '&select=' + encodeURIComponent(champs.join(','));
+
+      recuperer(url)
+        .then(function (d) {
+          var l = lignes(d);
+          var consos = [], chauffages = [], parEnergie = {};
+          l.forEach(function (r) {
+            var c = nombre(r[champConso]);
+            if (c !== null && c > 0 && c < 2000) consos.push(c);
+            if (champChauffage) {
+              var ch = nombre(r[champChauffage]);
+              if (ch !== null && ch > 0 && ch < 2000) chauffages.push(ch);
+            }
+            if (champEnergie && r[champEnergie] && c) {
+              var e = String(r[champEnergie]);
+              (parEnergie[e] = parEnergie[e] || []).push(c);
+            }
+          });
+          var detailEnergie = {};
+          Object.keys(parEnergie).forEach(function (e) {
+            if (parEnergie[e].length >= 20) {
+              detailEnergie[e] = { n: parEnergie[e].length, mediane_conso_ep: mediane(parEnergie[e]) };
+            }
+          });
+          resultats[p.cle] = {
+            annees: p.min + '-' + p.max,
+            n: consos.length,
+            total_disponible: d.total,
+            mediane_conso_5_usages_ep: mediane(consos),
+            mediane_conso_chauffage_ep: chauffages.length ? mediane(chauffages) : null,
+            par_energie: detailEnergie
+          };
+          index++;
+          setTimeout(suivante, 400); // on ménage le service public
+        })
+        .catch(function (e) {
+          resultats[p.cle] = { erreur: e.message };
+          index++;
+          setTimeout(suivante, 400);
+        });
+    }
+    suivante();
+  });
+
+  /* --- 4. Copie --- */
+
+  document.getElementById('btn-copier').addEventListener('click', function () {
+    var zone = document.getElementById('sortie');
+    zone.removeAttribute('readonly');
+    zone.select();
+    zone.setSelectionRange(0, 999999); // iOS a besoin d'une plage explicite
+    var copie = false;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(zone.value).then(function () {
+        afficher('etat-copie', 'Copié.', 'ok');
+      }).catch(function () {
+        afficher('etat-copie', 'Copie automatique refusée : le texte est sélectionné, ' +
+          'utilisez « Copier » du menu de votre téléphone.', 'ko');
+      });
+      copie = true;
+    }
+    zone.setAttribute('readonly', 'readonly');
+    if (!copie) {
+      afficher('etat-copie', 'Le texte est sélectionné : utilisez « Copier » du menu.', 'ok');
+    }
+  });
+
+  majSortie();
+})();
+</script>
+
+</body>
+</html>
