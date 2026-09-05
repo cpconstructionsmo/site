@@ -7,8 +7,8 @@
   <meta name="description" content="Estimez le DPE de votre logement et découvrez les travaux prioritaires pour gagner des classes énergétiques.">
   <link rel="icon" href="assets/logo-icon.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-  <link rel="stylesheet" href="css/style.css?v=15">
-  <script src="js/anim.js?v=15" defer></script>
+  <link rel="stylesheet" href="css/style.css?v=16">
+  <script src="js/anim.js?v=16" defer></script>
 </head>
 <body>
 
@@ -39,9 +39,10 @@
 
 <h1>Estimez le DPE de votre logement</h1>
 <p class="page-detail-intro">
-  Répondez à quelques questions pour obtenir une estimation de votre
-  diagnostic de performance énergétique, et découvrez les travaux qui
-  amélioreraient le plus votre logement.
+  Répondez à quelques questions pour obtenir une estimation détaillée de
+  votre diagnostic de performance énergétique, et découvrez les travaux
+  qui amélioreraient le plus votre logement. Vous avez déjà un DPE ?
+  Importez-le à l'étape 1 pour gagner du temps.
 </p>
 
 <section class="mt-4">
@@ -64,8 +65,17 @@
 
   <div class="dpe-contenu">
 
-    <!-- Étape 1 : adresse -->
+    <!-- Étape 1 : adresse + import DPE -->
     <div class="dpe-panneau actif" data-panneau="1">
+
+      <div class="dpe-import">
+        <h3>Vous avez déjà un DPE ?</h3>
+        <p>Importez le PDF : nous en extrayons la surface, l'année de construction, la consommation et les émissions pour gagner du temps.</p>
+        <label for="dpe-fichier" class="dpe-import-bouton">Choisir un fichier PDF</label>
+        <input type="file" id="dpe-fichier" accept="application/pdf" hidden>
+        <p class="dpe-import-statut" id="dpe-import-statut"></p>
+      </div>
+
       <h2>Votre adresse</h2>
       <p class="dpe-soustitre">Elle nous sert uniquement à situer votre logement sur la carte, elle n'est pas enregistrée.</p>
 
@@ -89,7 +99,7 @@
     <!-- Étape 2 : le bien -->
     <div class="dpe-panneau" data-panneau="2">
       <h2>Décrivez votre bien</h2>
-      <p class="dpe-soustitre">Ces informations permettent d'estimer les déperditions de votre logement.</p>
+      <p class="dpe-soustitre">Ces informations permettent d'estimer les déperditions de votre logement. Plus elles sont précises, plus l'estimation et les travaux proposés le seront aussi.</p>
 
       <div class="dpe-grille-champs">
         <div class="form-group">
@@ -120,32 +130,42 @@
             <option value="pac">Pompe à chaleur</option>
           </select>
         </div>
-      </div>
-
-      <div class="form-group">
-        <label>Isolation des murs</label>
-        <div class="dpe-choix" data-groupe="isolationMurs">
-          <button type="button" data-valeur="aucune">Aucune</button>
-          <button type="button" data-valeur="sup10">Plus de 10 ans</button>
-          <button type="button" data-valeur="inf10">Moins de 10 ans</button>
+        <div class="form-group">
+          <label for="dpe-ecs">Production d'eau chaude sanitaire</label>
+          <select id="dpe-ecs">
+            <option value="">Choisir...</option>
+            <option value="pac_int">Intégrée à la pompe à chaleur</option>
+            <option value="ballon_thermo">Ballon thermodynamique</option>
+            <option value="ballon_elec">Ballon électrique classique</option>
+            <option value="chaudiere_gaz">Chaudière gaz</option>
+            <option value="chaudiere_fioul">Chaudière fioul</option>
+          </select>
         </div>
       </div>
 
-      <div class="form-group">
-        <label>Isolation de la toiture</label>
-        <div class="dpe-choix" data-groupe="isolationToiture">
-          <button type="button" data-valeur="aucune">Aucune</button>
-          <button type="button" data-valeur="sup10">Plus de 10 ans</button>
-          <button type="button" data-valeur="inf10">Moins de 10 ans</button>
+      <div class="dpe-grille-champs">
+        <div class="form-group">
+          <label for="dpe-epaisseur-murs">Épaisseur d'isolant des murs (mm)</label>
+          <input type="number" id="dpe-epaisseur-murs" min="0" max="400" step="10" placeholder="Ex : 120, 0 si aucune">
+        </div>
+        <div class="form-group">
+          <label for="dpe-r-toiture">Résistance thermique R du plafond/toiture (m².K/W)</label>
+          <input type="number" id="dpe-r-toiture" min="0" max="12" step="0.5" placeholder="Ex : 7">
         </div>
       </div>
+      <p class="dpe-astuce">
+        Astuce : la résistance R figure sur l'emballage de l'isolant. À
+        défaut, comptez environ R = 1 tous les 3,5 cm de laine de verre ou
+        de roche (par exemple 240 mm ≈ R7).
+      </p>
 
       <div class="form-group">
         <label>Type de vitrage</label>
         <div class="dpe-choix" data-groupe="vitrage">
-          <button type="button" data-valeur="ancien">Simple / ancien</button>
-          <button type="button" data-valeur="double">Double</button>
-          <button type="button" data-valeur="triple">Triple</button>
+          <button type="button" data-valeur="simple">Simple vitrage</button>
+          <button type="button" data-valeur="double">Double vitrage standard</button>
+          <button type="button" data-valeur="double_recent">Double vitrage récent (&gt; 2006)</button>
+          <button type="button" data-valeur="triple">Triple vitrage</button>
         </div>
       </div>
 
@@ -194,12 +214,14 @@
     <div class="dpe-panneau" data-panneau="4">
       <h2>Estimation de votre DPE</h2>
       <p class="dpe-soustitre" id="dpe-adresse-resultat"></p>
+      <p class="dpe-source-dpe" id="dpe-source-dpe" hidden></p>
 
       <div class="dpe-resultat-tete">
         <div class="dpe-etiquette-classe" id="dpe-classe-actuelle">-</div>
         <div class="dpe-resultat-detail">
-          <p>Classe énergétique estimée : <strong id="dpe-classe-texte">-</strong></p>
-          <p>Consommation estimée : <strong id="dpe-conso-texte">-</strong></p>
+          <p>Classe énergétique : <strong id="dpe-classe-texte">-</strong></p>
+          <p>Consommation : <strong id="dpe-conso-texte">-</strong></p>
+          <p id="dpe-ges-ligne" hidden>Émissions de gaz à effet de serre : <strong id="dpe-ges-texte">-</strong></p>
         </div>
       </div>
 
@@ -250,15 +272,14 @@
 
       <div class="dpe-avertissement">
         Cette estimation est simplifiée et indicative, à partir des
-        informations que vous avez renseignées : elle ne remplace pas un
-        diagnostic de performance énergétique (DPE) réglementaire réalisé
-        par un diagnostiqueur certifié, qui s'appuie sur la méthode 3CL et
-        prend en compte des éléments que ce simulateur ne mesure pas
-        (ventilation, forme et compacité du bâtiment, orientation, ponts
-        thermiques, zone climatique...). Deux logements a priori
-        similaires peuvent donc afficher des résultats réels différents
-        de cette estimation. Elle ne constitue ni une offre, ni un
-        engagement de CP Constructions.
+        informations que vous avez renseignées (ou de votre DPE importé) :
+        elle ne remplace pas un diagnostic de performance énergétique
+        réglementaire réalisé par un diagnostiqueur certifié, qui s'appuie
+        sur la méthode 3CL et prend en compte des éléments que ce
+        simulateur ne mesure pas (ventilation, forme et compacité du
+        bâtiment, orientation, ponts thermiques, zone climatique...). Les
+        travaux proposés sont des pistes de réflexion, pas un devis. Elle
+        ne constitue ni une offre, ni un engagement de CP Constructions.
       </div>
 
       <div class="dpe-form-lead">
@@ -305,6 +326,7 @@
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
 (function () {
   'use strict';
@@ -317,11 +339,13 @@
     surface: null,
     periode: '',
     chauffage: '',
-    isolationMurs: '',
-    isolationToiture: '',
+    ecs: '',
+    epaisseurMurs: null,
+    rToiture: null,
     vitrage: '',
     occupation: '',
-    delai: ''
+    delai: '',
+    dpeConnu: null // { conso, ges, facture, deperditionMax } si un DPE a été importé
   };
 
   /* --- Navigation entre les 4 étapes --- */
@@ -438,6 +462,152 @@
     allerEtape(2);
   });
 
+  /* --- Import d'un DPE existant (PDF) ---
+     Lecture du texte du PDF côté navigateur (pdf.js), puis recherche des
+     champs standardisés du DPE (surface, année de construction,
+     consommation, émissions, répartition des déperditions si présente).
+     C'est une lecture « au mieux » : la mise en page varie selon le
+     logiciel du diagnostiqueur, donc les champs non trouvés restent à
+     compléter à la main. Rien n'est jamais appliqué sans être montré à
+     l'écran. */
+
+  var champFichier = document.getElementById('dpe-fichier');
+  var statutImport = document.getElementById('dpe-import-statut');
+
+  function normaliserNombre(texte) {
+    return parseFloat(texte.replace(/\s/g, '').replace(',', '.'));
+  }
+
+  function periodeDepuisAnnee(annee) {
+    if (annee < 1975) return 'avant1975';
+    if (annee <= 1988) return 'rt1974';
+    if (annee <= 2000) return 'rt1988';
+    if (annee <= 2005) return 'rt2000';
+    if (annee <= 2012) return 'rt2005';
+    if (annee <= 2021) return 'rt2012';
+    return 're2020';
+  }
+
+  function analyserTexteDPE(texte) {
+    var trouve = {};
+
+    var mSurface = texte.match(/surface\s+habitable\s*:?\s*([\d]+[,.]?\d*)\s*m/i);
+    if (mSurface) trouve.surface = normaliserNombre(mSurface[1]);
+
+    var mAnnee = texte.match(/ann[ée]e\s+de\s+construction\s*:?\s*(\d{4})/i);
+    if (mAnnee) trouve.annee = parseInt(mAnnee[1], 10);
+
+    var mConso = texte.match(/consommation\s+conventionnelle\s*:?\s*([\d]+[,.]?\d*)\s*kwh/i) ||
+      texte.match(/([\d]+[,.]\d)\s*kwh\s*ep\s*\/?\s*m/i);
+    if (mConso) trouve.conso = normaliserNombre(mConso[1]);
+
+    var mGes = texte.match(/estimation\s+des\s+[ée]missions\s*:?\s*([\d]+[,.]?\d*)\s*kg/i) ||
+      texte.match(/([\d]+[,.]\d)\s*kg\s*eq\s*co\s*2/i);
+    if (mGes) trouve.ges = normaliserNombre(mGes[1]);
+
+    var mFacture = texte.match(/([\d]+[,.]\d{2})\s*€\s*(?:abonnements|\)|$)/i);
+    if (mFacture) trouve.facture = normaliserNombre(mFacture[1]);
+
+    var deperditions = {};
+    ['Toiture', 'Façades', 'Sols', 'Fenêtres', 'Ventilation'].forEach(function (poste) {
+      var re = new RegExp(poste.replace('ç', '[çc]').replace('ê', '[êe]') + '\\D{0,15}(\\d{1,2})\\s*%', 'i');
+      var m = texte.match(re);
+      if (m) deperditions[poste] = parseInt(m[1], 10);
+    });
+    if (Object.keys(deperditions).length) trouve.deperditions = deperditions;
+
+    return trouve;
+  }
+
+  function appliquerDonneesDPE(trouve) {
+    var messages = [];
+
+    if (trouve.surface) {
+      document.getElementById('dpe-surface').value = trouve.surface;
+      messages.push('surface ' + trouve.surface + ' m²');
+    }
+    if (trouve.annee) {
+      var periode = periodeDepuisAnnee(trouve.annee);
+      document.getElementById('dpe-periode').value = periode;
+      etat.periode = periode;
+      messages.push('construction ' + trouve.annee);
+    }
+    if (trouve.conso) {
+      etat.dpeConnu = etat.dpeConnu || {};
+      etat.dpeConnu.conso = trouve.conso;
+      messages.push('consommation ' + trouve.conso + ' kWhEP/m²/an');
+    }
+    if (trouve.ges) {
+      etat.dpeConnu = etat.dpeConnu || {};
+      etat.dpeConnu.ges = trouve.ges;
+    }
+    if (trouve.facture) {
+      etat.dpeConnu = etat.dpeConnu || {};
+      etat.dpeConnu.facture = trouve.facture;
+    }
+    if (trouve.deperditions) {
+      var posteMax = Object.keys(trouve.deperditions).reduce(function (a, b) {
+        return trouve.deperditions[a] >= trouve.deperditions[b] ? a : b;
+      });
+      etat.dpeConnu = etat.dpeConnu || {};
+      etat.dpeConnu.posteFaible = posteMax;
+    }
+
+    if (messages.length) {
+      statutImport.textContent = 'Trouvé dans votre DPE : ' + messages.join(', ') +
+        '. Vérifiez et complétez les champs ci-dessous, notamment l\'isolation et le chauffage, pour affiner les travaux proposés.';
+      statutImport.className = 'dpe-import-statut dpe-import-ok';
+    } else {
+      statutImport.textContent = 'Nous n\'avons pas réussi à lire automatiquement ce fichier. Complétez les champs manuellement ci-dessous.';
+      statutImport.className = 'dpe-import-statut dpe-import-echec';
+    }
+  }
+
+  champFichier.addEventListener('change', function () {
+    var fichier = champFichier.files[0];
+    if (!fichier) return;
+
+    statutImport.textContent = 'Lecture du fichier en cours...';
+    statutImport.className = 'dpe-import-statut';
+
+    if (typeof pdfjsLib === 'undefined') {
+      statutImport.textContent = 'La lecture automatique n\'est pas disponible pour le moment. Complétez les champs manuellement ci-dessous.';
+      statutImport.className = 'dpe-import-statut dpe-import-echec';
+      return;
+    }
+
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    var lecteur = new FileReader();
+    lecteur.onload = function () {
+      var donnees = new Uint8Array(this.result);
+      pdfjsLib.getDocument({ data: donnees }).promise.then(function (pdf) {
+        var pagesTexte = [];
+        var i = 1;
+        function lirePage() {
+          if (i > pdf.numPages) {
+            appliquerDonneesDPE(analyserTexteDPE(pagesTexte.join(' ')));
+            return;
+          }
+          pdf.getPage(i).then(function (page) {
+            return page.getTextContent();
+          }).then(function (contenu) {
+            pagesTexte.push(contenu.items.map(function (it) { return it.str; }).join(' '));
+            i++;
+            lirePage();
+          }).catch(function () {
+            appliquerDonneesDPE(analyserTexteDPE(pagesTexte.join(' ')));
+          });
+        }
+        lirePage();
+      }).catch(function () {
+        statutImport.textContent = 'Ce fichier n\'a pas pu être lu. Complétez les champs manuellement ci-dessous.';
+        statutImport.className = 'dpe-import-statut dpe-import-echec';
+      });
+    };
+    lecteur.readAsArrayBuffer(fichier);
+  });
+
   /* --- Étape 2 : boutons à choix unique par groupe --- */
 
   function initGroupeChoix(groupe, cible) {
@@ -451,8 +621,6 @@
     });
   }
 
-  initGroupeChoix('isolationMurs', 'isolationMurs');
-  initGroupeChoix('isolationToiture', 'isolationToiture');
   initGroupeChoix('vitrage', 'vitrage');
   initGroupeChoix('occupation', 'occupation');
   initGroupeChoix('delai', 'delai');
@@ -461,10 +629,15 @@
     etat.surface = parseFloat(document.getElementById('dpe-surface').value) || null;
     etat.periode = document.getElementById('dpe-periode').value;
     etat.chauffage = document.getElementById('dpe-chauffage').value;
+    etat.ecs = document.getElementById('dpe-ecs').value;
+    etat.epaisseurMurs = document.getElementById('dpe-epaisseur-murs').value === ''
+      ? null : parseFloat(document.getElementById('dpe-epaisseur-murs').value);
+    etat.rToiture = document.getElementById('dpe-r-toiture').value === ''
+      ? null : parseFloat(document.getElementById('dpe-r-toiture').value);
 
     var erreur = document.getElementById('dpe-erreur-2');
-    var complet = etat.surface && etat.periode && etat.chauffage &&
-      etat.isolationMurs && etat.isolationToiture && etat.vitrage;
+    var complet = etat.surface && etat.periode && etat.chauffage && etat.ecs &&
+      etat.epaisseurMurs !== null && etat.rToiture !== null && etat.vitrage;
     if (!complet) {
       erreur.hidden = false;
       return;
@@ -485,81 +658,117 @@
   });
 
   /* --- Étape 4 : calcul de l'estimation ---
-     Modèle simplifié à but indicatif, construit en trois temps pour se
-     rapprocher de la logique réelle d'un DPE plutôt que d'un simple
-     coefficient global :
+     Modèle simplifié à but indicatif, construit à partir de grandeurs
+     physiques plutôt que de catégories forfaitaires :
 
-       1. Besoin de chauffage du bâti (kWh d'énergie finale/m²/an), selon
-          la réglementation thermique en vigueur au moment de la
-          construction, ajusté par l'isolation et le vitrage réellement
-          déclarés (une maison peut avoir été rénovée depuis, ou au
-          contraire s'être dégradée).
+       1. Le besoin de chauffage du bâti (kWh d'énergie finale/m²/an),
+          calé sur la réglementation thermique de la période de
+          construction, est ajusté par la résistance thermique réelle
+          des murs et de la toiture (R = épaisseur / conductivité, pour
+          les murs ; R saisie directement pour la toiture) et par le
+          coefficient de déperdition du vitrage (Uw), comparés à ce qui
+          est typique pour cette période. Plus la valeur réelle s'écarte
+          de la référence de l'époque, plus l'écart au besoin de base est
+          marqué.
        2. Ce besoin est divisé par le rendement (ou le COP, pour une
-          pompe à chaleur) du système de chauffage pour obtenir l'énergie
-          finale réellement consommée. L'eau chaude sanitaire et les
-          auxiliaires/éclairage s'ajoutent séparément, comme dans un DPE
-          réel où ils pèsent souvent une part significative.
-       3. L'énergie finale est convertie en énergie primaire via le
-          coefficient réglementaire (2,58 pour l'électricité, 1 pour les
-          énergies de combustion), pour retrouver la classe DPE selon les
-          seuils publiés par l'ADEME.
+          pompe à chaleur) du système de chauffage. L'eau chaude
+          sanitaire est calculée séparément, selon son propre mode de
+          production (ballon électrique, thermodynamique, chaudière...),
+          et les auxiliaires/éclairage s'ajoutent en électricité.
+       3. Le total est converti en énergie primaire via le coefficient
+          réglementaire (2,58 pour l'électricité, confirmé sur un DPE
+          réel ; 1 pour les énergies de combustion), pour obtenir la
+          classe DPE selon les seuils publiés par l'ADEME.
 
-     Ce n'est pas la méthode réglementaire 3CL : elle ne tient pas compte
-     de la ventilation, de la forme du bâtiment, de son orientation, des
-     ponts thermiques ni de la zone climatique. Elle ne doit jamais être
-     présentée comme un DPE officiel : voir l'avertissement à l'écran. */
+     Si un DPE a été importé et qu'une consommation réelle a pu en être
+     extraite, elle sert de référence pour la classe et la consommation
+     affichées : le modèle ci-dessus n'est alors utilisé que pour estimer
+     l'effet relatif des travaux (les pourcentages d'économie), ce qui
+     est plus fiable qu'une valeur absolue recalculée de zéro.
 
-  // Besoin de chauffage du bâti, en kWh d'énergie finale par m² et par an.
+     Ce n'est pas la méthode réglementaire 3CL : voir l'avertissement
+     affiché à l'écran pour ce qu'elle ne mesure pas. */
+
+  var LAMBDA_ISOLANT = 0.035; // W/(m.K), isolant standard (laine minérale)
+  var R_BASE_MUR = 0.25;      // m².K/W, résistance d'un mur nu (parpaing/brique)
+  var R_BASE_TOITURE = 0.2;   // m².K/W, résistance d'une toiture sans isolant
+
   var BESOIN_CHAUFFAGE_PERIODE = {
     avant1975: 220, rt1974: 170, rt1988: 130, rt2000: 100,
     rt2005: 70, rt2012: 35, re2020: 22
   };
 
-  // Rendement du système de chauffage (COP pour la pompe à chaleur) :
-  // énergie finale = besoin / rendement.
+  // Épaisseur d'isolant des murs typique de chaque époque (mm) : sert de
+  // référence pour comparer la valeur réellement saisie. À épaisseur
+  // égale à cette référence, le facteur vaut 1 (ni bonus ni malus).
+  var EPAISSEUR_MUR_REFERENCE_PERIODE = {
+    avant1975: 0, rt1974: 40, rt1988: 60, rt2000: 80,
+    rt2005: 100, rt2012: 140, re2020: 180
+  };
+  var R_TOITURE_REFERENCE_PERIODE = {
+    avant1975: 0.2, rt1974: 1.0, rt1988: 2.0, rt2000: 3.0,
+    rt2005: 4.0, rt2012: 7.0, re2020: 8.5
+  };
+  var UW_VITRAGE = { simple: 5.0, double: 2.9, double_recent: 1.5, triple: 0.9 };
+  var UW_REFERENCE_PERIODE = {
+    avant1975: 5.0, rt1974: 4.5, rt1988: 3.5, rt2000: 2.9,
+    rt2005: 2.0, rt2012: 1.3, re2020: 1.0
+  };
+  var NIVEAUX_VITRAGE = ['simple', 'double', 'double_recent', 'triple'];
+
   var RENDEMENT_CHAUFFAGE = { gaz: 0.92, fioul: 0.85, bois: 0.80, electrique: 1.0, pac: 3.2 };
-
-  // Coefficient de conversion en énergie primaire (réglementaire : 2,58
-  // pour l'électricité, confirmé par un DPE réel ; 1 pour le gaz, le
-  // fioul et le bois).
   var COEFFICIENT_PRIMAIRE = { gaz: 1, fioul: 1, bois: 1, electrique: 2.58, pac: 2.58 };
-
-  // Prix moyens indicatifs de l'énergie finale, en €/kWh.
   var PRIX_KWH = { gaz: 0.10, fioul: 0.12, electrique: 0.21, bois: 0.08, pac: 0.21 };
 
-  // Eau chaude sanitaire et auxiliaires/éclairage : postes forfaitaires,
-  // en kWh d'énergie finale par m² et par an. L'ECS suit le même vecteur
-  // énergétique que le chauffage (cas le plus courant en maison
-  // individuelle) ; les auxiliaires et l'éclairage sont toujours
-  // électriques, quel que soit le mode de chauffage.
-  var ECS_FINALE_BASE = 18;
-  var AUX_ECLAIRAGE_FINALE = 8;
+  var ECS_INFO = {
+    pac_int: { rendement: 2.5, vecteur: 'electrique' },
+    ballon_thermo: { rendement: 2.8, vecteur: 'electrique' },
+    ballon_elec: { rendement: 1.0, vecteur: 'electrique' },
+    chaudiere_gaz: { rendement: 0.85, vecteur: 'gaz' },
+    chaudiere_fioul: { rendement: 0.80, vecteur: 'fioul' }
+  };
+  var ECS_FINALE_BASE = 18; // kWh d'énergie finale/m²/an, avant rendement
+  var AUX_ECLAIRAGE_FINALE = 8; // kWh d'énergie finale/m²/an, toujours électrique
 
-  var FACTEUR_ISOLATION = { aucune: 1.20, sup10: 1.0, inf10: 0.85 };
-  var FACTEUR_VITRAGE = { ancien: 1.15, double: 1.0, triple: 0.88 };
-  var NIVEAUX_ISOLATION = ['aucune', 'sup10', 'inf10'];
-  var NIVEAUX_VITRAGE = ['ancien', 'double', 'triple'];
+  function facteurBorne(valeur) {
+    return Math.max(0.4, Math.min(2.5, valeur));
+  }
+
+  function facteurMur(epaisseurMm, periode) {
+    var rActuel = R_BASE_MUR + (epaisseurMm || 0) / 1000 / LAMBDA_ISOLANT;
+    var rReference = R_BASE_MUR + EPAISSEUR_MUR_REFERENCE_PERIODE[periode] / 1000 / LAMBDA_ISOLANT;
+    return facteurBorne(rReference / rActuel);
+  }
+
+  function facteurToiture(rToiture, periode) {
+    var rActuel = Math.max(R_BASE_TOITURE, rToiture || R_BASE_TOITURE);
+    return facteurBorne(R_TOITURE_REFERENCE_PERIODE[periode] / rActuel);
+  }
+
+  function facteurVitrage(typeVitrage, periode) {
+    return facteurBorne(UW_VITRAGE[typeVitrage] / UW_REFERENCE_PERIODE[periode]);
+  }
 
   function calculerConsommation(valeurs) {
-    var besoinChauffage = BESOIN_CHAUFFAGE_PERIODE[valeurs.periode] *
-      FACTEUR_ISOLATION[valeurs.isolationMurs] *
-      FACTEUR_ISOLATION[valeurs.isolationToiture] *
-      FACTEUR_VITRAGE[valeurs.vitrage];
+    var fMur = facteurMur(valeurs.epaisseurMurs, valeurs.periode);
+    var fToiture = facteurToiture(valeurs.rToiture, valeurs.periode);
+    var fVitrage = facteurVitrage(valeurs.vitrage, valeurs.periode);
 
+    var besoinChauffage = BESOIN_CHAUFFAGE_PERIODE[valeurs.periode] * fMur * fToiture * fVitrage;
     var chauffageFinale = besoinChauffage / RENDEMENT_CHAUFFAGE[valeurs.chauffage];
-    var ecsFinale = ECS_FINALE_BASE / RENDEMENT_CHAUFFAGE[valeurs.chauffage];
+
+    var ecsInfo = ECS_INFO[valeurs.ecs];
+    var ecsFinale = ECS_FINALE_BASE / ecsInfo.rendement;
 
     var primaire = chauffageFinale * COEFFICIENT_PRIMAIRE[valeurs.chauffage] +
-      ecsFinale * COEFFICIENT_PRIMAIRE[valeurs.chauffage] +
+      ecsFinale * COEFFICIENT_PRIMAIRE[ecsInfo.vecteur] +
       AUX_ECLAIRAGE_FINALE * COEFFICIENT_PRIMAIRE.electrique;
 
-    var finale = chauffageFinale + ecsFinale + AUX_ECLAIRAGE_FINALE;
-
-    var prixChauffageEcs = PRIX_KWH[valeurs.chauffage];
-    var factureParM2 = (chauffageFinale + ecsFinale) * prixChauffageEcs +
+    var factureParM2 = chauffageFinale * PRIX_KWH[valeurs.chauffage] +
+      ecsFinale * PRIX_KWH[ecsInfo.vecteur] +
       AUX_ECLAIRAGE_FINALE * PRIX_KWH.electrique;
 
-    return { primaire: primaire, finale: finale, factureParM2: factureParM2 };
+    return { primaire: primaire, factureParM2: factureParM2, fMur: fMur, fToiture: fToiture, fVitrage: fVitrage };
   }
 
   function classeDepuisConso(conso) {
@@ -572,77 +781,108 @@
     return 'G';
   }
 
-  function ameliorerNiveau(liste, niveau) {
-    var i = liste.indexOf(niveau);
-    return i < liste.length - 1 ? liste[i + 1] : niveau;
+  function ameliorerVitrage(niveau) {
+    var i = NIVEAUX_VITRAGE.indexOf(niveau);
+    return i < NIVEAUX_VITRAGE.length - 1 ? NIVEAUX_VITRAGE[i + 1] : niveau;
+  }
+
+  function afficherEtiquette(id, classe) {
+    var el = document.getElementById(id);
+    el.textContent = classe;
+    el.className = 'dpe-etiquette-classe dpe-classe-' + classe.toLowerCase();
   }
 
   function calculerEtAfficher() {
     var resultat = calculerConsommation(etat);
-    var classe = classeDepuisConso(resultat.primaire);
-    var facture = resultat.factureParM2 * etat.surface;
+    var classeCalculee = classeDepuisConso(resultat.primaire);
+
+    // Si un DPE réel a été importé, on l'utilise comme référence pour la
+    // classe et la consommation affichées ; le modèle ci-dessus ne sert
+    // plus qu'à estimer l'effet relatif des travaux.
+    var consoAffichee = resultat.primaire;
+    var classeAffichee = classeCalculee;
+    var factureAffichee = resultat.factureParM2 * etat.surface;
+    var sourceDpe = document.getElementById('dpe-source-dpe');
+
+    if (etat.dpeConnu && etat.dpeConnu.conso) {
+      consoAffichee = etat.dpeConnu.conso;
+      classeAffichee = classeDepuisConso(consoAffichee);
+      if (etat.dpeConnu.facture) factureAffichee = etat.dpeConnu.facture;
+      sourceDpe.hidden = false;
+      sourceDpe.textContent = 'Classe et consommation reprises de votre DPE importé. Les travaux ci-dessous sont estimés en appliquant l\'effet relatif calculé par notre modèle à cette valeur réelle.';
+    } else {
+      sourceDpe.hidden = true;
+    }
 
     document.getElementById('dpe-adresse-resultat').textContent =
       etat.adresseTexte ? etat.adresseTexte : 'Logement renseigné à l\'étape précédente';
 
-    var etiquette = document.getElementById('dpe-classe-actuelle');
-    etiquette.textContent = classe;
-    etiquette.className = 'dpe-etiquette-classe dpe-classe-' + classe.toLowerCase();
-    document.getElementById('dpe-classe-texte').textContent = 'Classe ' + classe;
-    document.getElementById('dpe-conso-texte').textContent = Math.round(resultat.primaire) + ' kWh/m²/an (énergie primaire)';
+    afficherEtiquette('dpe-classe-actuelle', classeAffichee);
+    document.getElementById('dpe-classe-texte').textContent = 'Classe ' + classeAffichee;
+    document.getElementById('dpe-conso-texte').textContent = Math.round(consoAffichee) + ' kWh/m²/an (énergie primaire)';
 
-    document.getElementById('dpe-stat-facture').textContent = Math.round(facture).toLocaleString('fr-FR') + ' €';
+    var ligneGes = document.getElementById('dpe-ges-ligne');
+    if (etat.dpeConnu && etat.dpeConnu.ges) {
+      ligneGes.hidden = false;
+      document.getElementById('dpe-ges-texte').textContent = etat.dpeConnu.ges + ' kg éqCO2/m²/an';
+    } else {
+      ligneGes.hidden = true;
+    }
+
+    document.getElementById('dpe-stat-facture').textContent = Math.round(factureAffichee).toLocaleString('fr-FR') + ' €';
     document.getElementById('dpe-stat-surface').textContent = etat.surface + ' m²';
-    document.getElementById('dpe-stat-conso').textContent = Math.round(resultat.primaire);
+    document.getElementById('dpe-stat-conso').textContent = Math.round(consoAffichee);
 
-    // Solution "première étape" : on améliore le point le plus faible.
-    var facteursActuels = {
-      isolationMurs: FACTEUR_ISOLATION[etat.isolationMurs],
-      isolationToiture: FACTEUR_ISOLATION[etat.isolationToiture],
-      vitrage: FACTEUR_VITRAGE[etat.vitrage]
-    };
-    var pointFaible = Object.keys(facteursActuels).reduce(function (a, b) {
-      return facteursActuels[a] >= facteursActuels[b] ? a : b;
-    });
-    var valeursEtape1 = Object.assign({}, etat);
+    // Point le plus faible : la répartition réelle des déperditions du
+    // DPE importé prime sur la déduction du modèle, quand elle existe.
     var libellesEtape = {
       isolationMurs: 'Isolation des murs',
       isolationToiture: 'Isolation de la toiture',
       vitrage: 'Remplacement du vitrage'
     };
-    if (pointFaible === 'vitrage') {
-      valeursEtape1.vitrage = ameliorerNiveau(NIVEAUX_VITRAGE, etat.vitrage);
+    var pointFaible;
+    if (etat.dpeConnu && etat.dpeConnu.posteFaible) {
+      var correspondance = {
+        'Façades': 'isolationMurs', 'Toiture': 'isolationToiture', 'Fenêtres': 'vitrage'
+      };
+      pointFaible = correspondance[etat.dpeConnu.posteFaible] || 'isolationMurs';
     } else {
-      valeursEtape1[pointFaible] = ameliorerNiveau(NIVEAUX_ISOLATION, etat[pointFaible]);
+      var facteursActuels = { isolationMurs: resultat.fMur, isolationToiture: resultat.fToiture, vitrage: resultat.fVitrage };
+      pointFaible = Object.keys(facteursActuels).reduce(function (a, b) {
+        return facteursActuels[a] >= facteursActuels[b] ? a : b;
+      });
+    }
+
+    var valeursEtape1 = Object.assign({}, etat);
+    if (pointFaible === 'vitrage') {
+      valeursEtape1.vitrage = ameliorerVitrage(etat.vitrage);
+    } else if (pointFaible === 'isolationMurs') {
+      valeursEtape1.epaisseurMurs = (etat.epaisseurMurs || 0) + 100;
+    } else {
+      valeursEtape1.rToiture = (etat.rToiture || 0) + 4;
     }
     var resultatEtape1 = calculerConsommation(valeursEtape1);
-    var classeEtape1 = classeDepuisConso(resultatEtape1.primaire);
     var economieEtape1 = Math.round((1 - resultatEtape1.primaire / resultat.primaire) * 100);
+    var consoEtape1Affichee = consoAffichee * (resultatEtape1.primaire / resultat.primaire);
+    var classeEtape1 = classeDepuisConso(consoEtape1Affichee);
 
     document.getElementById('dpe-premiere-etape-pourcent').textContent = economieEtape1 + ' %';
-    var e1avant = document.getElementById('dpe-premiere-etape-avant');
-    e1avant.textContent = classe;
-    e1avant.className = 'dpe-etiquette-classe dpe-classe-' + classe.toLowerCase();
-    var e1apres = document.getElementById('dpe-premiere-etape-apres');
-    e1apres.textContent = classeEtape1;
-    e1apres.className = 'dpe-etiquette-classe dpe-classe-' + classeEtape1.toLowerCase();
+    afficherEtiquette('dpe-premiere-etape-avant', classeAffichee);
+    afficherEtiquette('dpe-premiere-etape-apres', classeEtape1);
     document.getElementById('dpe-premiere-etape-detail').textContent = libellesEtape[pointFaible];
 
-    // Solution "rénovation d'ampleur" : tous les postes au meilleur niveau.
+    // Rénovation d'ampleur : tous les postes au meilleur niveau.
     var valeursAmpleur = Object.assign({}, etat, {
-      isolationMurs: 'inf10', isolationToiture: 'inf10', vitrage: 'triple'
+      epaisseurMurs: 160, rToiture: 8, vitrage: 'triple'
     });
     var resultatAmpleur = calculerConsommation(valeursAmpleur);
-    var classeAmpleur = classeDepuisConso(resultatAmpleur.primaire);
     var economieAmpleur = Math.round((1 - resultatAmpleur.primaire / resultat.primaire) * 100);
+    var consoAmpleurAffichee = consoAffichee * (resultatAmpleur.primaire / resultat.primaire);
+    var classeAmpleur = classeDepuisConso(consoAmpleurAffichee);
 
     document.getElementById('dpe-ampleur-pourcent').textContent = economieAmpleur + ' %';
-    var eaAvant = document.getElementById('dpe-ampleur-avant');
-    eaAvant.textContent = classe;
-    eaAvant.className = 'dpe-etiquette-classe dpe-classe-' + classe.toLowerCase();
-    var eaApres = document.getElementById('dpe-ampleur-apres');
-    eaApres.textContent = classeAmpleur;
-    eaApres.className = 'dpe-etiquette-classe dpe-classe-' + classeAmpleur.toLowerCase();
+    afficherEtiquette('dpe-ampleur-avant', classeAffichee);
+    afficherEtiquette('dpe-ampleur-apres', classeAmpleur);
   }
 
   /* --- Formulaire de recontact (même principe que la page Contact) --- */
@@ -660,7 +900,8 @@
       '%0ASurface: ' + etat.surface + ' m²' +
       '%0A' + classeActuelle +
       '%0AOccupation: ' + etat.occupation +
-      '%0ADélai souhaité: ' + etat.delai;
+      '%0ADélai souhaité: ' + etat.delai +
+      (etat.dpeConnu ? '%0A(DPE existant importé par le client)' : '');
 
     window.location.href = 'mailto:contact@cpconstructions.fr?subject=' + encodeURIComponent(sujet) + '&body=' + corps;
   });
