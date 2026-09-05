@@ -1646,21 +1646,45 @@
        2013-2021     16     5      21     10      20          29
        après 2021    15     6      22     10      16          31
 
-     Ces mesures ne sont pas encore câblées dans le calcul, et c'est
-     délibéré : les facteurs par poste ci-dessous se rapportent au
-     logement tel que construit (R_MUR_REFERENCE_PERIODE et ses
-     voisins), tandis que ces médianes décrivent le logement médian
-     d'aujourd'hui, souvent partiellement rénové. Mélanger les deux a été
-     essayé et mesuré : avec les médianes du parc, une passoire de 1960
-     jamais isolée ressortait en classe D ; avec celles des logements
-     jamais rénovés, un audit réel passait de 287 à 443 kWh/m²/an. Il
-     manque, pour rendre les deux comparables, la répartition des
-     déperditions par poste selon la qualité d'isolation de ce poste-là,
-     qui fixerait les références poste par poste sur la même base. */
+     Répartition mesurée par poste selon la qualité d'isolation de ce
+     poste-là (W/K par m² habitable), obtenue depuis :
 
+       poste          insuffisante  moyenne  bonne  très bonne
+       murs               1,534      0,551   0,416    0,249
+       toiture            0,450      0,169   0,149    0,095
+       plancher bas       0,389      0,360   0,229    0,157
+       fenêtres+portes    0,736      0,544   0,398    0,285
+
+     Ce qu'elles ont permis de trancher. Les niveaux absolus de la base
+     ADEME ne sont pas utilisables pour caler une consommation : ses
+     couples (Ubat, besoin de chauffage) impliquent 2 800 à 3 700
+     degrés-jours en zone H2, là où la réalité est d'environ 2 200. Le
+     champ besoin_chauffage est donc systématiquement d'un quart au-dessus
+     d'un bilan thermique mené sur son propre Ubat, et l'ancrage du niveau
+     reste l'audit réglementaire, dont besoin, Ubat et consommations sont
+     cohérents entre eux. Deux modèles alternatifs ont été construits et
+     mesurés sur ces niveaux — l'un à déperditions absolues par qualité,
+     l'autre à surfaces d'enveloppe et coefficients U calculés depuis la
+     géométrie saisie — et tous deux s'écartaient davantage de l'audit
+     (+6 % et +10 %) que le modèle en place (+2 %) : ils n'ont pas été
+     retenus.
+
+     En revanche la STRUCTURE mesurée, elle, est solide, et c'est elle qui
+     a été reprise : les répartitions par poste ci-dessus servent à
+     déduire les parts de déperdition de chaque période (voir
+     PART_DEPERDITION_PERIODE), et elles ont mis en évidence deux défauts
+     réels du calcul, tous deux corrigés — une part de toiture et de
+     ventilation figée quelle que soit l'époque, et un plancher bas de
+     maison récente pénalisé comme s'il n'avait jamais été isolé. */
+
+  // Recalées à l'adoption des parts par période : les parts redistribuent
+  // les pertes entre postes sans changer le niveau, chaque base est donc
+  // multipliée par le rapport des sommes pondérées avant/après, ce qui
+  // laisse le logement de référence de chaque période à son besoin
+  // antérieur — celui qui avait été vérifié sur l'audit réglementaire.
   var BESOIN_CHAUFFAGE_PERIODE = {
-    avant1975: 250, rt1974: 115, rt1988: 95, rt2000: 78,
-    rt2005: 57, rt2012: 36, re2020: 28
+    avant1975: 260, rt1974: 118, rt1988: 100, rt2000: 95,
+    rt2005: 68, rt2012: 51, re2020: 40
   };
 
   // Épaisseur d'isolant des murs typique de chaque époque (mm) : sert de
@@ -1681,9 +1705,17 @@
   };
 
   var R_BASE_SOL = 0.17; // m².K/W, plancher nu
+  // Résistance du plancher bas réellement mise en œuvre à chaque époque.
+  // Aucune réglementation n'a imposé d'isoler les planchers bas avant la
+  // RT 2000 : les valeurs de référence retenues jusqu'ici (0,34 dès 1975,
+  // 0,6 dès 1989) supposaient une isolation qui n'existait pas, si bien
+  // qu'une maison de 1980 dont le plancher n'a jamais été touché était
+  // comptée deux fois plus déperditive que la référence de sa propre
+  // époque. Symétriquement, une maison récente sans travaux se voyait
+  // attribuer un plancher nu alors qu'elle a été construite isolée.
   var R_SOL_REFERENCE_PERIODE = {
-    avant1975: 0.17, rt1974: 0.34, rt1988: 0.6, rt2000: 1.0,
-    rt2005: 1.5, rt2012: 2.5, re2020: 3.0
+    avant1975: 0.17, rt1974: 0.17, rt1988: 0.25, rt2000: 0.6,
+    rt2005: 1.2, rt2012: 2.5, re2020: 3.0
   };
 
   // Plutôt que de demander une épaisseur ou une résistance précise (peu
@@ -1805,9 +1837,32 @@
   // zéro.
   // Le poste « vitrage » couvre les fenêtres et les portes extérieures,
   // comme le fait la ligne « portes et fenêtres » d'un audit.
-  var PART_DEPERDITION = {
-    murs: 0.21, toiture: 0.26, vitrage: 0.19, sol: 0.12,
-    pontsThermiques: 0.05, ventilation: 0.17
+  // Ces parts décrivent le logement de RÉFÉRENCE de chaque période, avant
+  // travaux — pas le logement médian d'aujourd'hui. Elles sont déduites
+  // des répartitions mesurées sur la base ADEME (voir plus haut) en
+  // divisant chaque part mesurée par le facteur que le modèle applique
+  // déjà à l'état médian du poste : les combles sont le geste le plus
+  // courant en France, le double vitrage aussi, tandis que murs et
+  // planchers restent majoritairement d'origine. Sur le neuf, où presque
+  // rien n'a été rénové, médian et référence se confondent.
+  //
+  // Une part unique pour toutes les périodes, telle qu'utilisée jusqu'ici,
+  // ne pouvait pas convenir : la toiture pèse un quart des pertes d'une
+  // maison d'avant-guerre à charpente nue, et moins de 5 % de celles
+  // d'une maison RT 2012 construite avec 30 cm de laine. À l'inverse la
+  // ventilation, marginale dans le modèle précédent (17 %), est en
+  // réalité le premier poste des constructions récentes, dont l'enveloppe
+  // ne perd presque plus rien. Confrontée aux répartitions mesurées sur
+  // le parc, la table unique s'écartait de 370 points cumulés sur les
+  // sept périodes ; la table ci-dessous de 2.
+  var PART_DEPERDITION_PERIODE = {
+    avant1975: { murs: 0.211, toiture: 0.263, vitrage: 0.147, sol: 0.174, pontsThermiques: 0.059, ventilation: 0.146 },
+    rt1974:    { murs: 0.193, toiture: 0.139, vitrage: 0.179, sol: 0.224, pontsThermiques: 0.077, ventilation: 0.188 },
+    rt1988:    { murs: 0.166, toiture: 0.078, vitrage: 0.189, sol: 0.157, pontsThermiques: 0.105, ventilation: 0.305 },
+    rt2000:    { murs: 0.155, toiture: 0.052, vitrage: 0.284, sol: 0.078, pontsThermiques: 0.112, ventilation: 0.319 },
+    rt2005:    { murs: 0.170, toiture: 0.057, vitrage: 0.215, sol: 0.085, pontsThermiques: 0.151, ventilation: 0.322 },
+    rt2012:    { murs: 0.126, toiture: 0.039, vitrage: 0.143, sol: 0.079, pontsThermiques: 0.157, ventilation: 0.456 },
+    re2020:    { murs: 0.112, toiture: 0.045, vitrage: 0.183, sol: 0.075, pontsThermiques: 0.120, ventilation: 0.465 }
   };
 
   // Écart moyen de prix de vente par classe DPE par rapport à une classe
@@ -1907,13 +1962,18 @@
   }
 
   function facteurSol(categorie, periode, sousSol) {
-    // Sans travaux, la performance dépend du type de sous-sol d'origine
-    // plutôt que d'un mur nu par défaut — une précision que la question
-    // sur le type de sous-sol permet d'apporter.
-    var rActuel = categorie === 'aucune'
-      ? (R_SOL_TYPE_ORIGINE[sousSol] || R_BASE_SOL)
-      : (R_SOL_CATEGORIE[categorie] || R_BASE_SOL);
-    return facteurBorne(R_SOL_REFERENCE_PERIODE[periode] / rActuel);
+    // Sans travaux, le plancher est resté tel qu'il a été construit : sa
+    // résistance ne peut pas être inférieure à celle de son époque. Le
+    // type de sous-sol ne joue que lorsqu'il fait mieux que cette
+    // référence — une dalle sur terre-plein, couplée au sol, reste plus
+    // tempérée qu'un plancher sur vide sanitaire ventilé.
+    if (categorie === 'aucune') {
+      var rOrigine = Math.max(R_SOL_TYPE_ORIGINE[sousSol] || R_BASE_SOL,
+                              R_SOL_REFERENCE_PERIODE[periode]);
+      return facteurBorne(R_SOL_REFERENCE_PERIODE[periode] / rOrigine);
+    }
+    return facteurBorne(R_SOL_REFERENCE_PERIODE[periode] /
+                        (R_SOL_CATEGORIE[categorie] || R_BASE_SOL));
   }
 
   function facteurVentilation(type) {
@@ -1940,11 +2000,12 @@
   // surface. Renormaliser reviendrait à effacer cette économie du
   // calcul. Pour une maison, la somme vaut 1 et rien ne change.
   function partsDeperdition(v) {
+    var reference = PART_DEPERDITION_PERIODE[v.periode] || PART_DEPERDITION_PERIODE.rt1988;
     var parts = {
-      murs: PART_DEPERDITION.murs, toiture: PART_DEPERDITION.toiture,
-      vitrage: PART_DEPERDITION.vitrage, sol: PART_DEPERDITION.sol,
-      pontsThermiques: PART_DEPERDITION.pontsThermiques,
-      ventilation: PART_DEPERDITION.ventilation
+      murs: reference.murs, toiture: reference.toiture,
+      vitrage: reference.vitrage, sol: reference.sol,
+      pontsThermiques: reference.pontsThermiques,
+      ventilation: reference.ventilation
     };
     if (v.typeBien === 'appartement') {
       if (v.position !== 'dernier') parts.toiture = 0;
