@@ -7,8 +7,8 @@
   <meta name="description" content="Estimez le DPE de votre logement et découvrez les travaux prioritaires pour gagner des classes énergétiques.">
   <link rel="icon" href="assets/logo-icon.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-  <link rel="stylesheet" href="css/style.css?v=27">
-  <script src="js/anim.js?v=27" defer></script>
+  <link rel="stylesheet" href="css/style.css?v=28">
+  <script src="js/anim.js?v=28" defer></script>
 </head>
 <body>
 
@@ -916,6 +916,42 @@
     return null;
   }
 
+  /* L'ADEME a déjà renommé ce jeu de données deux fois : « dpe-france »
+     avant la réforme de 2021, puis « dpe-v2-logements-existants », et
+     aujourd'hui « dpe03existant ». Un identifiant écrit en dur finit
+     donc toujours par renvoyer une 404 — silencieusement, puisque cette
+     recherche est optionnelle et n'a pas le droit de bloquer le
+     simulateur. C'est précisément ce qui s'est produit : la
+     fonctionnalité était morte sans que rien ne le signale.
+     On essaie donc les identifiants connus dans l'ordre, du plus récent
+     au plus ancien, et on retient celui qui répond pour les recherches
+     suivantes. */
+
+  var DATASETS_ADEME = ['dpe03existant', 'dpe-v2-logements-existants'];
+  var datasetAdemeValide = null;
+
+  function urlAdeme(identifiant, adresse) {
+    return 'https://data.ademe.fr/data-fair/api/v1/datasets/' + identifiant +
+      '/lines?size=3&q=' + encodeURIComponent(adresse);
+  }
+
+  // Interroge le premier jeu de données qui répond, en mémorisant lequel.
+  function interrogerAdeme(adresse) {
+    var candidats = datasetAdemeValide ? [datasetAdemeValide] : DATASETS_ADEME;
+
+    function essayer(i) {
+      if (i >= candidats.length) return Promise.resolve(null);
+      return fetch(urlAdeme(candidats[i], adresse))
+        .then(function (r) {
+          if (!r.ok) return essayer(i + 1);
+          datasetAdemeValide = candidats[i];
+          return r.json();
+        })
+        .catch(function () { return essayer(i + 1); });
+    }
+    return essayer(0);
+  }
+
   function chercherDpeAdeme(adresse) {
     if (!adresse || adresse.trim().length < 8 || !window.fetch) return Promise.resolve();
     adresse = adresse.trim();
@@ -924,11 +960,7 @@
     banniereAdeme.hidden = true;
     dpeAdemeTrouve = null;
 
-    var url = 'https://data.ademe.fr/data-fair/api/v1/datasets/dpe-v2-logements-existants/lines?size=3&q=' +
-      encodeURIComponent(adresse);
-
-    return fetch(url)
-      .then(function (r) { return r.ok ? r.json() : null; })
+    return interrogerAdeme(adresse)
       .then(function (donnees) {
         var resultats = donnees && (donnees.results || donnees.lines);
         if (!resultats || !resultats.length) return;
