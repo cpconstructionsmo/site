@@ -265,21 +265,47 @@
 
   /* --- 4. Échantillon de calibration --- */
 
+  /* « periode_construction » est un libellé, pas un nombre : interroger
+     un intervalle numérique dessus ne marche que par accident
+     lexicographique, et laisse de côté « avant 1948 » et « après 2021 ».
+     On énumère donc les tranches réelles de la base. */
+
   var PERIODES = [
-    { cle: 'avant1975', min: 1800, max: 1974 },
-    { cle: 'rt1974', min: 1975, max: 1988 },
-    { cle: 'rt1988', min: 1989, max: 2000 },
-    { cle: 'rt2000', min: 2001, max: 2005 },
-    { cle: 'rt2005', min: 2006, max: 2012 },
-    { cle: 'rt2012', min: 2013, max: 2021 },
-    { cle: 're2020', min: 2022, max: 2030 }
+    { cle: 'avant1975', tranches: ['avant 1948', '1948-1974'] },
+    { cle: 'rt1974', tranches: ['1975-1977', '1978-1982', '1983-1988'] },
+    { cle: 'rt1988', tranches: ['1989-2000'] },
+    { cle: 'rt2000', tranches: ['2001-2005'] },
+    { cle: 'rt2005', tranches: ['2006-2012'] },
+    { cle: 'rt2012', tranches: ['2013-2021'] },
+    { cle: 're2020', tranches: ['après 2021'] }
   ];
 
+  // Postes de déperdition exposés par la base, en W/K. Leur somme
+  // rapportée au total donne directement la répartition à comparer aux
+  // parts du simulateur.
+  var POSTES_DEPERDITION = {
+    murs: 'deperditions_murs',
+    toiture: 'deperditions_planchers_hauts',
+    sol: 'deperditions_planchers_bas',
+    baies: 'deperditions_baies_vitrees',
+    portes: 'deperditions_portes',
+    pontsThermiques: 'deperditions_ponts_thermiques',
+    ventilation: 'deperditions_renouvellement_air'
+  };
+
+  // Médiane brute : l'arrondi se fait à l'affichage, sinon un Ubat de
+  // 0,62 W/(m².K) serait ramené à 1 et perdrait tout son intérêt.
   function mediane(valeurs) {
     if (!valeurs.length) return null;
     var t = valeurs.slice().sort(function (a, b) { return a - b; });
     var m = Math.floor(t.length / 2);
-    return Math.round(t.length % 2 ? t[m] : (t[m - 1] + t[m]) / 2);
+    return t.length % 2 ? t[m] : (t[m - 1] + t[m]) / 2;
+  }
+
+  function arrondi(valeur, decimales) {
+    if (valeur === null || valeur === undefined) return null;
+    var f = Math.pow(10, decimales || 0);
+    return Math.round(valeur * f) / f;
   }
 
   function nombre(v) {
@@ -316,36 +342,43 @@
 
   document.getElementById('btn-calib').addEventListener('click', function () {
     this.disabled = true;
-    var champConso = champ(['conso_5_usages_par_m2_ep', 'conso_5_usages_ep_m2', 'conso_5_usages_ep']) ||
-      champParMotif([/conso.*5.*usages.*m2/i, /conso.*5.*usages/i, /conso.*ep.*m2/i, /^conso/i],
-                    [/finale|ef$|initial|projet|apres|avant_travaux/i]);
-    var champAnnee = champ(['annee_construction']) ||
-      champParMotif([/ann[ée]e.*construction/i, /periode.*construction/i, /construction/i]);
-    var champType = champ(['type_batiment', 'typologie_logement']) ||
-      champParMotif([/type.*b[âa]timent/i, /typologie/i]);
-    var champEnergie = champ(['type_energie_principale_chauffage', 'type_energie_chauffage']) ||
-      champParMotif([/energie.*principale.*chauffage/i, /type.*energie.*chauffage/i, /energie.*chauffage/i]);
-    var champChauffage = champ(['conso_chauffage_ep', 'conso_chauffage']) ||
-      champParMotif([/conso.*chauffage.*ep/i, /conso.*chauffage/i], [/finale|ef$|projet|apres/i]);
 
-    if (!champConso || !champAnnee) {
-      afficher('etat-calib', 'Aucun champ de consommation ou d\'année de construction reconnu, ' +
-        'même par motif. Renvoyez-moi la liste des champs (test 2) et j\'adapterai.', 'ko');
-      rapport.echec_calibration = {
-        conso_trouve: champConso, annee_trouve: champAnnee
-      };
+    var champBesoin = champ(['besoin_chauffage']) || champParMotif([/besoin.*chauffage/i]);
+    var champSurface = champ(['surface_habitable_immeuble', 'surface_habitable_logement']) ||
+      champParMotif([/surface.*habitable/i]);
+    var champConso = champ(['conso_5_usages_par_m2_ep']) ||
+      champParMotif([/conso.*5.*usages.*m2.*ep/i], [/_ef$|finale/i]);
+    var champPeriode = champ(['periode_construction']) || champParMotif([/periode.*construction/i]);
+    var champType = champ(['type_batiment']) || champParMotif([/type.*b[âa]timent/i]);
+    var champEnergie = champ(['type_energie_principale_chauffage']);
+    var champUbat = champ(['ubat_w_par_m2_k']) || champParMotif([/ubat/i]);
+    var champZone = champ(['zone_climatique']);
+
+    if (!champPeriode || (!champBesoin && !champConso)) {
+      afficher('etat-calib', 'Champs indispensables introuvables (période, besoin ou consommation).', 'ko');
+      rapport.echec_calibration = { periode: champPeriode, besoin: champBesoin, conso: champConso };
       majSortie();
       return;
     }
 
+    var postesPresents = {};
+    Object.keys(POSTES_DEPERDITION).forEach(function (cle) {
+      if (champsDisponibles.indexOf(POSTES_DEPERDITION[cle]) !== -1) {
+        postesPresents[cle] = POSTES_DEPERDITION[cle];
+      }
+    });
+
     rapport.champs_utilises_pour_echantillon = {
-      conso: champConso, annee: champAnnee, type_batiment: champType,
-      energie_chauffage: champEnergie, conso_chauffage: champChauffage
+      besoin_chauffage: champBesoin, surface: champSurface, conso: champConso,
+      periode: champPeriode, type_batiment: champType, energie: champEnergie,
+      ubat: champUbat, zone: champZone,
+      postes_deperdition: Object.keys(postesPresents).length
     };
     document.getElementById('res-calib').innerHTML =
       '<p style="font-size:13px;">Champs retenus : <code>' +
-      [champConso, champAnnee, champType, champEnergie, champChauffage]
-        .filter(Boolean).join('</code>, <code>') + '</code></p>';
+      [champBesoin, champSurface, champConso, champPeriode, champUbat, champZone]
+        .filter(Boolean).join('</code>, <code>') + '</code>, plus ' +
+      Object.keys(postesPresents).length + ' postes de déperdition.</p>';
 
     var resultats = {};
     var index = 0;
@@ -360,12 +393,16 @@
       var p = PERIODES[index];
       afficher('etat-calib', 'Période ' + p.cle + ' (' + (index + 1) + '/' + PERIODES.length + ')...');
 
-      // qs : syntaxe de requête de data-fair (Elasticsearch simplifié)
-      var qs = champAnnee + ':[' + p.min + ' TO ' + p.max + ']';
+      // On énumère les tranches exactes, entre guillemets : ce sont des
+      // libellés, pas des nombres.
+      var qs = champPeriode + ':(' + p.tranches.map(function (t) { return '"' + t + '"'; }).join(' OR ') + ')';
       if (champType) qs += ' AND ' + champType + ':"maison"';
-      var champs = [champConso, champAnnee];
-      if (champEnergie) champs.push(champEnergie);
-      if (champChauffage) champs.push(champChauffage);
+
+      var champs = [champPeriode];
+      [champBesoin, champSurface, champConso, champEnergie, champUbat, champZone].forEach(function (c) {
+        if (c) champs.push(c);
+      });
+      Object.keys(postesPresents).forEach(function (cle) { champs.push(postesPresents[cle]); });
 
       var url = BASE() + '?size=1000&qs=' + encodeURIComponent(qs) +
         '&select=' + encodeURIComponent(champs.join(','));
@@ -373,32 +410,75 @@
       recuperer(url)
         .then(function (d) {
           var l = lignes(d);
-          var consos = [], chauffages = [], parEnergie = {};
+          var besoins = [], consos = [], ubats = [];
+          var parEnergie = {}, parZone = {}, partsPoste = {};
+          Object.keys(postesPresents).forEach(function (cle) { partsPoste[cle] = []; });
+
           l.forEach(function (r) {
-            var c = nombre(r[champConso]);
-            if (c !== null && c > 0 && c < 2000) consos.push(c);
-            if (champChauffage) {
-              var ch = nombre(r[champChauffage]);
-              if (ch !== null && ch > 0 && ch < 2000) chauffages.push(ch);
+            var conso = nombre(r[champConso]);
+            if (conso !== null && conso > 0 && conso < 2000) consos.push(conso);
+
+            // Le besoin de chauffage est un total annuel : c'est sa
+            // valeur au m² qui se compare aux paramètres du simulateur.
+            var surface = champSurface ? nombre(r[champSurface]) : null;
+            var besoin = champBesoin ? nombre(r[champBesoin]) : null;
+            var besoinParM2 = null;
+            if (besoin !== null && surface && surface > 15 && surface < 1000) {
+              besoinParM2 = besoin / surface;
+              if (besoinParM2 > 5 && besoinParM2 < 600) besoins.push(besoinParM2);
             }
-            if (champEnergie && r[champEnergie] && c) {
-              var e = String(r[champEnergie]);
-              (parEnergie[e] = parEnergie[e] || []).push(c);
+
+            var u = champUbat ? nombre(r[champUbat]) : null;
+            if (u !== null && u > 0.05 && u < 5) ubats.push(u);
+
+            if (champEnergie && r[champEnergie] && conso) {
+              (parEnergie[String(r[champEnergie])] = parEnergie[String(r[champEnergie])] || []).push(conso);
+            }
+            // Zone ramenée à H1/H2/H3 : la base descend à la sous-zone.
+            if (champZone && r[champZone] && besoinParM2) {
+              var z = String(r[champZone]).slice(0, 2).toUpperCase();
+              (parZone[z] = parZone[z] || []).push(besoinParM2);
+            }
+
+            // Répartition des déperditions : chaque poste rapporté à leur somme.
+            var total = 0, valeurs = {};
+            Object.keys(postesPresents).forEach(function (cle) {
+              var v = nombre(r[postesPresents[cle]]);
+              if (v !== null && v >= 0) { valeurs[cle] = v; total += v; }
+            });
+            if (total > 0 && Object.keys(valeurs).length === Object.keys(postesPresents).length) {
+              Object.keys(valeurs).forEach(function (cle) {
+                partsPoste[cle].push(valeurs[cle] / total * 100);
+              });
             }
           });
-          var detailEnergie = {};
-          Object.keys(parEnergie).forEach(function (e) {
-            if (parEnergie[e].length >= 20) {
-              detailEnergie[e] = { n: parEnergie[e].length, mediane_conso_ep: mediane(parEnergie[e]) };
-            }
+
+          function medianesDe(groupes, seuil) {
+            var sortie = {};
+            Object.keys(groupes).forEach(function (k) {
+              if (groupes[k].length >= (seuil || 20)) {
+                sortie[k] = { n: groupes[k].length, mediane: arrondi(mediane(groupes[k])) };
+              }
+            });
+            return sortie;
+          }
+
+          var parts = {};
+          Object.keys(partsPoste).forEach(function (cle) {
+            if (partsPoste[cle].length >= 20) parts[cle] = arrondi(mediane(partsPoste[cle]), 1);
           });
+
           resultats[p.cle] = {
-            annees: p.min + '-' + p.max,
-            n: consos.length,
+            tranches: p.tranches.join(' / '),
+            n: l.length,
             total_disponible: d.total,
-            mediane_conso_5_usages_ep: mediane(consos),
-            mediane_conso_chauffage_ep: chauffages.length ? mediane(chauffages) : null,
-            par_energie: detailEnergie
+            mediane_besoin_chauffage_par_m2: arrondi(mediane(besoins)),
+            n_besoin: besoins.length,
+            mediane_conso_5_usages_ep: arrondi(mediane(consos)),
+            mediane_ubat: arrondi(mediane(ubats), 2),
+            parts_deperdition_pct: parts,
+            besoin_par_zone_climatique: medianesDe(parZone),
+            conso_par_energie: medianesDe(parEnergie)
           };
           index++;
           setTimeout(suivante, 400); // on ménage le service public
