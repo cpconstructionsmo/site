@@ -7,8 +7,8 @@
   <meta name="description" content="Estimez le DPE de votre logement et découvrez les travaux prioritaires pour gagner des classes énergétiques.">
   <link rel="icon" href="assets/logo-icon.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-  <link rel="stylesheet" href="css/style.css?v=26">
-  <script src="js/anim.js?v=26" defer></script>
+  <link rel="stylesheet" href="css/style.css?v=27">
+  <script src="js/anim.js?v=27" defer></script>
 </head>
 <body>
 
@@ -688,9 +688,13 @@
         informations que vous avez renseignées (ou de votre DPE importé) :
         elle ne remplace pas un diagnostic de performance énergétique
         réglementaire réalisé par un diagnostiqueur certifié, qui s'appuie
-        sur la méthode 3CL et prend en compte des éléments que ce
-        simulateur ne mesure pas (forme et compacité du bâtiment,
-        orientation, ponts thermiques précis, altitude...). Les
+        sur la méthode 3CL et relève sur place ce que ce simulateur ne
+        peut que supposer : surfaces réelles de chaque paroi, orientation
+        et masques solaires, épaisseurs d'isolant constatées, étanchéité
+        à l'air, traitement réel des ponts thermiques, altitude. Le
+        modèle a été recalé sur un audit énergétique réglementaire réel
+        et retrouve sa consommation à quelques pour cent près, mais un
+        écart d'une classe reste possible sur un logement atypique. Les
         travaux proposés sont des pistes de réflexion, pas un devis. Elle
         ne constitue ni une offre, ni un engagement de CP Constructions.
       </div>
@@ -1271,7 +1275,9 @@
 
   /* --- Étape 2 : compteurs +/- (nombre de portes, nombre de fenêtres) --- */
 
-  function initCompteur(cle) {
+  var fenetresSaisiesManuellement = false;
+
+  function initCompteur(cle, alChangement) {
     var conteneur = document.querySelector('.dpe-stepper[data-stepper="' + cle + '"]');
     var min = parseInt(conteneur.getAttribute('data-min'), 10);
     var max = parseInt(conteneur.getAttribute('data-max'), 10);
@@ -1281,12 +1287,28 @@
         var delta = parseInt(bouton.getAttribute('data-delta'), 10);
         etat[cle] = Math.max(min, Math.min(max, etat[cle] + delta));
         affichage.textContent = etat[cle];
+        if (alChangement) alChangement();
       });
     });
   }
 
   initCompteur('nombrePortes');
-  initCompteur('nombreFenetres');
+  initCompteur('nombreFenetres', function () { fenetresSaisiesManuellement = true; });
+
+  /* Le nombre de fenêtres par défaut suit la surface saisie, à la densité
+     de référence utilisée par le calcul (une fenêtre pour 13 m²). Un
+     nombre fixe pénalisait les petits logements, à qui l'on comptait huit
+     fenêtres quelle que soit leur taille : un 65 m² se retrouvait avec une
+     surface vitrée de maison. Dès que la personne touche le compteur, sa
+     valeur est respectée et n'est plus recalculée. */
+
+  document.getElementById('dpe-surface').addEventListener('input', function () {
+    if (fenetresSaisiesManuellement) return;
+    var surface = parseFloat(this.value);
+    if (!surface || surface <= 0) return;
+    etat.nombreFenetres = Math.max(2, Math.min(40, Math.round(surface / SURFACE_REFERENCE_PAR_FENETRE)));
+    document.getElementById('dpe-nombreFenetres-valeur').textContent = etat.nombreFenetres;
+  });
 
   /* Facture ou consommation réelle saisie à l'étape 2 : elle recale
      l'estimation par une simple règle de trois, exactement comme le
@@ -1381,9 +1403,23 @@
   var R_BASE_MUR = 0.25;      // m².K/W, résistance d'un mur nu (parpaing/brique)
   var R_BASE_TOITURE = 0.2;   // m².K/W, résistance d'une toiture sans isolant
 
+  // Besoin de chauffage (kWh d'énergie utile/m²/an) d'un logement typique
+  // de chaque période, en zone H2, à compacité de référence et avec une
+  // ventilation de type VMC simple flux.
+  //
+  // Ces valeurs ont été recalées sur un bilan de déperditions classique
+  // (coefficient de déperdition de l'enveloppe × degrés-jours de la zone,
+  // moins les apports solaires et internes) pour chaque niveau de
+  // réglementation thermique, puis vérifiées sur un audit énergétique
+  // réglementaire réel (maison de 1980, 90 m², zone H1). Les valeurs
+  // précédentes confondaient besoin de chauffage et consommation totale
+  // du logement : elles surestimaient le besoin d'environ 45 % sur les
+  // périodes intermédiaires, ce qui suffisait à faire basculer d'une
+  // classe à l'autre, surtout en chauffage électrique où l'écart est
+  // ensuite multiplié par le coefficient d'énergie primaire.
   var BESOIN_CHAUFFAGE_PERIODE = {
-    avant1975: 220, rt1974: 170, rt1988: 130, rt2000: 100,
-    rt2005: 70, rt2012: 35, re2020: 22
+    avant1975: 250, rt1974: 115, rt1988: 95, rt2000: 78,
+    rt2005: 57, rt2012: 36, re2020: 28
   };
 
   // Épaisseur d'isolant des murs typique de chaque époque (mm) : sert de
@@ -1432,7 +1468,12 @@
   // en dessous comme une façade, une dalle sur terre-plein est un peu
   // protégée par l'inertie du sol, un sous-sol non chauffé fait tampon
   // (température intermédiaire entre intérieur et extérieur).
-  var R_SOL_TYPE_ORIGINE = { terre_plein: 0.34, vide_sanitaire: 0.17, sous_sol_non_chauffe: 0.55 };
+  // Une dalle sur terre-plein n'échange pas avec l'air extérieur mais
+  // avec le sol, qui reste bien plus tempéré que l'air en hiver : à
+  // isolation égale elle perd sensiblement moins qu'un plancher sur vide
+  // sanitaire ventilé. La valeur retenue pour le terre-plein traduit ce
+  // couplage au sol, que la version précédente ignorait.
+  var R_SOL_TYPE_ORIGINE = { terre_plein: 0.45, vide_sanitaire: 0.17, sous_sol_non_chauffe: 0.55 };
 
   // Compacité du bâti : à surface habitable égale, une forme compacte
   // et plusieurs niveaux exposent moins de murs/toiture/plancher à
@@ -1453,14 +1494,22 @@
   // en France entre maisons individuelles et logements collectifs. Le
   // rez-de-chaussée et le dernier étage n'exposent qu'une de ces deux
   // parois.
-  var POSITION_FACTEUR = { rdc: 0.85, intermediaire: 0.70, dernier: 0.88 };
-  var FACADES_FACTEUR = { '1': 0.90, '2': 1.0, '3': 1.12 };
+  //
+  // Cet effet est porté entièrement par les parts de déperdition (voir
+  // partsDeperdition) : supprimer la toiture et le plancher bas y retire
+  // directement leur part des pertes. Un facteur forfaitaire en plus
+  // reviendrait à compter deux fois la même économie.
 
-  // Ventilation : une VMC double flux récupère une bonne partie de la
-  // chaleur de l'air extrait, une ventilation naturelle ou l'absence de
-  // ventilation contrôlée laisse plus de déperditions par renouvellement
-  // d'air (poste déjà cité dans l'avertissement affiché à l'écran).
-  var VENTILATION_FACTEUR = { naturelle: 1.05, simple_flux: 1.0, double_flux: 0.85 };
+  // Ventilation, en prenant la VMC simple flux comme référence. Une VMC
+  // double flux récupère 70 à 90 % de la chaleur de l'air extrait, donc
+  // ses déperditions par renouvellement d'air tombent à environ la
+  // moitié de celles d'une simple flux une fois tenu compte des
+  // imperfections d'installation. À l'inverse, un logement sans
+  // ventilation mécanique se renouvelle par ses défauts d'étanchéité, de
+  // façon subie et souvent excessive en hiver : nettement plus qu'une
+  // simple flux. L'écart précédent (1,05 / 1,00 / 0,85) était bien trop
+  // resserré pour un poste qui pèse couramment un tiers des pertes.
+  var VENTILATION_FACTEUR = { naturelle: 1.35, simple_flux: 1.0, double_flux: 0.50 };
 
   // Zone climatique : le besoin de chauffage varie sensiblement selon la
   // rigueur de l'hiver local (degrés-jours unitaires), un facteur que le
@@ -1499,12 +1548,26 @@
     return facteurBorne(1 + ecart * 0.02);
   }
 
-  // Part moyenne de chaque poste dans les déperditions totales d'un
-  // logement (ordre de grandeur réaliste, pas propre à un logement en
-  // particulier) : sert à pondérer l'effet de chaque poste plutôt que de
-  // multiplier des facteurs entre eux, ce qui ferait exploser le résultat
-  // si plusieurs postes sont mauvais à la fois.
-  var PART_DEPERDITION = { murs: 0.25, toiture: 0.25, vitrage: 0.15, sol: 0.10, ventilation: 0.25 };
+  // Part de chaque poste dans les déperditions du logement de référence
+  // de sa période — c'est-à-dire de la répartition à partir de laquelle
+  // les facteurs ci-dessus font varier chaque poste. Elle sert à
+  // pondérer les postes plutôt qu'à multiplier leurs facteurs entre eux,
+  // ce qui ferait exploser le résultat si plusieurs postes sont mauvais
+  // à la fois.
+  //
+  // Les ponts thermiques (jonctions mur/plancher, tableaux de baies,
+  // acrotères) manquaient complètement, alors que tout audit les chiffre
+  // et que le coefficient Ubat réglementaire les intègre. Ils sont
+  // ajoutés ici, et ils ne s'améliorent pas quand on isole : une
+  // isolation par l'intérieur les laisse intacts. C'est justement ce qui
+  // empêche une rénovation, même complète, de ramener les déperditions à
+  // zéro.
+  // Le poste « vitrage » couvre les fenêtres et les portes extérieures,
+  // comme le fait la ligne « portes et fenêtres » d'un audit.
+  var PART_DEPERDITION = {
+    murs: 0.21, toiture: 0.26, vitrage: 0.19, sol: 0.12,
+    pontsThermiques: 0.05, ventilation: 0.17
+  };
 
   // Écart moyen de prix de vente par classe DPE par rapport à une classe
   // D, pour des maisons anciennes (étude Notaires de France 2025 sur la
@@ -1513,7 +1576,15 @@
   var VALEUR_FONCIERE_PAR_CLASSE = { A: 17, B: 9, C: 3, D: 0, E: -9, F: -17, G: -25 };
 
   var RENDEMENT_CHAUFFAGE = { gaz: 0.92, fioul: 0.85, bois: 0.80, electrique: 1.0, pac: 3.2 };
-  var COEFFICIENT_PRIMAIRE = { gaz: 1, fioul: 1, bois: 1, electrique: 2.58, pac: 2.58 };
+
+  // Coefficient de conversion en énergie primaire de l'électricité. La
+  // réforme du DPE de juillet 2021 l'a abaissé de 2,58 à 2,30 : c'est
+  // 2,30 qui figure sur tous les DPE et audits actuels. La valeur 2,58
+  // utilisée jusqu'ici surestimait de 12 % la consommation de tout
+  // logement chauffé à l'électricité ou par pompe à chaleur. Vérifiable
+  // directement sur un audit réglementaire : 222,2 kWhEP pour
+  // 96,6 kWhEF de chauffage, soit exactement 2,30.
+  var COEFFICIENT_PRIMAIRE = { gaz: 1, fioul: 1, bois: 1, electrique: 2.3, pac: 2.3 };
   var PRIX_KWH = { gaz: 0.10, fioul: 0.12, electrique: 0.21, bois: 0.08, pac: 0.21 };
 
   // Émissions de gaz à effet de serre par kWh d'énergie finale (facteurs
@@ -1527,10 +1598,16 @@
   // simplement parce que le bâti est bien isolé.
   var FACTEUR_GES = { gaz: 0.227, fioul: 0.324, bois: 0.030, electrique: 0.079, pac: 0.079 };
 
+  // Rendements de production d'eau chaude, pertes de stockage comprises.
+  // Un ballon électrique n'est pas un convertisseur parfait : il maintient
+  // en température une réserve d'eau jour et nuit, et ces pertes de
+  // maintien représentent couramment un quart de sa consommation — un
+  // ballon surdimensionné davantage encore. Le rendement de 1,0 retenu
+  // jusqu'ici les ignorait et sous-estimait le poste eau chaude.
   var ECS_INFO = {
     pac_int: { rendement: 2.5, vecteur: 'electrique' },
-    ballon_thermo: { rendement: 2.8, vecteur: 'electrique' },
-    ballon_elec: { rendement: 1.0, vecteur: 'electrique' },
+    ballon_thermo: { rendement: 2.5, vecteur: 'electrique' },
+    ballon_elec: { rendement: 0.75, vecteur: 'electrique' },
     chaudiere_gaz: { rendement: 0.85, vecteur: 'gaz' },
     chaudiere_fioul: { rendement: 0.80, vecteur: 'fioul' }
   };
@@ -1542,7 +1619,17 @@
   // même valeur qu'avant (18 kWh/m²/an de besoin) sur un logement de
   // référence de 100 m².
   var ECS_BASE_PAR_OCCUPANT = 603; // kWh de besoin ECS/occupant conventionnel/an, avant rendement
-  var AUX_ECLAIRAGE_FINALE = 4; // kWh d'énergie finale/m²/an, toujours électrique
+
+  // Éclairage et auxiliaires étaient regroupés dans un forfait unique de
+  // 4 kWh/m²/an. Ce sont deux postes distincts : l'éclairage ne dépend
+  // pas de la ventilation (et a beaucoup baissé avec les LED), tandis
+  // que les auxiliaires sont essentiellement les ventilateurs de la VMC
+  // — nuls sans ventilation mécanique, et plus élevés en double flux qui
+  // fait tourner deux moteurs en permanence. Les séparer évite de
+  // facturer un ventilateur à un logement qui n'en a pas, et de faire
+  // passer la double flux pour gratuite à l'usage.
+  var ECLAIRAGE_FINALE = 1.9; // kWh d'énergie finale/m²/an, électrique
+  var AUXILIAIRES_FINALE = { naturelle: 0, simple_flux: 2.5, double_flux: 4.5 };
 
   function nombreOccupantsConventionnel(surface) {
     var s = surface || 100;
@@ -1550,8 +1637,15 @@
     return 1 + 1.75 * Math.sqrt((s - 10) / 70);
   }
 
+  // Bornes de sécurité sur chaque facteur de poste. Le plancher était
+  // fixé à 0,4, ce qui interdisait à un poste correctement isolé de
+  // descendre en dessous de 40 % des pertes de sa référence d'époque :
+  // une maison ancienne parfaitement rénovée restait mécaniquement
+  // mauvaise, quoi qu'on fasse. Or isoler un mur nu à 20 cm divise
+  // réellement ses pertes par plus de dix. Le plancher est donc abaissé
+  // à 0,15, ce qui reste prudent au regard de la physique.
   function facteurBorne(valeur) {
-    return Math.max(0.4, Math.min(2.5, valeur));
+    return Math.max(0.15, Math.min(2.5, valeur));
   }
 
   function facteurMur(categorie, periode) {
@@ -1586,24 +1680,29 @@
   }
 
   function facteurCompacite(v) {
-    if (v.typeBien === 'appartement') {
-      return (POSITION_FACTEUR[v.position] || 0.80) * (FACADES_FACTEUR[v.facades] || 1.0);
-    }
+    // Pour un appartement, toute la géométrie est déjà dans les parts de
+    // déperdition : parois mitoyennes retirées, murs pondérés par le
+    // nombre de façades exposées.
+    if (v.typeBien === 'appartement') return 1.0;
     return (FORME_FACTEUR[v.forme] || 1.0) * (NIVEAUX_FACTEUR[v.niveaux] || 1.0) *
       (EMPLACEMENT_FACTEUR[v.emplacement] || 1.0);
   }
 
   // Répartition des déperditions entre postes : celle d'une maison sert
-  // de référence, mais les parois qui ne donnent pas sur l'extérieur ne
-  // déperdent rien du tout (toiture et plancher bas d'un appartement
-  // d'étage intermédiaire). Le reste est renormalisé pour que la somme
-  // des parts fasse toujours 1 : c'est la composition des pertes qui
-  // change ici, leur niveau total étant porté par le facteur de
-  // compacité ci-dessus.
+  // de référence, et les parois qui ne donnent pas sur l'extérieur ne
+  // déperdent rien du tout — toiture et plancher bas d'un appartement
+  // d'étage intermédiaire, par exemple.
+  //
+  // La somme des parts n'est délibérément pas ramenée à 1 : c'est
+  // justement parce qu'elle tombe à 0,62 qu'un appartement d'étage
+  // intermédiaire consomme nettement moins qu'une maison de même
+  // surface. Renormaliser reviendrait à effacer cette économie du
+  // calcul. Pour une maison, la somme vaut 1 et rien ne change.
   function partsDeperdition(v) {
     var parts = {
       murs: PART_DEPERDITION.murs, toiture: PART_DEPERDITION.toiture,
       vitrage: PART_DEPERDITION.vitrage, sol: PART_DEPERDITION.sol,
+      pontsThermiques: PART_DEPERDITION.pontsThermiques,
       ventilation: PART_DEPERDITION.ventilation
     };
     if (v.typeBien === 'appartement') {
@@ -1614,8 +1713,6 @@
       // traversant ou d'angle. Le cas à deux façades sert de référence.
       parts.murs = parts.murs * (PART_MUR_EXPOSE_APPARTEMENT[v.facades] || 0.5) / 0.5;
     }
-    var somme = parts.murs + parts.toiture + parts.vitrage + parts.sol + parts.ventilation;
-    Object.keys(parts).forEach(function (cle) { parts[cle] = parts[cle] / somme; });
     return parts;
   }
 
@@ -1635,9 +1732,16 @@
     // exploser le résultat de façon irréaliste, alors qu'en réalité les
     // déperditions de chaque poste s'additionnent, elles ne se multiplient
     // pas entre elles.
+    // Les ponts thermiques restent au niveau de référence de la période :
+    // aucun des gestes proposés ici ne les traite vraiment (seule une
+    // isolation par l'extérieur soignée y parvient, ce que le formulaire
+    // ne demande pas). C'est volontairement le poste qu'on n'améliore pas.
+    var fPontsThermiques = 1;
+
     var parts = partsDeperdition(valeurs);
     var facteurGlobal = parts.murs * fMur + parts.toiture * fToiture +
       parts.vitrage * fVitrage + parts.sol * fSol +
+      parts.pontsThermiques * fPontsThermiques +
       parts.ventilation * fVentilation;
 
     var facteurZone = ZONE_CLIMATIQUE_FACTEUR[valeurs.zoneClimatique] || 1.0;
@@ -1650,22 +1754,25 @@
     var besoinEcsParM2 = ECS_BASE_PAR_OCCUPANT * nombreOccupantsConventionnel(surface) / surface;
     var ecsFinale = besoinEcsParM2 / ecsInfo.rendement;
 
+    var auxFinale = ECLAIRAGE_FINALE + (AUXILIAIRES_FINALE[valeurs.ventilation] || 0);
+
     var primaire = chauffageFinale * COEFFICIENT_PRIMAIRE[valeurs.chauffage] +
       ecsFinale * COEFFICIENT_PRIMAIRE[ecsInfo.vecteur] +
-      AUX_ECLAIRAGE_FINALE * COEFFICIENT_PRIMAIRE.electrique;
+      auxFinale * COEFFICIENT_PRIMAIRE.electrique;
 
     var ges = chauffageFinale * FACTEUR_GES[valeurs.chauffage] +
       ecsFinale * FACTEUR_GES[ecsInfo.vecteur] +
-      AUX_ECLAIRAGE_FINALE * FACTEUR_GES.electrique;
+      auxFinale * FACTEUR_GES.electrique;
 
     var coutChauffage = chauffageFinale * PRIX_KWH[valeurs.chauffage];
     var coutEcs = ecsFinale * PRIX_KWH[ecsInfo.vecteur];
-    var coutAux = AUX_ECLAIRAGE_FINALE * PRIX_KWH.electrique;
+    var coutAux = auxFinale * PRIX_KWH.electrique;
     var factureParM2 = coutChauffage + coutEcs + coutAux;
 
     return {
       primaire: primaire, ges: ges, factureParM2: factureParM2,
-      fMur: fMur, fToiture: fToiture, fVitrage: fVitrage, fSol: fSol, fVentilation: fVentilation,
+      fMur: fMur, fToiture: fToiture, fVitrage: fVitrage, fSol: fSol,
+      fVentilation: fVentilation, fPontsThermiques: fPontsThermiques,
       parts: parts,
       coutChauffage: coutChauffage, coutEcs: coutEcs, coutAux: coutAux
     };
@@ -1897,7 +2004,8 @@
     { label: 'Ventilation (air renouvelé et fuites)', part: 'ventilation', facteur: 'fVentilation' },
     { label: 'Murs', part: 'murs', facteur: 'fMur' },
     { label: 'Sols', part: 'sol', facteur: 'fSol' },
-    { label: 'Fenêtres', part: 'vitrage', facteur: 'fVitrage' }
+    { label: 'Fenêtres et portes', part: 'vitrage', facteur: 'fVitrage' },
+    { label: 'Ponts thermiques', part: 'pontsThermiques', facteur: 'fPontsThermiques' }
   ];
 
   function niveauDeperdition(facteur) {
