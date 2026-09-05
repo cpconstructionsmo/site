@@ -7,8 +7,8 @@
   <meta name="description" content="Estimez le DPE de votre logement et découvrez les travaux prioritaires pour gagner des classes énergétiques.">
   <link rel="icon" href="assets/logo-icon.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-  <link rel="stylesheet" href="css/style.css?v=29">
-  <script src="js/anim.js?v=29" defer></script>
+  <link rel="stylesheet" href="css/style.css?v=30">
+  <script src="js/anim.js?v=30" defer></script>
 </head>
 <body>
 
@@ -1001,10 +1001,22 @@
         dpeAdemeTrouve = {
           classe: classe,
           conso: conso !== null ? parseFloat(conso) : null,
-          ges: premiereValeur(ligne, ['etiquette_ges', 'classe_estimation_ges']),
-          surface: premiereValeur(ligne, ['surface_habitable_logement', 'surface_habitable']),
-          annee: premiereValeur(ligne, ['annee_construction']),
-          adresse: premiereValeur(ligne, ['adresse_ban', 'adresse_brut', 'adresse_batiment']) || adresse
+          classeGes: premiereValeur(ligne, ['etiquette_ges']),
+          // Les émissions en kg CO2/m²/an, une valeur numérique — à ne
+          // pas confondre avec l'étiquette GES, qui est une lettre.
+          ges: premiereValeur(ligne, ['emission_ges_5_usages_par_m2']),
+          surface: premiereValeur(ligne, ['surface_habitable_immeuble', 'surface_habitable_logement',
+            'surface_chauffee_installation_chauffage_n1']),
+          periode: premiereValeur(ligne, ['periode_construction']),
+          zone: premiereValeur(ligne, ['zone_climatique']),
+          typeBien: premiereValeur(ligne, ['type_batiment']),
+          energieChauffage: premiereValeur(ligne, ['type_energie_principale_chauffage']),
+          energieEcs: premiereValeur(ligne, ['type_energie_principale_ecs']),
+          isolationMurs: premiereValeur(ligne, ['qualite_isolation_murs']),
+          isolationToiture: premiereValeur(ligne, ['qualite_isolation_plancher_haut_comble_perdu']),
+          isolationSol: premiereValeur(ligne, ['qualite_isolation_plancher_bas']),
+          menuiseries: premiereValeur(ligne, ['qualite_isolation_menuiseries']),
+          adresse: premiereValeur(ligne, ['adresse_ban', 'adresse_brut', 'adresse_complete_brut']) || adresse
         };
 
         var phrase = 'Un DPE existant a été trouvé pour ' + dpeAdemeTrouve.adresse + '.';
@@ -1019,27 +1031,134 @@
       });
   }
 
+  /* Correspondances entre le vocabulaire de la base ADEME et celui du
+     formulaire. La base décrit une période sous forme de tranche
+     (« 1978-1982 »), l'isolation par une appréciation (« bonne »,
+     « moyenne »...) et l'énergie en toutes lettres : autant de valeurs
+     à traduire avant de pré-remplir quoi que ce soit. */
+
+  var PERIODE_ADEME = {
+    'avant 1948': 'avant1975', '1948-1974': 'avant1975',
+    '1975-1977': 'rt1974', '1978-1982': 'rt1974', '1983-1988': 'rt1974',
+    '1989-2000': 'rt1988', '2001-2005': 'rt2000',
+    '2006-2012': 'rt2005', '2013-2021': 'rt2012', 'après 2021': 're2020'
+  };
+
+  // « très bonne » et « bonne » valent une isolation aux standards
+  // actuels, « moyenne » une isolation plus ancienne, « insuffisante »
+  // l'absence de travaux depuis la construction.
+  var ISOLATION_ADEME = {
+    'très bonne': 'recente', 'bonne': 'recente',
+    'moyenne': 'ancienne', 'insuffisante': 'aucune'
+  };
+
+  function chauffageAdeme(libelle) {
+    var t = String(libelle || '').toLowerCase();
+    if (/pompe à chaleur|pac/.test(t)) return 'pac';
+    if (/électricité|electricite/.test(t)) return 'electrique';
+    if (/gaz/.test(t)) return 'gaz';
+    if (/fioul/.test(t)) return 'fioul';
+    if (/bois|granul|pellet|bûche|buche/.test(t)) return 'bois';
+    return '';
+  }
+
+  function ecsAdeme(libelle) {
+    var t = String(libelle || '').toLowerCase();
+    if (/thermodynamique/.test(t)) return 'ballon_thermo';
+    if (/pompe à chaleur/.test(t)) return 'pac_int';
+    if (/électricité|electricite/.test(t)) return 'ballon_elec';
+    if (/gaz/.test(t)) return 'chaudiere_gaz';
+    if (/fioul/.test(t)) return 'chaudiere_fioul';
+    return '';
+  }
+
+  // Sélectionne un bouton d'un groupe de choix comme le ferait un clic.
+  function selectionnerChoix(groupe, cible, valeur) {
+    if (!valeur) return false;
+    var bouton = document.querySelector('.dpe-choix[data-groupe="' + groupe +
+      '"] button[data-valeur="' + valeur + '"]');
+    if (!bouton) return false;
+    document.querySelectorAll('.dpe-choix[data-groupe="' + groupe + '"] button')
+      .forEach(function (b) { b.classList.remove('selectionne'); });
+    bouton.classList.add('selectionne');
+    etat[cible] = valeur;
+    return true;
+  }
+
   function appliquerDpeAdeme(trouve) {
     etat.dpeConnu = etat.dpeConnu || {};
-    if (trouve.conso) etat.dpeConnu.conso = trouve.conso;
-    if (trouve.ges) etat.dpeConnu.ges = trouve.ges;
+    if (trouve.conso) etat.dpeConnu.conso = parseFloat(trouve.conso);
+    // Les émissions doivent rester un nombre : y ranger l'étiquette GES
+    // (une lettre) faussait complètement la classe affichée.
+    if (trouve.ges) etat.dpeConnu.ges = parseFloat(trouve.ges);
 
-    if (trouve.surface) document.getElementById('dpe-surface').value = trouve.surface;
-    if (trouve.annee) {
-      var periode = periodeDepuisAnnee(parseInt(trouve.annee, 10));
+    var rempli = [];
+
+    if (trouve.surface) {
+      document.getElementById('dpe-surface').value = Math.round(parseFloat(trouve.surface));
+      etat.surface = parseFloat(trouve.surface);
+      rempli.push('surface');
+    }
+
+    var periode = PERIODE_ADEME[String(trouve.periode || '').trim()];
+    if (periode) {
       document.getElementById('dpe-periode').value = periode;
       etat.periode = periode;
+      rempli.push('période de construction');
     }
+
+    // La base précise la sous-zone (H1a, H2b...) ; le simulateur ne
+    // raisonne qu'en H1, H2, H3.
+    var zone = String(trouve.zone || '').trim().toLowerCase().slice(0, 2);
+    if (/^h[123]$/.test(zone)) {
+      document.getElementById('dpe-zone-climatique').value = zone;
+      etat.zoneClimatique = zone;
+      rempli.push('zone climatique');
+    }
+
+    var typeBien = /maison/i.test(trouve.typeBien || '') ? 'maison'
+      : /appartement|immeuble/i.test(trouve.typeBien || '') ? 'appartement' : '';
+    if (selectionnerChoix('type-bien', 'typeBien', typeBien)) {
+      majChampsSelonBien();
+      rempli.push('type de bien');
+    }
+
+    var chauffage = chauffageAdeme(trouve.energieChauffage);
+    if (chauffage) {
+      document.getElementById('dpe-chauffage').value = chauffage;
+      etat.chauffage = chauffage;
+      rempli.push('chauffage');
+    }
+
+    var ecs = ecsAdeme(trouve.energieEcs);
+    if (ecs) {
+      document.getElementById('dpe-ecs').value = ecs;
+      etat.ecs = ecs;
+      rempli.push('eau chaude');
+    }
+
+    var isolations = 0;
+    if (selectionnerChoix('isolation-murs', 'isolationMurs',
+      ISOLATION_ADEME[String(trouve.isolationMurs || '').toLowerCase()])) isolations++;
+    if (selectionnerChoix('isolation-toiture', 'isolationToiture',
+      ISOLATION_ADEME[String(trouve.isolationToiture || '').toLowerCase()])) isolations++;
+    if (selectionnerChoix('isolation-sol', 'isolationSol',
+      ISOLATION_ADEME[String(trouve.isolationSol || '').toLowerCase()])) isolations++;
+    if (isolations) rempli.push('isolation (' + isolations + ' postes)');
+
+    return rempli;
   }
 
   document.getElementById('dpe-ademe-utiliser').addEventListener('click', function () {
     if (!dpeAdemeTrouve) return;
-    appliquerDpeAdeme(dpeAdemeTrouve);
+    var rempli = appliquerDpeAdeme(dpeAdemeTrouve);
 
     banniereAdeme.hidden = true;
     statutAdeme.hidden = false;
-    statutAdeme.textContent = 'DPE ADEME appliqué' + (dpeAdemeTrouve.classe ? ' (classe ' + dpeAdemeTrouve.classe + ')' : '') +
-      '. Complétez les informations ci-dessous pour affiner les travaux proposés.';
+    statutAdeme.textContent = 'DPE ADEME appliqué' +
+      (dpeAdemeTrouve.classe ? ' (classe ' + dpeAdemeTrouve.classe + ')' : '') + '. ' +
+      (rempli.length ? 'Pré-rempli depuis le DPE : ' + rempli.join(', ') + '. Vérifiez ces valeurs et complétez le reste.'
+                     : 'Complétez les informations ci-dessous pour affiner les travaux proposés.');
     statutAdeme.className = 'dpe-import-statut dpe-import-ok';
     dpeAdemeTrouve = null; // la décision est prise : un nouveau clic sur Continuer doit avancer
   });
