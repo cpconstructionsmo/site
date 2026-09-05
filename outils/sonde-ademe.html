@@ -51,16 +51,26 @@
   dans votre navigateur, et vous choisissez ce que vous recopiez.
 </div>
 
-<h2>1. Quels champs la base expose-t-elle vraiment ?</h2>
+<h2>1. Quels jeux de données existent ?</h2>
 <p style="font-size:14px;">
-  Le simulateur devine aujourd'hui des noms de champs qui n'ont jamais été validés.
-  Ce test récupère un DPE réel et liste tout ce qu'il contient.
+  L'ADEME renomme régulièrement ses jeux de données, et un identifiant écrit en dur
+  finit par renvoyer une erreur 404 — c'est ce qui est arrivé au simulateur.
+  Ce test interroge le catalogue pour lister ce qui existe réellement aujourd'hui,
+  plutôt que de deviner.
 </p>
-<button id="btn-schema">Inspecter un DPE réel</button>
+<button id="btn-catalogue">Lister les jeux de données DPE</button>
+<div class="etat" id="etat-catalogue"></div>
+<div id="res-catalogue"></div>
+
+<h2>2. Quels champs le jeu de données expose-t-il ?</h2>
+<p style="font-size:14px;">
+  Récupère un DPE réel dans le jeu de données retenu et liste tout ce qu'il contient.
+</p>
+<button id="btn-schema" disabled>Inspecter un DPE réel</button>
 <div class="etat" id="etat-schema"></div>
 <div id="res-schema"></div>
 
-<h2>2. Le simulateur lit-il les bons champs ?</h2>
+<h2>3. Le simulateur lit-il les bons champs ?</h2>
 <p style="font-size:14px;">
   Vérifie un par un les noms utilisés par la page d'estimation DPE pour la recherche
   automatique par adresse et l'import par numéro.
@@ -69,7 +79,7 @@
 <div class="etat" id="etat-champs"></div>
 <div id="res-champs"></div>
 
-<h2>3. Échantillon de calibration</h2>
+<h2>4. Échantillon de calibration</h2>
 <p style="font-size:14px;">
   Prélève des DPE de maisons individuelles par période de construction et par énergie de
   chauffage, et calcule la consommation médiane de chaque groupe. C'est ce qu'il faut pour
@@ -80,7 +90,7 @@
 <div class="etat" id="etat-calib"></div>
 <div id="res-calib"></div>
 
-<h2>4. À renvoyer</h2>
+<h2>5. À renvoyer</h2>
 <p style="font-size:14px;">Appuyez sur copier, puis collez le tout dans la conversation.</p>
 <button id="btn-copier" style="margin-bottom:12px;">Copier le résultat</button>
 <div class="etat" id="etat-copie"></div>
@@ -90,9 +100,12 @@
 (function () {
   'use strict';
 
-  var BASE = 'https://data.ademe.fr/data-fair/api/v1/datasets/dpe-v2-logements-existants/lines';
+  var RACINE = 'https://data.ademe.fr/data-fair/api/v1/datasets';
   var rapport = { date: new Date().toISOString().slice(0, 10) };
   var champsDisponibles = [];
+  var datasetRetenu = null;
+
+  function BASE() { return RACINE + '/' + datasetRetenu + '/lines'; }
 
   function afficher(id, texte, classe) {
     var el = document.getElementById(id);
@@ -115,12 +128,59 @@
     return (donnees && (donnees.results || donnees.lines)) || [];
   }
 
-  /* --- 1. Schéma --- */
+  /* --- 1. Catalogue : quels jeux de données existent aujourd'hui ? --- */
+
+  document.getElementById('btn-catalogue').addEventListener('click', function () {
+    this.disabled = true;
+    afficher('etat-catalogue', 'Interrogation du catalogue...');
+    recuperer(RACINE + '?q=dpe&size=100&select=id,title,count')
+      .then(function (d) {
+        var jeux = (d.results || []).filter(function (j) {
+          return /dpe/i.test(j.id) || /dpe/i.test(j.title || '');
+        });
+        if (!jeux.length) throw new Error('le catalogue ne renvoie aucun jeu de données DPE');
+
+        rapport.jeux_de_donnees_disponibles = jeux.map(function (j) {
+          return { id: j.id, titre: j.title, lignes: j.count };
+        });
+
+        // On retient le jeu des logements existants : le plus gros dont
+        // le titre ou l'identifiant parle d'existant, à défaut le plus gros.
+        var existants = jeux.filter(function (j) {
+          return /existant/i.test(j.id + ' ' + (j.title || ''));
+        });
+        var candidats = existants.length ? existants : jeux;
+        datasetRetenu = candidats.reduce(function (a, b) {
+          return (b.count || 0) > (a.count || 0) ? b : a;
+        }).id;
+        rapport.dataset_retenu = datasetRetenu;
+
+        var html = '<div class="tableau-scroll"><table><tr><th>Identifiant</th><th>Titre</th><th>Lignes</th></tr>';
+        jeux.forEach(function (j) {
+          html += '<tr><td><code>' + j.id + '</code>' +
+            (j.id === datasetRetenu ? ' <span class="ok">← retenu</span>' : '') +
+            '</td><td>' + (j.title || '') + '</td><td>' + (j.count || '?') + '</td></tr>';
+        });
+        html += '</table></div>';
+        document.getElementById('res-catalogue').innerHTML = html;
+        afficher('etat-catalogue', jeux.length + ' jeu(x) de données DPE trouvé(s). Retenu : ' +
+          datasetRetenu + '.', 'ok');
+        document.getElementById('btn-schema').disabled = false;
+        majSortie();
+      })
+      .catch(function (e) {
+        afficher('etat-catalogue', 'Échec : ' + e.message, 'ko');
+        rapport.erreur_catalogue = e.message;
+        majSortie();
+      });
+  });
+
+  /* --- 2. Schéma --- */
 
   document.getElementById('btn-schema').addEventListener('click', function () {
     this.disabled = true;
     afficher('etat-schema', 'Interrogation de la base...');
-    recuperer(BASE + '?size=1')
+    recuperer(BASE() + '?size=1')
       .then(function (d) {
         var l = lignes(d);
         if (!l.length) throw new Error('la base a répondu, mais sans aucun résultat');
@@ -135,8 +195,8 @@
         });
         rapport.champs_utiles_pour_le_calcul = interessants;
 
-        afficher('etat-schema', 'Base accessible : ' + (d.total || '?') + ' DPE, ' +
-          champsDisponibles.length + ' champs par enregistrement.', 'ok');
+        afficher('etat-schema', 'Jeu « ' + datasetRetenu + ' » accessible : ' + (d.total || '?') +
+          ' DPE, ' + champsDisponibles.length + ' champs par enregistrement.', 'ok');
         document.getElementById('res-schema').innerHTML =
           '<p style="font-size:13px;margin-bottom:4px;"><strong>' + interessants.length +
           '</strong> champs utiles à un calcul thermique :</p><pre>' +
@@ -153,7 +213,7 @@
       });
   });
 
-  /* --- 2. Champs utilisés par le simulateur --- */
+  /* --- 3. Champs utilisés par le simulateur --- */
 
   var CHAMPS_SIMULATEUR = {
     'classe énergie': ['etiquette_dpe', 'classe_consommation_energie', 'classe_dpe'],
@@ -190,7 +250,7 @@
     majSortie();
   });
 
-  /* --- 3. Échantillon de calibration --- */
+  /* --- 4. Échantillon de calibration --- */
 
   var PERIODES = [
     { cle: 'avant1975', min: 1800, max: 1974 },
@@ -262,7 +322,7 @@
       if (champEnergie) champs.push(champEnergie);
       if (champChauffage) champs.push(champChauffage);
 
-      var url = BASE + '?size=1000&qs=' + encodeURIComponent(qs) +
+      var url = BASE() + '?size=1000&qs=' + encodeURIComponent(qs) +
         '&select=' + encodeURIComponent(champs.join(','));
 
       recuperer(url)
@@ -307,7 +367,7 @@
     suivante();
   });
 
-  /* --- 4. Copie --- */
+  /* --- 5. Copie --- */
 
   document.getElementById('btn-copier').addEventListener('click', function () {
     var zone = document.getElementById('sortie');
