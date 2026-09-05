@@ -7,8 +7,8 @@
   <meta name="description" content="Estimez le DPE de votre logement et découvrez les travaux prioritaires pour gagner des classes énergétiques.">
   <link rel="icon" href="assets/logo-icon.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-  <link rel="stylesheet" href="css/style.css?v=20">
-  <script src="js/anim.js?v=20" defer></script>
+  <link rel="stylesheet" href="css/style.css?v=21">
+  <script src="js/anim.js?v=21" defer></script>
 </head>
 <body>
 
@@ -341,13 +341,50 @@
         </div>
       </div>
 
+      <div class="dpe-confort">
+        <p class="dpe-confort-titre">Baromètre du confort <span>(estimation indicative)</span></p>
+        <div class="dpe-confort-grille">
+          <div class="dpe-confort-item">
+            <div class="dpe-confort-jauge" id="dpe-confort-ete-jauge">☀️</div>
+            <strong id="dpe-confort-ete-texte">-</strong>
+            <span>Confort d'été</span>
+          </div>
+          <div class="dpe-confort-item">
+            <div class="dpe-confort-jauge" id="dpe-confort-hiver-jauge">❄️</div>
+            <strong id="dpe-confort-hiver-texte">-</strong>
+            <span>Confort d'hiver</span>
+          </div>
+          <div class="dpe-confort-item">
+            <div class="dpe-confort-jauge" id="dpe-confort-air-jauge">💨</div>
+            <strong id="dpe-confort-air-texte">-</strong>
+            <span>Qualité de l'air</span>
+          </div>
+        </div>
+        <p class="dpe-confort-note">
+          Estimation simplifiée à partir de vos réponses (isolation,
+          ventilation, période de construction) : elle ne remplace pas
+          l'indicateur de confort d'été officiel de la méthode 3CL, qui
+          prend en compte des critères que ce simulateur ne mesure pas
+          (protections solaires, aspect traversant, inertie réelle du
+          bâti).
+        </p>
+      </div>
+
       <h3 style="color: var(--brique); margin-bottom: 18px;">Découvrez vos solutions de travaux</h3>
       <div class="dpe-solutions">
         <div class="dpe-solution premiere-etape">
           <div class="dpe-solution-tete">Première étape</div>
           <div class="dpe-solution-corps">
-            <div>Économie d'énergie estimée</div>
-            <strong style="font-size: 22px; color: var(--encre);" id="dpe-premiere-etape-pourcent">-</strong>
+            <div class="dpe-solution-stats">
+              <div>
+                <span class="dpe-solution-stat-label">Économie d'énergie</span>
+                <strong id="dpe-premiere-etape-pourcent">-</strong>
+              </div>
+              <div>
+                <span class="dpe-solution-stat-label">Valeur foncière</span>
+                <strong id="dpe-premiere-etape-valeur">-</strong>
+              </div>
+            </div>
             <div class="dpe-solution-classes">
               <div class="dpe-etiquette-classe" id="dpe-premiere-etape-avant">-</div>
               <span class="dpe-solution-fleche">→</span>
@@ -359,17 +396,32 @@
         <div class="dpe-solution">
           <div class="dpe-solution-tete">Rénovation d'ampleur</div>
           <div class="dpe-solution-corps">
-            <div>Économie d'énergie estimée</div>
-            <strong style="font-size: 22px; color: var(--encre);" id="dpe-ampleur-pourcent">-</strong>
+            <div class="dpe-solution-stats">
+              <div>
+                <span class="dpe-solution-stat-label">Économie d'énergie</span>
+                <strong id="dpe-ampleur-pourcent">-</strong>
+              </div>
+              <div>
+                <span class="dpe-solution-stat-label">Valeur foncière</span>
+                <strong id="dpe-ampleur-valeur">-</strong>
+              </div>
+            </div>
             <div class="dpe-solution-classes">
               <div class="dpe-etiquette-classe" id="dpe-ampleur-avant">-</div>
               <span class="dpe-solution-fleche">→</span>
               <div class="dpe-etiquette-classe" id="dpe-ampleur-apres">-</div>
             </div>
-            <p style="font-size: 13px; color: var(--gris); margin: 10px 0 0;">Isolation des murs, de la toiture et vitrage triple.</p>
+            <p style="font-size: 13px; color: var(--gris); margin: 10px 0 0;">Isolation des murs, de la toiture, du sol, vitrage triple, ventilation et chauffage performants.</p>
           </div>
         </div>
       </div>
+      <p class="dpe-source-valeur">
+        Estimation de l'effet sur la valeur foncière basée sur l'étude
+        Notaires de France 2025 sur la valeur verte des logements
+        (écarts moyens observés pour des maisons, par rapport à une
+        classe D) : à titre indicatif, l'effet réel dépend fortement du
+        marché local.
+      </p>
 
       <div class="dpe-avertissement">
         Cette estimation est simplifiée et indicative, à partir des
@@ -1029,6 +1081,12 @@
   // si plusieurs postes sont mauvais à la fois.
   var PART_DEPERDITION = { murs: 0.25, toiture: 0.25, vitrage: 0.15, sol: 0.10, ventilation: 0.25 };
 
+  // Écart moyen de prix de vente par classe DPE par rapport à une classe
+  // D, pour des maisons anciennes (étude Notaires de France 2025 sur la
+  // valeur verte des logements) : A +17 %, E -9 %, G -25 % sont les
+  // chiffres publiés ; B, C et F sont interpolés entre ces points réels.
+  var VALEUR_FONCIERE_PAR_CLASSE = { A: 17, B: 9, C: 3, D: 0, E: -9, F: -17, G: -25 };
+
   var RENDEMENT_CHAUFFAGE = { gaz: 0.92, fioul: 0.85, bois: 0.80, electrique: 1.0, pac: 3.2 };
   var COEFFICIENT_PRIMAIRE = { gaz: 1, fioul: 1, bois: 1, electrique: 2.58, pac: 2.58 };
   var PRIX_KWH = { gaz: 0.10, fioul: 0.12, electrique: 0.21, bois: 0.08, pac: 0.21 };
@@ -1223,36 +1281,58 @@
 
     // Point le plus faible : la répartition réelle des déperditions du
     // DPE importé prime sur la déduction du modèle, quand elle existe.
+    // Sinon, on teste chaque levier disponible (isolation, vitrage,
+    // ventilation, chauffage, eau chaude) un par un et on retient celui
+    // qui fait le plus baisser la consommation calculée : une mesure
+    // directe de l'effet réel, qui reste valable même en comparant des
+    // leviers de nature différente (un mur mal isolé face à une
+    // chaudière vétuste, par exemple).
     var libellesEtape = {
       isolationMurs: 'Isolation des murs',
       isolationToiture: 'Isolation de la toiture',
       isolationSol: 'Isolation du sol / plancher bas',
-      vitrage: 'Remplacement du vitrage'
+      vitrage: 'Remplacement du vitrage',
+      ventilation: 'Installation d\'une VMC double flux',
+      chauffage: 'Remplacement du système de chauffage par une pompe à chaleur',
+      ecs: 'Passage à une production d\'eau chaude thermodynamique'
     };
     var pointFaible;
     if (etat.dpeConnu && etat.dpeConnu.posteFaible) {
       var correspondance = {
-        'Façades': 'isolationMurs', 'Toiture': 'isolationToiture', 'Fenêtres': 'vitrage', 'Sols': 'isolationSol'
+        'Façades': 'isolationMurs', 'Toiture': 'isolationToiture', 'Fenêtres': 'vitrage',
+        'Sols': 'isolationSol', 'Ventilation': 'ventilation'
       };
       pointFaible = correspondance[etat.dpeConnu.posteFaible] || 'isolationMurs';
     } else {
-      // Pondéré par le poids de chaque poste dans les déperditions
-      // totales : un mur très mal isolé (poids 25 %) pèse davantage
-      // qu'un sol très mal isolé (poids 10 %), même à facteur égal.
-      var contributionsActuelles = {
-        isolationMurs: resultat.fMur * PART_DEPERDITION.murs,
-        isolationToiture: resultat.fToiture * PART_DEPERDITION.toiture,
-        vitrage: resultat.fVitrage * PART_DEPERDITION.vitrage,
-        isolationSol: resultat.fSol * PART_DEPERDITION.sol
-      };
-      pointFaible = Object.keys(contributionsActuelles).reduce(function (a, b) {
-        return contributionsActuelles[a] >= contributionsActuelles[b] ? a : b;
-      });
+      var candidatsLevier = [];
+      if (etat.isolationMurs !== 'recente') candidatsLevier.push({ cle: 'isolationMurs', valeurs: Object.assign({}, etat, { isolationMurs: 'recente' }) });
+      if (etat.isolationToiture !== 'recente') candidatsLevier.push({ cle: 'isolationToiture', valeurs: Object.assign({}, etat, { isolationToiture: 'recente' }) });
+      if (etat.isolationSol !== 'recente') candidatsLevier.push({ cle: 'isolationSol', valeurs: Object.assign({}, etat, { isolationSol: 'recente' }) });
+      if (etat.vitrage !== 'triple') candidatsLevier.push({ cle: 'vitrage', valeurs: Object.assign({}, etat, { vitrage: ameliorerVitrage(etat.vitrage) }) });
+      if (etat.ventilation !== 'double_flux') candidatsLevier.push({ cle: 'ventilation', valeurs: Object.assign({}, etat, { ventilation: 'double_flux' }) });
+      if (etat.chauffage !== 'pac') candidatsLevier.push({ cle: 'chauffage', valeurs: Object.assign({}, etat, { chauffage: 'pac' }) });
+      if (etat.ecs !== 'pac_int') candidatsLevier.push({ cle: 'ecs', valeurs: Object.assign({}, etat, { ecs: 'pac_int' }) });
+
+      if (candidatsLevier.length) {
+        pointFaible = candidatsLevier.reduce(function (meilleur, candidat) {
+          var gainMeilleur = resultat.primaire - calculerConsommation(meilleur.valeurs).primaire;
+          var gainCandidat = resultat.primaire - calculerConsommation(candidat.valeurs).primaire;
+          return gainCandidat > gainMeilleur ? candidat : meilleur;
+        }).cle;
+      } else {
+        pointFaible = 'isolationMurs'; // déjà au meilleur niveau partout
+      }
     }
 
     var valeursEtape1 = Object.assign({}, etat);
     if (pointFaible === 'vitrage') {
       valeursEtape1.vitrage = ameliorerVitrage(etat.vitrage);
+    } else if (pointFaible === 'ventilation') {
+      valeursEtape1.ventilation = 'double_flux';
+    } else if (pointFaible === 'chauffage') {
+      valeursEtape1.chauffage = 'pac';
+    } else if (pointFaible === 'ecs') {
+      valeursEtape1.ecs = 'pac_int';
     } else {
       valeursEtape1[pointFaible] = 'recente'; // isolationMurs, isolationToiture ou isolationSol
     }
@@ -1266,10 +1346,13 @@
     afficherEtiquette('dpe-premiere-etape-apres', classeEtape1);
     document.getElementById('dpe-premiere-etape-detail').textContent = libellesEtape[pointFaible];
 
-    // Rénovation d'ampleur : tous les postes au meilleur niveau.
+    // Rénovation d'ampleur : tous les leviers au meilleur niveau, y
+    // compris le système de chauffage et l'eau chaude — c'est ce que
+    // recouvre une rénovation globale dans les dispositifs d'aide
+    // (MaPrimeRénov' Sérénité, par exemple), pas seulement l'enveloppe.
     var valeursAmpleur = Object.assign({}, etat, {
       isolationMurs: 'recente', isolationToiture: 'recente', isolationSol: 'recente',
-      vitrage: 'triple'
+      vitrage: 'triple', ventilation: 'double_flux', chauffage: 'pac', ecs: 'pac_int'
     });
     var resultatAmpleur = calculerConsommation(valeursAmpleur);
     var economieAmpleur = Math.round((1 - resultatAmpleur.primaire / resultat.primaire) * 100);
@@ -1279,6 +1362,70 @@
     document.getElementById('dpe-ampleur-pourcent').textContent = economieAmpleur + ' %';
     afficherEtiquette('dpe-ampleur-avant', classeAffichee);
     afficherEtiquette('dpe-ampleur-apres', classeAmpleur);
+
+    // Valeur foncière : écarts moyens observés par classe DPE par
+    // rapport à une classe D, pour des maisons (étude Notaires de
+    // France 2025 sur la valeur verte). A, E et G sont les valeurs
+    // publiées ; B, C et F sont interpolées entre ces points réels.
+    var valeurFonciereEtape1 = VALEUR_FONCIERE_PAR_CLASSE[classeEtape1] - VALEUR_FONCIERE_PAR_CLASSE[classeAffichee];
+    var valeurFonciereAmpleur = VALEUR_FONCIERE_PAR_CLASSE[classeAmpleur] - VALEUR_FONCIERE_PAR_CLASSE[classeAffichee];
+    document.getElementById('dpe-premiere-etape-valeur').textContent = (valeurFonciereEtape1 >= 0 ? '+' : '') + valeurFonciereEtape1 + ' %';
+    document.getElementById('dpe-ampleur-valeur').textContent = (valeurFonciereAmpleur >= 0 ? '+' : '') + valeurFonciereAmpleur + ' %';
+
+    afficherBarometreConfort();
+  }
+
+  /* --- Baromètre du confort (estimation indicative) ---
+     L'indicateur officiel de confort d'été de la méthode 3CL combine
+     l'isolation de la toiture, la protection solaire, le caractère
+     traversant du logement, l'inertie du bâti et la présence de
+     brasseurs d'air — nous ne collectons que l'isolation de la
+     toiture et la ventilation, et approchons l'inertie par la période
+     de construction (les bâtis anciens en maçonnerie lourde en ont
+     davantage que les constructions récentes à ossature légère). Le
+     confort d'hiver reprend directement la qualité globale de
+     l'enveloppe déjà calculée, et la qualité de l'air suit le type de
+     ventilation : les deux sont de simples relectures du modèle, pas
+     de nouvelles données inventées. */
+
+  var NIVEAUX_CONFORT = ['insuffisant', 'moyen', 'bon', 'excellent'];
+  var LIBELLE_CONFORT = { insuffisant: 'Insuffisant', moyen: 'Moyen', bon: 'Bon', excellent: 'Excellent' };
+  var INERTIE_PERIODE = {
+    avant1975: 'bon', rt1974: 'bon', rt1988: 'moyen', rt2000: 'moyen',
+    rt2005: 'moyen', rt2012: 'insuffisant', re2020: 'insuffisant'
+  };
+
+  function afficherJauge(prefixe, niveau) {
+    var jauge = document.getElementById('dpe-confort-' + prefixe + '-jauge');
+    jauge.className = 'dpe-confort-jauge confort-' + niveau;
+    document.getElementById('dpe-confort-' + prefixe + '-texte').textContent = LIBELLE_CONFORT[niveau];
+  }
+
+  function afficherBarometreConfort() {
+    // Été : toiture bien isolée + ventilation permettant un renouvellement
+    // d'air + inertie (via la période) plutôt favorable = meilleur score.
+    var indexEte = NIVEAUX_CONFORT.indexOf('moyen');
+    if (etat.isolationToiture === 'recente') indexEte += 1;
+    else if (etat.isolationToiture === 'aucune') indexEte -= 1;
+    if (etat.ventilation === 'double_flux' || etat.ventilation === 'simple_flux') indexEte += 1;
+    else if (etat.ventilation === 'aucune') indexEte -= 1;
+    if (INERTIE_PERIODE[etat.periode] === 'bon') indexEte += 1;
+    else if (INERTIE_PERIODE[etat.periode] === 'insuffisant') indexEte -= 1;
+    indexEte = Math.max(0, Math.min(NIVEAUX_CONFORT.length - 1, indexEte));
+    afficherJauge('ete', NIVEAUX_CONFORT[Math.round(indexEte)]);
+
+    // Hiver : relecture directe de la qualité d'enveloppe déjà calculée.
+    var resultatActuel = calculerConsommation(etat);
+    var indexHiver;
+    if (resultatActuel.primaire <= 110) indexHiver = 3;
+    else if (resultatActuel.primaire <= 180) indexHiver = 2;
+    else if (resultatActuel.primaire <= 330) indexHiver = 1;
+    else indexHiver = 0;
+    afficherJauge('hiver', NIVEAUX_CONFORT[indexHiver]);
+
+    // Qualité de l'air : suit directement le type de ventilation.
+    var indexAir = { double_flux: 3, simple_flux: 2, naturelle: 1, aucune: 0 }[etat.ventilation];
+    afficherJauge('air', NIVEAUX_CONFORT[indexAir === undefined ? 1 : indexAir]);
   }
 
   /* --- Ajuster la facture ou la consommation avec une valeur réelle ---
