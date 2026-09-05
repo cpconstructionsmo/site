@@ -7,8 +7,8 @@
   <meta name="description" content="Estimez le DPE de votre logement et découvrez les travaux prioritaires pour gagner des classes énergétiques.">
   <link rel="icon" href="assets/logo-icon.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-  <link rel="stylesheet" href="css/style.css?v=18">
-  <script src="js/anim.js?v=18" defer></script>
+  <link rel="stylesheet" href="css/style.css?v=19">
+  <script src="js/anim.js?v=19" defer></script>
 </head>
 <body>
 
@@ -91,6 +91,15 @@
       <div class="dpe-carte">
         <div id="dpe-carte-conteneur"></div>
       </div>
+
+      <div class="dpe-ademe-trouve" id="dpe-ademe-trouve" hidden>
+        <p id="dpe-ademe-texte"></p>
+        <div class="dpe-ademe-actions">
+          <button type="button" class="dpe-import-bouton" id="dpe-ademe-utiliser">Utiliser ce DPE</button>
+          <button type="button" class="dpe-ademe-ignorer" id="dpe-ademe-ignorer">Non merci, je renseigne moi-même</button>
+        </div>
+      </div>
+      <p class="dpe-import-statut" id="dpe-ademe-statut" hidden></p>
 
       <p class="dpe-erreur" id="dpe-erreur-1" hidden>Merci de saisir votre adresse pour continuer.</p>
 
@@ -262,6 +271,20 @@
         <div class="dpe-stat">
           <span class="dpe-stat-valeur" id="dpe-stat-conso">-</span>
           <span class="dpe-stat-label">kWh/m²/an (énergie primaire)</span>
+        </div>
+      </div>
+
+      <div class="dpe-repartition">
+        <p class="dpe-repartition-titre">Répartition de la facture par poste</p>
+        <div class="dpe-repartition-barre" id="dpe-repartition-barre">
+          <span class="dpe-repartition-segment dpe-segment-chauffage" id="dpe-segment-chauffage"></span>
+          <span class="dpe-repartition-segment dpe-segment-ecs" id="dpe-segment-ecs"></span>
+          <span class="dpe-repartition-segment dpe-segment-aux" id="dpe-segment-aux"></span>
+        </div>
+        <div class="dpe-repartition-legende">
+          <span class="dpe-legende-item"><i class="dpe-segment-chauffage"></i>Chauffage <b id="dpe-pourcent-chauffage">-</b></span>
+          <span class="dpe-legende-item"><i class="dpe-segment-ecs"></i>Eau chaude <b id="dpe-pourcent-ecs">-</b></span>
+          <span class="dpe-legende-item"><i class="dpe-segment-aux"></i>Auxiliaires &amp; éclairage <b id="dpe-pourcent-aux">-</b></span>
         </div>
       </div>
 
@@ -452,6 +475,102 @@
     suggestions.innerHTML = '';
   }
 
+  /* --- Recherche automatique d'un DPE existant (base ADEME) ---
+     L'ADEME publie en accès libre les DPE réalisés depuis juillet 2021
+     (data.ademe.fr). Si un logement correspondant à l'adresse saisie s'y
+     trouve déjà, on propose d'utiliser ses vraies valeurs plutôt que
+     l'estimation du modèle : c'est toujours plus fiable qu'un calcul
+     indicatif. On ne montre le bandeau que si une classe ou une
+     consommation a bien été trouvée, jamais une carte vide ; en cas
+     d'échec (base indisponible, aucun résultat), l'outil continue
+     normalement en saisie manuelle. */
+
+  var dpeAdemeTrouve = null;
+  var derniereRechercheAdeme = '';
+  var banniereAdeme = document.getElementById('dpe-ademe-trouve');
+  var texteAdeme = document.getElementById('dpe-ademe-texte');
+  var statutAdeme = document.getElementById('dpe-ademe-statut');
+
+  function premiereValeur(objet, cles) {
+    for (var i = 0; i < cles.length; i++) {
+      var v = objet[cles[i]];
+      if (v !== undefined && v !== null && v !== '') return v;
+    }
+    return null;
+  }
+
+  function chercherDpeAdeme(adresse) {
+    if (!adresse || adresse.trim().length < 8 || !window.fetch) return Promise.resolve();
+    adresse = adresse.trim();
+    if (adresse === derniereRechercheAdeme) return Promise.resolve();
+    derniereRechercheAdeme = adresse;
+    banniereAdeme.hidden = true;
+    dpeAdemeTrouve = null;
+
+    var url = 'https://data.ademe.fr/data-fair/api/v1/datasets/dpe-v2-logements-existants/lines?size=3&q=' +
+      encodeURIComponent(adresse);
+
+    return fetch(url)
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (donnees) {
+        var resultats = donnees && (donnees.results || donnees.lines);
+        if (!resultats || !resultats.length) return;
+        var ligne = resultats[0];
+
+        var classe = premiereValeur(ligne, ['etiquette_dpe', 'classe_consommation_energie', 'classe_dpe']);
+        var conso = premiereValeur(ligne, ['conso_5_usages_par_m2_ep', 'conso_5_usages_ep_m2', 'conso_5_usages_ep']);
+        // On n'affiche le bandeau que si on tient au moins une donnée
+        // exploitable : mieux vaut ne rien montrer qu'un résultat vide.
+        if (!classe && !conso) return;
+
+        dpeAdemeTrouve = {
+          classe: classe,
+          conso: conso !== null ? parseFloat(conso) : null,
+          ges: premiereValeur(ligne, ['etiquette_ges', 'classe_estimation_ges']),
+          surface: premiereValeur(ligne, ['surface_habitable_logement', 'surface_habitable']),
+          annee: premiereValeur(ligne, ['annee_construction']),
+          adresse: premiereValeur(ligne, ['adresse_ban', 'adresse_brut', 'adresse_batiment']) || adresse
+        };
+
+        var phrase = 'Un DPE existant a été trouvé pour ' + dpeAdemeTrouve.adresse + '.';
+        if (dpeAdemeTrouve.classe) phrase += ' Classe ' + dpeAdemeTrouve.classe + '.';
+        if (dpeAdemeTrouve.conso) phrase += ' ' + Math.round(dpeAdemeTrouve.conso) + ' kWhEP/m²/an.';
+        texteAdeme.textContent = phrase;
+        banniereAdeme.hidden = false;
+      })
+      .catch(function () {
+        // La base ADEME reste un service tiers optionnel : son
+        // indisponibilité ne doit jamais bloquer le simulateur.
+      });
+  }
+
+  document.getElementById('dpe-ademe-utiliser').addEventListener('click', function () {
+    if (!dpeAdemeTrouve) return;
+
+    etat.dpeConnu = etat.dpeConnu || {};
+    if (dpeAdemeTrouve.conso) etat.dpeConnu.conso = dpeAdemeTrouve.conso;
+    if (dpeAdemeTrouve.ges) etat.dpeConnu.ges = dpeAdemeTrouve.ges;
+
+    if (dpeAdemeTrouve.surface) document.getElementById('dpe-surface').value = dpeAdemeTrouve.surface;
+    if (dpeAdemeTrouve.annee) {
+      var periode = periodeDepuisAnnee(parseInt(dpeAdemeTrouve.annee, 10));
+      document.getElementById('dpe-periode').value = periode;
+      etat.periode = periode;
+    }
+
+    banniereAdeme.hidden = true;
+    statutAdeme.hidden = false;
+    statutAdeme.textContent = 'DPE ADEME appliqué' + (dpeAdemeTrouve.classe ? ' (classe ' + dpeAdemeTrouve.classe + ')' : '') +
+      '. Complétez les informations ci-dessous pour affiner les travaux proposés.';
+    statutAdeme.className = 'dpe-import-statut dpe-import-ok';
+    dpeAdemeTrouve = null; // la décision est prise : un nouveau clic sur Continuer doit avancer
+  });
+
+  document.getElementById('dpe-ademe-ignorer').addEventListener('click', function () {
+    banniereAdeme.hidden = true;
+    dpeAdemeTrouve = null;
+  });
+
   champAdresse.addEventListener('input', function () {
     var requete = champAdresse.value.trim();
     etat.adresseTexte = requete;
@@ -482,6 +601,7 @@
               etat.lat = f.geometry.coordinates[1];
               masquerSuggestions();
               placerMarqueur(etat.lat, etat.lon);
+              chercherDpeAdeme(f.properties.label);
             });
             suggestions.appendChild(bouton);
           });
@@ -506,7 +626,29 @@
     }
     erreur.hidden = true;
     etat.adresseTexte = champAdresse.value.trim();
-    allerEtape(2);
+
+    // On laisse une seconde à la recherche ADEME pour aboutir avant de
+    // tourner la page : assez pour ne pas manquer un DPE déjà trouvé
+    // (l'adresse a déjà été cherchée au clic sur une suggestion, donc
+    // c'est en général déjà résolu ici), sans jamais bloquer le
+    // simulateur si la base est lente ou indisponible.
+    var boutonSuivant = this;
+    var texteInitial = boutonSuivant.textContent;
+    boutonSuivant.disabled = true;
+    boutonSuivant.textContent = 'Un instant...';
+
+    var recherche = chercherDpeAdeme(etat.adresseTexte) || Promise.resolve();
+    var delaiMax = new Promise(function (resoudre) { setTimeout(resoudre, 1000); });
+
+    Promise.race([recherche, delaiMax]).then(function () {
+      boutonSuivant.disabled = false;
+      boutonSuivant.textContent = texteInitial;
+      // Un DPE a été trouvé : on reste sur cette étape pour laisser la
+      // personne choisir de l'utiliser ou non, plutôt que de tourner la
+      // page et masquer aussitôt le bandeau qui vient d'apparaître.
+      if (dpeAdemeTrouve) return;
+      allerEtape(2);
+    });
   });
 
   /* --- Import d'un DPE existant (PDF) ---
@@ -890,11 +1032,16 @@
       ecsFinale * COEFFICIENT_PRIMAIRE[ecsInfo.vecteur] +
       AUX_ECLAIRAGE_FINALE * COEFFICIENT_PRIMAIRE.electrique;
 
-    var factureParM2 = chauffageFinale * PRIX_KWH[valeurs.chauffage] +
-      ecsFinale * PRIX_KWH[ecsInfo.vecteur] +
-      AUX_ECLAIRAGE_FINALE * PRIX_KWH.electrique;
+    var coutChauffage = chauffageFinale * PRIX_KWH[valeurs.chauffage];
+    var coutEcs = ecsFinale * PRIX_KWH[ecsInfo.vecteur];
+    var coutAux = AUX_ECLAIRAGE_FINALE * PRIX_KWH.electrique;
+    var factureParM2 = coutChauffage + coutEcs + coutAux;
 
-    return { primaire: primaire, factureParM2: factureParM2, fMur: fMur, fToiture: fToiture, fVitrage: fVitrage, fSol: fSol };
+    return {
+      primaire: primaire, factureParM2: factureParM2,
+      fMur: fMur, fToiture: fToiture, fVitrage: fVitrage, fSol: fSol,
+      coutChauffage: coutChauffage, coutEcs: coutEcs, coutAux: coutAux
+    };
   }
 
   function classeDepuisConso(conso) {
@@ -958,6 +1105,21 @@
     document.getElementById('dpe-stat-facture').textContent = Math.round(factureAffichee).toLocaleString('fr-FR') + ' €';
     document.getElementById('dpe-stat-surface').textContent = etat.surface + ' m²';
     document.getElementById('dpe-stat-conso').textContent = Math.round(consoAffichee);
+
+    // Répartition par poste : toujours calculée à partir du modèle (même
+    // quand la facture affichée vient d'un DPE réel importé), car c'est
+    // une proportion, pas une valeur absolue — le même principe que pour
+    // les pourcentages d'économie des travaux proposés plus bas.
+    var totalCouts = resultat.coutChauffage + resultat.coutEcs + resultat.coutAux;
+    var pctChauffage = Math.round(resultat.coutChauffage / totalCouts * 100);
+    var pctEcs = Math.round(resultat.coutEcs / totalCouts * 100);
+    var pctAux = Math.max(0, 100 - pctChauffage - pctEcs);
+    document.getElementById('dpe-segment-chauffage').style.width = pctChauffage + '%';
+    document.getElementById('dpe-segment-ecs').style.width = pctEcs + '%';
+    document.getElementById('dpe-segment-aux').style.width = pctAux + '%';
+    document.getElementById('dpe-pourcent-chauffage').textContent = pctChauffage + ' %';
+    document.getElementById('dpe-pourcent-ecs').textContent = pctEcs + ' %';
+    document.getElementById('dpe-pourcent-aux').textContent = pctAux + ' %';
 
     // Point le plus faible : la répartition réelle des déperditions du
     // DPE importé prime sur la déduction du modèle, quand elle existe.
