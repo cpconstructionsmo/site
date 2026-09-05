@@ -7,8 +7,8 @@
   <meta name="description" content="Estimez le DPE de votre logement et découvrez les travaux prioritaires pour gagner des classes énergétiques.">
   <link rel="icon" href="assets/logo-icon.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-  <link rel="stylesheet" href="css/style.css?v=21">
-  <script src="js/anim.js?v=21" defer></script>
+  <link rel="stylesheet" href="css/style.css?v=22">
+  <script src="js/anim.js?v=22" defer></script>
 </head>
 <body>
 
@@ -194,7 +194,23 @@
             <option value="double_flux">VMC double flux</option>
           </select>
         </div>
+        <div class="form-group">
+          <label for="dpe-zone-climatique">Zone climatique</label>
+          <select id="dpe-zone-climatique">
+            <option value="">Choisir...</option>
+            <option value="h1">H1 — Nord, Est, Île-de-France, Massif central, zones de montagne (hiver plus rigoureux)</option>
+            <option value="h2">H2 — Ouest, Centre, Sud-Ouest (climat océanique/tempéré)</option>
+            <option value="h3">H3 — Pourtour méditerranéen, Corse (hiver doux)</option>
+          </select>
+        </div>
       </div>
+      <p class="dpe-astuce">
+        La zone climatique influence fortement le besoin de chauffage :
+        un même logement demande sensiblement plus d'énergie en zone H1
+        qu'en zone H3. Ces trois zones correspondent à celles utilisées
+        par la réglementation thermique française ; en cas de doute,
+        H2 correspond à la majorité du territoire.
+      </p>
 
       <div class="dpe-grille-champs dpe-grille-3">
         <div class="form-group">
@@ -280,14 +296,23 @@
       <p class="dpe-soustitre" id="dpe-adresse-resultat"></p>
       <p class="dpe-source-dpe" id="dpe-source-dpe" hidden></p>
 
-      <div class="dpe-resultat-tete">
-        <div class="dpe-etiquette-classe" id="dpe-classe-actuelle">-</div>
-        <div class="dpe-resultat-detail">
-          <p>Classe énergétique : <strong id="dpe-classe-texte">-</strong></p>
-          <p>Consommation : <strong id="dpe-conso-texte">-</strong></p>
-          <p id="dpe-ges-ligne" hidden>Émissions de gaz à effet de serre : <strong id="dpe-ges-texte">-</strong></p>
+      <div class="dpe-resultat-double">
+        <div class="dpe-resultat-tete">
+          <div class="dpe-etiquette-classe" id="dpe-classe-energie">-</div>
+          <div class="dpe-resultat-detail">
+            <p class="dpe-resultat-label">Classe énergétique</p>
+            <p>Consommation : <strong id="dpe-conso-texte">-</strong></p>
+          </div>
+        </div>
+        <div class="dpe-resultat-tete">
+          <div class="dpe-etiquette-classe" id="dpe-classe-ges">-</div>
+          <div class="dpe-resultat-detail">
+            <p class="dpe-resultat-label">Classe GES</p>
+            <p>Émissions : <strong id="dpe-ges-texte">-</strong></p>
+          </div>
         </div>
       </div>
+      <p class="dpe-classe-retenue" id="dpe-classe-retenue"></p>
 
       <div class="dpe-stats">
         <div class="dpe-stat">
@@ -430,7 +455,7 @@
         réglementaire réalisé par un diagnostiqueur certifié, qui s'appuie
         sur la méthode 3CL et prend en compte des éléments que ce
         simulateur ne mesure pas (forme et compacité du bâtiment,
-        orientation, ponts thermiques, zone climatique...). Les
+        orientation, ponts thermiques précis, altitude...). Les
         travaux proposés sont des pistes de réflexion, pas un devis. Elle
         ne constitue ni une offre, ni un engagement de CP Constructions.
       </div>
@@ -493,6 +518,7 @@
     chauffage: '',
     ecs: '',
     ventilation: '',
+    zoneClimatique: '',
     isolationMurs: '',
     isolationToiture: '',
     isolationSol: '',
@@ -965,9 +991,10 @@
     etat.chauffage = document.getElementById('dpe-chauffage').value;
     etat.ecs = document.getElementById('dpe-ecs').value;
     etat.ventilation = document.getElementById('dpe-ventilation').value;
+    etat.zoneClimatique = document.getElementById('dpe-zone-climatique').value;
 
     var erreur = document.getElementById('dpe-erreur-2');
-    var complet = etat.surface && etat.periode && etat.chauffage && etat.ecs && etat.ventilation &&
+    var complet = etat.surface && etat.periode && etat.chauffage && etat.ecs && etat.ventilation && etat.zoneClimatique &&
       etat.isolationMurs && etat.isolationToiture && etat.isolationSol && etat.vitrage;
     if (!complet) {
       erreur.hidden = false;
@@ -1074,6 +1101,16 @@
   // d'air (poste déjà cité dans l'avertissement affiché à l'écran).
   var VENTILATION_FACTEUR = { aucune: 1.05, naturelle: 1.05, simple_flux: 1.0, double_flux: 0.85 };
 
+  // Zone climatique : le besoin de chauffage varie sensiblement selon la
+  // rigueur de l'hiver local (degrés-jours unitaires), un facteur que le
+  // simulateur ignorait complètement jusqu'ici — l'avertissement affiché
+  // à l'écran le citait justement comme une limite du modèle. H2 (la
+  // majorité du territoire, climat océanique/tempéré) sert de référence ;
+  // H1 (Nord, Est, Île-de-France, Massif central, montagne) et H3
+  // (pourtour méditerranéen) sont ajustées à partir des écarts usuels de
+  // degrés-jours entre ces zones.
+  var ZONE_CLIMATIQUE_FACTEUR = { h1: 1.15, h2: 1.0, h3: 0.75 };
+
   // Part moyenne de chaque poste dans les déperditions totales d'un
   // logement (ordre de grandeur réaliste, pas propre à un logement en
   // particulier) : sert à pondérer l'effet de chaque poste plutôt que de
@@ -1173,7 +1210,8 @@
       PART_DEPERDITION.vitrage * fVitrage + PART_DEPERDITION.sol * fSol +
       PART_DEPERDITION.ventilation * fVentilation;
 
-    var besoinChauffage = BESOIN_CHAUFFAGE_PERIODE[valeurs.periode] * facteurGlobal;
+    var facteurZone = ZONE_CLIMATIQUE_FACTEUR[valeurs.zoneClimatique] || 1.0;
+    var besoinChauffage = BESOIN_CHAUFFAGE_PERIODE[valeurs.periode] * facteurGlobal * facteurZone;
     var chauffageFinale = besoinChauffage / RENDEMENT_CHAUFFAGE[valeurs.chauffage];
 
     var ecsInfo = ECS_INFO[valeurs.ecs];
@@ -1288,22 +1326,36 @@
       gesAffichee = gesAffichee * ratioAjustement;
     }
 
-    // Double seuil, comme la vraie méthode 3CL depuis 2021 : la classe
-    // affichée est la moins bonne des deux entre l'énergie primaire et
-    // les émissions de gaz à effet de serre (un chauffage très carboné,
-    // au fioul par exemple, ne peut donc plus afficher une bonne classe
-    // uniquement parce que le bâti est bien isolé).
+    // La vraie méthode 3CL affiche deux classes distinctes (énergie et
+    // GES) et retient la moins bonne des deux comme étiquette DPE
+    // officielle depuis sa réforme de 2021 : un chauffage très carboné
+    // (au fioul, par exemple) ne peut donc pas afficher une bonne classe
+    // uniquement parce que le bâti est bien isolé. On montre les deux
+    // classes séparément, avec le nombre qui va avec chacune, plutôt
+    // qu'une seule étiquette combinée qui semblerait ne pas correspondre
+    // à la consommation affichée à côté.
+    var classeEnergie = classeDepuisConso(consoAffichee);
+    var gesTexte = (etat.dpeConnu && etat.dpeConnu.ges ? etat.dpeConnu.ges : Math.round(gesAffichee));
+    var classeGes = classeDepuisGes(etat.dpeConnu && etat.dpeConnu.ges ? etat.dpeConnu.ges : gesAffichee);
     var classeAffichee = classeFinale(consoAffichee, gesAffichee);
 
     document.getElementById('dpe-adresse-resultat').textContent =
       etat.adresseTexte ? etat.adresseTexte : 'Logement renseigné à l\'étape précédente';
 
-    afficherEtiquette('dpe-classe-actuelle', classeAffichee);
-    document.getElementById('dpe-classe-texte').textContent = 'Classe ' + classeAffichee;
+    afficherEtiquette('dpe-classe-energie', classeEnergie);
     document.getElementById('dpe-conso-texte').textContent = Math.round(consoAffichee) + ' kWh/m²/an (énergie primaire)';
 
-    document.getElementById('dpe-ges-ligne').hidden = false;
-    document.getElementById('dpe-ges-texte').textContent = (etat.dpeConnu && etat.dpeConnu.ges ? etat.dpeConnu.ges : Math.round(gesAffichee)) + ' kg éqCO2/m²/an';
+    afficherEtiquette('dpe-classe-ges', classeGes);
+    document.getElementById('dpe-ges-texte').textContent = gesTexte + ' kg éqCO2/m²/an';
+
+    var noteRetenue = document.getElementById('dpe-classe-retenue');
+    if (classeEnergie !== classeGes) {
+      noteRetenue.hidden = false;
+      noteRetenue.textContent = 'Classe DPE retenue (la moins bonne des deux, comme la méthode officielle) : Classe ' + classeAffichee + '.';
+    } else {
+      noteRetenue.hidden = true;
+    }
+    etat.derniereClasseRetenue = classeAffichee;
 
     document.getElementById('dpe-stat-facture').textContent = Math.round(factureAffichee).toLocaleString('fr-FR') + ' €';
     document.getElementById('dpe-stat-surface').textContent = etat.surface + ' m²';
@@ -1521,7 +1573,7 @@
     var nom = document.getElementById('dpe-lead-nom').value;
     var tel = document.getElementById('dpe-lead-tel').value;
     var email = document.getElementById('dpe-lead-email').value;
-    var classeActuelle = document.getElementById('dpe-classe-texte').textContent;
+    var classeActuelle = 'Classe ' + (etat.derniereClasseRetenue || '?');
 
     var sujet = 'Estimation DPE - ' + nom;
     var corps = 'Nom: ' + nom + '%0ATel: ' + tel + '%0AEmail: ' + email +

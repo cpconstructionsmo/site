@@ -1910,15 +1910,40 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
 
 /* ---------- Résultats du simulateur DPE ---------- */
 
-.dpe-resultat-tete {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 24px;
-  align-items: center;
-  margin-bottom: 30px;
+.dpe-resultat-double {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  margin-bottom: 18px;
   padding-bottom: 26px;
   border-bottom: 1px solid var(--filet);
 }
+
+.dpe-resultat-tete {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 20px;
+  align-items: center;
+  flex: 1 1 260px;
+}
+
+.dpe-resultat-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--gris) !important;
+  margin: 0 0 4px !important;
+}
+
+.dpe-classe-retenue {
+  font-size: 13px;
+  color: var(--gris);
+  font-style: italic;
+  margin: -6px 0 30px;
+}
+
+.dpe-classe-retenue[hidden] { display: none; }
 
 .dpe-etiquette-classe {
   width: 84px;
