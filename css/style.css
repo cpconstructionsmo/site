@@ -1423,3 +1423,423 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
   font-weight: 700;
   color: var(--ocre);
 }
+
+
+/* ---------- Bandeau DPE (accueil) ---------- */
+
+.bandeau-dpe {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  align-items: stretch;
+  gap: 0;
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  box-shadow: var(--ombre-l);
+  background: linear-gradient(150deg, var(--brique) 0%, var(--nuit) 100%);
+}
+
+.bandeau-dpe-texte {
+  padding: 56px 48px;
+  color: #fff;
+}
+
+.bandeau-dpe-texte h2 {
+  text-align: left;
+  color: #fff;
+  font-size: clamp(24px, 3vw, 32px);
+  margin: 0 0 20px;
+}
+
+.bandeau-dpe-texte h2::after { margin: 0; }
+
+.bandeau-dpe-texte p {
+  color: rgba(255,255,255,.85);
+  font-size: 16px;
+  max-width: 46ch;
+  margin: 0 0 30px;
+}
+
+.bandeau-dpe-visuel {
+  position: relative;
+  min-height: 220px;
+  background: linear-gradient(160deg, var(--ocre-clair), var(--ocre));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bandeau-dpe-etiquettes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bandeau-dpe-etiquette {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255,255,255,.92);
+  border-radius: var(--pilule);
+  padding: 8px 20px 8px 8px;
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--encre);
+  box-shadow: var(--ombre-s);
+}
+
+.bandeau-dpe-etiquette span {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 15px;
+}
+
+.bandeau-dpe-etiquette:nth-child(1) { transform: translateX(-18px); }
+.bandeau-dpe-etiquette:nth-child(1) span { background: #3E9E4F; }
+.bandeau-dpe-etiquette:nth-child(2) { transform: translateX(6px); }
+.bandeau-dpe-etiquette:nth-child(2) span { background: #E8B94A; }
+.bandeau-dpe-etiquette:nth-child(3) { transform: translateX(-8px); }
+.bandeau-dpe-etiquette:nth-child(3) span { background: #C24A2E; }
+
+@media (max-width: 780px) {
+  .bandeau-dpe { grid-template-columns: 1fr; }
+  .bandeau-dpe-texte { padding: 40px 28px; }
+  .bandeau-dpe-visuel { min-height: 180px; padding: 30px; }
+}
+
+
+/* ---------- Simulateur DPE (page dédiée) ---------- */
+
+.dpe-app {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 0;
+  background: var(--surface);
+  border: 1px solid var(--filet);
+  border-radius: var(--r-l);
+  box-shadow: var(--ombre-s);
+  overflow: hidden;
+  min-height: 560px;
+}
+
+@media (max-width: 780px) {
+  .dpe-app { grid-template-columns: 1fr; }
+}
+
+.dpe-etapes {
+  background: var(--fond-tiede);
+  padding: 36px 24px;
+  border-right: 1px solid var(--filet);
+}
+
+@media (max-width: 780px) {
+  .dpe-etapes {
+    border-right: none;
+    border-bottom: 1px solid var(--filet);
+    padding: 24px;
+    display: flex;
+    gap: 18px;
+    overflow-x: auto;
+  }
+}
+
+.dpe-etape {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gris);
+  white-space: nowrap;
+}
+
+.dpe-etape-numero {
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1.5px solid var(--filet);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--gris);
+  transition: background var(--transition), border-color var(--transition), color var(--transition);
+}
+
+.dpe-etape.actuelle { color: var(--brique); }
+.dpe-etape.actuelle .dpe-etape-numero {
+  background: var(--brique);
+  border-color: var(--brique);
+  color: #fff;
+}
+
+.dpe-etape.faite { color: var(--encre); }
+.dpe-etape.faite .dpe-etape-numero {
+  background: #3E9E4F;
+  border-color: #3E9E4F;
+  color: #fff;
+}
+
+.dpe-contenu { padding: 40px 44px; }
+
+@media (max-width: 780px) {
+  .dpe-contenu { padding: 28px 22px; }
+}
+
+.dpe-panneau { display: none; }
+.dpe-panneau.actif { display: block; }
+
+.dpe-panneau h2 { text-align: left; font-size: clamp(20px, 2.4vw, 26px); margin: 0 0 10px; }
+.dpe-panneau h2::after { display: none; }
+.dpe-panneau > p.dpe-soustitre { color: var(--gris); margin: 0 0 30px; }
+
+.dpe-carte {
+  border-radius: var(--r-m);
+  overflow: hidden;
+  border: 1px solid var(--filet);
+  margin-bottom: 26px;
+}
+
+#dpe-carte-conteneur {
+  height: 320px;
+  width: 100%;
+  background: var(--fond-tiede);
+}
+
+.dpe-recherche {
+  position: relative;
+}
+
+.dpe-recherche input {
+  font-size: 16px;
+}
+
+.dpe-suggestions {
+  position: absolute;
+  z-index: 500;
+  left: 0;
+  right: 0;
+  top: calc(100% + 6px);
+  background: var(--surface);
+  border: 1px solid var(--filet);
+  border-radius: var(--r-s);
+  box-shadow: var(--ombre-m);
+  overflow: hidden;
+}
+
+.dpe-suggestions[hidden] { display: none; }
+
+.dpe-suggestion {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 12px 16px;
+  border: none;
+  background: none;
+  font-size: 14px;
+  color: var(--encre);
+  cursor: pointer;
+  border-bottom: 1px solid var(--filet);
+  font-family: inherit;
+}
+
+.dpe-suggestion:last-child { border-bottom: none; }
+.dpe-suggestion:hover { background: var(--fond-tiede); }
+
+.dpe-grille-champs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 22px;
+  margin-bottom: 24px;
+}
+
+.dpe-choix {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.dpe-choix button {
+  padding: 10px 16px;
+  border-radius: var(--r-xs);
+  border: 1.5px solid var(--filet);
+  background: var(--surface);
+  color: var(--encre);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color var(--transition), background var(--transition), color var(--transition);
+}
+
+.dpe-choix button:hover { border-color: var(--brique-clair); }
+
+.dpe-choix button.selectionne {
+  background: var(--brique);
+  border-color: var(--brique);
+  color: #fff;
+}
+
+.dpe-actions { margin-top: 32px; display: flex; gap: 14px; }
+
+.dpe-precedent {
+  background: none;
+  border: 1.5px solid var(--filet);
+  border-radius: var(--pilule);
+  padding: 13px 26px;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--gris);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.dpe-precedent:hover { border-color: var(--brique); color: var(--brique); }
+
+.dpe-erreur {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--brique-fonce);
+  font-weight: 600;
+}
+
+.dpe-erreur[hidden] { display: none; }
+
+/* ---------- Résultats du simulateur DPE ---------- */
+
+.dpe-resultat-tete {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 24px;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 26px;
+  border-bottom: 1px solid var(--filet);
+}
+
+.dpe-etiquette-classe {
+  width: 84px;
+  height: 84px;
+  min-width: 84px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.dpe-classe-a { background: #1E8E3E; }
+.dpe-classe-b { background: #3E9E4F; }
+.dpe-classe-c { background: #8BB83F; }
+.dpe-classe-d { background: #E8B94A; }
+.dpe-classe-e { background: #E08A3C; }
+.dpe-classe-f { background: #D25F3C; }
+.dpe-classe-g { background: #C24A2E; }
+
+.dpe-resultat-detail p { margin: 0; color: var(--gris); }
+.dpe-resultat-detail strong { color: var(--encre); }
+
+.dpe-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 18px;
+  margin-bottom: 32px;
+}
+
+.dpe-stat {
+  background: var(--fond-tiede);
+  border-radius: var(--r-m);
+  padding: 22px;
+  text-align: center;
+}
+
+.dpe-stat-valeur {
+  display: block;
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--brique);
+}
+
+.dpe-stat-label {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--gris);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  font-weight: 700;
+}
+
+.dpe-solutions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  margin-bottom: 36px;
+}
+
+.dpe-solution {
+  border: 1px solid var(--filet);
+  border-radius: var(--r-m);
+  overflow: hidden;
+}
+
+.dpe-solution-tete {
+  padding: 12px;
+  text-align: center;
+  font-weight: 800;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: #fff;
+  background: #3E9E4F;
+}
+
+.dpe-solution.premiere-etape .dpe-solution-tete { background: var(--ocre); }
+
+.dpe-solution-corps { padding: 20px; text-align: center; }
+
+.dpe-solution-classes {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 14px 0 4px;
+}
+
+.dpe-solution-classes .dpe-etiquette-classe {
+  width: 46px;
+  height: 46px;
+  min-width: 46px;
+  font-size: 18px;
+}
+
+.dpe-solution-fleche { color: var(--gris); font-size: 18px; }
+
+.dpe-avertissement {
+  padding: 20px 24px;
+  border-radius: var(--r-m);
+  background: var(--fond-tiede);
+  border: 1px solid var(--filet);
+  font-size: 13px;
+  color: var(--gris);
+  line-height: 1.7;
+  margin-bottom: 32px;
+}
+
+.dpe-form-lead {
+  border-top: 1px solid var(--filet);
+  padding-top: 32px;
+}
+
+.dpe-form-lead h3 { color: var(--brique); margin: 0 0 6px; }
+.dpe-form-lead > p { color: var(--gris); margin: 0 0 22px; }
