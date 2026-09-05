@@ -7,8 +7,8 @@
   <meta name="description" content="Estimez le DPE de votre logement et découvrez les travaux prioritaires pour gagner des classes énergétiques.">
   <link rel="icon" href="assets/logo-icon.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-  <link rel="stylesheet" href="css/style.css?v=23">
-  <script src="js/anim.js?v=23" defer></script>
+  <link rel="stylesheet" href="css/style.css?v=24">
+  <script src="js/anim.js?v=24" defer></script>
 </head>
 <body>
 
@@ -224,7 +224,6 @@
           <label for="dpe-ventilation">Type de ventilation</label>
           <select id="dpe-ventilation">
             <option value="">Choisir...</option>
-            <option value="aucune">Pas de ventilation</option>
             <option value="naturelle">Naturelle (grilles, aération)</option>
             <option value="simple_flux">VMC simple flux</option>
             <option value="double_flux">VMC double flux</option>
@@ -293,6 +292,25 @@
         haut (proche de zéro pour une maison d'avant 1975, déjà correct
         pour une maison très récente).
       </p>
+
+      <div class="dpe-grille-champs">
+        <div class="form-group">
+          <label>Nombre de portes donnant sur l'extérieur</label>
+          <div class="dpe-stepper" data-stepper="nombrePortes" data-min="1" data-max="10">
+            <button type="button" class="dpe-stepper-bouton" data-delta="-1" aria-label="Diminuer">−</button>
+            <span class="dpe-stepper-valeur" id="dpe-nombrePortes-valeur">2</span>
+            <button type="button" class="dpe-stepper-bouton" data-delta="1" aria-label="Augmenter">+</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Nombre de fenêtres</label>
+          <div class="dpe-stepper" data-stepper="nombreFenetres" data-min="1" data-max="40">
+            <button type="button" class="dpe-stepper-bouton" data-delta="-1" aria-label="Diminuer">−</button>
+            <span class="dpe-stepper-valeur" id="dpe-nombreFenetres-valeur">8</span>
+            <button type="button" class="dpe-stepper-bouton" data-delta="1" aria-label="Augmenter">+</button>
+          </div>
+        </div>
+      </div>
 
       <div class="form-group">
         <label>Type de vitrage</label>
@@ -419,6 +437,34 @@
           <span class="dpe-legende-item"><i class="dpe-segment-ecs"></i>Eau chaude <b id="dpe-pourcent-ecs">-</b></span>
           <span class="dpe-legende-item"><i class="dpe-segment-aux"></i>Auxiliaires &amp; éclairage <b id="dpe-pourcent-aux">-</b></span>
         </div>
+      </div>
+
+      <div class="dpe-deperditions">
+        <p class="dpe-deperditions-titre">D'où proviennent vos déperditions de chaleur ?</p>
+        <div class="dpe-deperditions-corps">
+          <svg class="dpe-maison-schema" viewBox="0 0 120 96" aria-hidden="true">
+            <polygon points="60,6 114,48 6,48" class="dpe-maison-toit"></polygon>
+            <rect x="18" y="48" width="84" height="42" class="dpe-maison-mur"></rect>
+            <rect x="52" y="62" width="16" height="28" class="dpe-maison-porte"></rect>
+            <rect x="26" y="58" width="14" height="14" class="dpe-maison-fenetre"></rect>
+            <rect x="80" y="58" width="14" height="14" class="dpe-maison-fenetre"></rect>
+          </svg>
+          <div class="dpe-deperditions-tableau-conteneur">
+            <table class="dpe-deperditions-tableau">
+              <thead>
+                <tr><th>Poste</th><th>Part des déperditions</th><th>Performance</th></tr>
+              </thead>
+              <tbody id="dpe-deperditions-corps"></tbody>
+            </table>
+          </div>
+        </div>
+        <p class="dpe-astuce">
+          Répartition estimée à partir de vos réponses (isolation, vitrage,
+          ventilation, nombre de portes et de fenêtres). « Élevée » signifie
+          que ce poste perd plus que ce qui est attendu pour un logement de
+          cette période et de cette surface ; « Faible » qu'il est déjà
+          performant.
+        </p>
       </div>
 
       <div class="dpe-confort">
@@ -587,6 +633,8 @@
     sousSol: '',
     isolationSol: '',
     vitrage: '',
+    nombrePortes: 2,
+    nombreFenetres: 8,
     occupation: '',
     delai: '',
     dpeConnu: null, // { conso, ges, facture, deperditionMax } si un DPE a été importé
@@ -1053,6 +1101,25 @@
   initGroupeChoix('occupation', 'occupation');
   initGroupeChoix('delai', 'delai');
 
+  /* --- Étape 2 : compteurs +/- (nombre de portes, nombre de fenêtres) --- */
+
+  function initCompteur(cle) {
+    var conteneur = document.querySelector('.dpe-stepper[data-stepper="' + cle + '"]');
+    var min = parseInt(conteneur.getAttribute('data-min'), 10);
+    var max = parseInt(conteneur.getAttribute('data-max'), 10);
+    var affichage = document.getElementById('dpe-' + cle + '-valeur');
+    conteneur.querySelectorAll('.dpe-stepper-bouton').forEach(function (bouton) {
+      bouton.addEventListener('click', function () {
+        var delta = parseInt(bouton.getAttribute('data-delta'), 10);
+        etat[cle] = Math.max(min, Math.min(max, etat[cle] + delta));
+        affichage.textContent = etat[cle];
+      });
+    });
+  }
+
+  initCompteur('nombrePortes');
+  initCompteur('nombreFenetres');
+
   document.getElementById('dpe-suivant-2').addEventListener('click', function () {
     etat.surface = parseFloat(document.getElementById('dpe-surface').value) || null;
     etat.periode = document.getElementById('dpe-periode').value;
@@ -1190,7 +1257,7 @@
   // chaleur de l'air extrait, une ventilation naturelle ou l'absence de
   // ventilation contrôlée laisse plus de déperditions par renouvellement
   // d'air (poste déjà cité dans l'avertissement affiché à l'écran).
-  var VENTILATION_FACTEUR = { aucune: 1.05, naturelle: 1.05, simple_flux: 1.0, double_flux: 0.85 };
+  var VENTILATION_FACTEUR = { naturelle: 1.05, simple_flux: 1.0, double_flux: 0.85 };
 
   // Zone climatique : le besoin de chauffage varie sensiblement selon la
   // rigueur de l'hiver local (degrés-jours unitaires), un facteur que le
@@ -1201,6 +1268,33 @@
   // (pourtour méditerranéen) sont ajustées à partir des écarts usuels de
   // degrés-jours entre ces zones.
   var ZONE_CLIMATIQUE_FACTEUR = { h1: 1.15, h2: 1.0, h3: 0.75 };
+
+  // Nombre de fenêtres et de portes extérieures : deux précisions du
+  // bâti qui n'étaient pas encore demandées. Une maison avec beaucoup
+  // plus de fenêtres que la moyenne pour sa surface a une part de
+  // vitrage plus importante dans son enveloppe, donc déperd davantage
+  // par les fenêtres même à type de vitrage identique (le vitrage isole
+  // toujours moins bien qu'un mur). Une porte extérieure est, de la
+  // même façon qu'une fenêtre, un pont thermique et une source
+  // d'infiltration d'air par rapport à un mur plein ; son effet est
+  // réel mais plus modeste (surface bien plus faible), d'où un facteur
+  // plus resserré. Références : ordre de grandeur usuel d'une maison
+  // individuelle (une fenêtre pour 12-15 m² habitables, une porte
+  // d'entrée et une porte de service).
+  var SURFACE_REFERENCE_PAR_FENETRE = 13;
+  var PORTES_EXTERIEURES_REFERENCE = 2;
+
+  function facteurDensiteFenetres(nombreFenetres, surface) {
+    var reference = Math.max(1, (surface || 100) / SURFACE_REFERENCE_PAR_FENETRE);
+    var nb = nombreFenetres || reference;
+    return facteurBorne(nb / reference);
+  }
+
+  function facteurPortes(nombrePortes) {
+    var nb = nombrePortes || PORTES_EXTERIEURES_REFERENCE;
+    var ecart = nb - PORTES_EXTERIEURES_REFERENCE;
+    return facteurBorne(1 + ecart * 0.02);
+  }
 
   // Part moyenne de chaque poste dans les déperditions totales d'un
   // logement (ordre de grandeur réaliste, pas propre à un logement en
@@ -1293,9 +1387,9 @@
   }
 
   function calculerConsommation(valeurs) {
-    var fMur = facteurMur(valeurs.isolationMurs, valeurs.periode);
+    var fMur = facteurBorne(facteurMur(valeurs.isolationMurs, valeurs.periode) * facteurPortes(valeurs.nombrePortes));
     var fToiture = facteurToiture(valeurs.isolationToiture, valeurs.periode);
-    var fVitrage = facteurVitrage(valeurs.vitrage, valeurs.periode);
+    var fVitrage = facteurBorne(facteurVitrage(valeurs.vitrage, valeurs.periode) * facteurDensiteFenetres(valeurs.nombreFenetres, valeurs.surface));
     var fSol = facteurSol(valeurs.isolationSol, valeurs.periode, valeurs.sousSol);
     var fVentilation = facteurVentilation(valeurs.ventilation);
 
@@ -1337,7 +1431,7 @@
 
     return {
       primaire: primaire, ges: ges, factureParM2: factureParM2,
-      fMur: fMur, fToiture: fToiture, fVitrage: fVitrage, fSol: fSol,
+      fMur: fMur, fToiture: fToiture, fVitrage: fVitrage, fSol: fSol, fVentilation: fVentilation,
       coutChauffage: coutChauffage, coutEcs: coutEcs, coutAux: coutAux
     };
   }
@@ -1383,6 +1477,54 @@
     var el = document.getElementById(id);
     el.textContent = classe;
     el.className = 'dpe-etiquette-classe dpe-classe-' + classe.toLowerCase();
+  }
+
+  /* --- Tableau des déperditions par poste ---
+     Reprend directement les facteurs déjà calculés par
+     calculerConsommation (un facteur > 1 signifie que le poste perd
+     plus que la référence de sa période, < 1 qu'il perd moins) : même
+     pondération PART_DEPERDITION que le calcul de consommation, donc
+     les pourcentages affichés sont cohérents avec le reste de
+     l'estimation plutôt qu'une répartition inventée séparément. */
+
+  var POSTE_DEPERDITION_LABELS = [
+    { label: 'Toiture', part: 'toiture', facteur: 'fToiture' },
+    { label: 'Ventilation (air renouvelé et fuites)', part: 'ventilation', facteur: 'fVentilation' },
+    { label: 'Murs', part: 'murs', facteur: 'fMur' },
+    { label: 'Sols', part: 'sol', facteur: 'fSol' },
+    { label: 'Fenêtres', part: 'vitrage', facteur: 'fVitrage' }
+  ];
+
+  function niveauDeperdition(facteur) {
+    if (facteur <= 0.85) return { texte: 'Faible', classe: 'faible' };
+    if (facteur <= 1.15) return { texte: 'Moyenne', classe: 'moyenne' };
+    return { texte: 'Élevée', classe: 'elevee' };
+  }
+
+  function afficherDeperditions(resultat) {
+    var poids = POSTE_DEPERDITION_LABELS.map(function (poste) {
+      return PART_DEPERDITION[poste.part] * resultat[poste.facteur];
+    });
+    var total = poids.reduce(function (a, b) { return a + b; }, 0);
+    var pourcentages = poids.map(function (p) { return Math.round(p / total * 100); });
+
+    // Le poste le plus important absorbe l'écart d'arrondi, pour que les
+    // pourcentages affichés totalisent toujours 100 %.
+    var sommeArrondie = pourcentages.reduce(function (a, b) { return a + b; }, 0);
+    var indexMax = pourcentages.indexOf(Math.max.apply(null, pourcentages));
+    pourcentages[indexMax] += 100 - sommeArrondie;
+
+    var corps = document.getElementById('dpe-deperditions-corps');
+    corps.innerHTML = '';
+    POSTE_DEPERDITION_LABELS.forEach(function (poste, i) {
+      var niveau = niveauDeperdition(resultat[poste.facteur]);
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td>' + poste.label + '</td>' +
+        '<td><div class="dpe-part-barre"><span style="width:' + pourcentages[i] + '%"></span></div><b>' + pourcentages[i] + ' %</b></td>' +
+        '<td><span class="dpe-tag dpe-tag-' + niveau.classe + '">' + niveau.texte + '</span></td>';
+      corps.appendChild(tr);
+    });
   }
 
   function calculerEtAfficher() {
@@ -1574,6 +1716,7 @@
     document.getElementById('dpe-premiere-etape-valeur').textContent = (valeurFonciereEtape1 >= 0 ? '+' : '') + valeurFonciereEtape1 + ' %';
     document.getElementById('dpe-ampleur-valeur').textContent = (valeurFonciereAmpleur >= 0 ? '+' : '') + valeurFonciereAmpleur + ' %';
 
+    afficherDeperditions(resultat);
     afficherBarometreConfort();
     afficherRecommandations();
   }
@@ -1624,7 +1767,7 @@
       conseils.push('<strong>Vitrage</strong> : un double vitrage récent ou un triple vitrage améliorerait encore le confort, notamment en hiver.');
     }
 
-    if (etat.ventilation === 'aucune' || etat.ventilation === 'naturelle') {
+    if (etat.ventilation === 'naturelle') {
       conseils.push('<strong>Ventilation</strong> : l\'installation d\'une VMC (simple ou double flux) améliore la qualité de l\'air intérieur et limite les déperditions liées au renouvellement d\'air.');
     }
 
@@ -1689,7 +1832,6 @@
     if (etat.isolationToiture === 'recente') indexEte += 1;
     else if (etat.isolationToiture === 'aucune') indexEte -= 1;
     if (etat.ventilation === 'double_flux' || etat.ventilation === 'simple_flux') indexEte += 1;
-    else if (etat.ventilation === 'aucune') indexEte -= 1;
     if (INERTIE_PERIODE[etat.periode] === 'bon') indexEte += 1;
     else if (INERTIE_PERIODE[etat.periode] === 'insuffisant') indexEte -= 1;
     indexEte = Math.max(0, Math.min(NIVEAUX_CONFORT.length - 1, indexEte));
@@ -1705,7 +1847,7 @@
     afficherJauge('hiver', NIVEAUX_CONFORT[indexHiver]);
 
     // Qualité de l'air : suit directement le type de ventilation.
-    var indexAir = { double_flux: 3, simple_flux: 2, naturelle: 1, aucune: 0 }[etat.ventilation];
+    var indexAir = { double_flux: 3, simple_flux: 2, naturelle: 1 }[etat.ventilation];
     afficherJauge('air', NIVEAUX_CONFORT[indexAir === undefined ? 1 : indexAir]);
   }
 
