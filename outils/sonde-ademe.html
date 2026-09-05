@@ -411,10 +411,15 @@
       var qs = champPeriode + ':(' + p.tranches.map(function (t) { return '"' + t + '"'; }).join(' OR ') + ')';
       if (champType) qs += ' AND ' + champType + ':"maison"';
 
+      // Attention : « champSurface » n'est qu'un libellé récapitulatif —
+      // ce sont les champs de CHAMPS_SURFACE qu'il faut demander, un par
+      // un. Y glisser le libellé produisait un nom de champ invalide, et
+      // l'API répondait 400 sur toutes les périodes.
       var champs = [champPeriode];
-      [champBesoin, champSurface, champConso, champEnergie, champUbat, champZone].forEach(function (c) {
+      [champBesoin, champConso, champEnergie, champUbat, champZone].forEach(function (c) {
         if (c) champs.push(c);
       });
+      CHAMPS_SURFACE.forEach(function (c) { champs.push(c); });
       Object.keys(postesPresents).forEach(function (cle) { champs.push(postesPresents[cle]); });
 
       /* Deux prélèvements par période. Le second ne retient que les
