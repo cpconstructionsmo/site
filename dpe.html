@@ -326,7 +326,25 @@
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+(function () {
+  'use strict';
+  var basesPdfJs = [
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/',
+    'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.16.105/build/'
+  ];
+  window.dpeBasePdfJs = basesPdfJs[0];
+  function essayer(index) {
+    if (index >= basesPdfJs.length) return;
+    var script = document.createElement('script');
+    script.src = basesPdfJs[index] + 'pdf.min.js';
+    script.onload = function () { window.dpeBasePdfJs = basesPdfJs[index]; };
+    script.onerror = function () { essayer(index + 1); };
+    document.head.appendChild(script);
+  }
+  essayer(0);
+})();
+</script>
 <script>
 (function () {
   'use strict';
@@ -576,7 +594,7 @@
       return;
     }
 
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    pdfjsLib.GlobalWorkerOptions.workerSrc = (window.dpeBasePdfJs || 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/') + 'pdf.worker.min.js';
 
     var lecteur = new FileReader();
     lecteur.onload = function () {
@@ -727,8 +745,21 @@
     chaudiere_gaz: { rendement: 0.85, vecteur: 'gaz' },
     chaudiere_fioul: { rendement: 0.80, vecteur: 'fioul' }
   };
-  var ECS_FINALE_BASE = 18; // kWh d'énergie finale/m²/an, avant rendement
-  var AUX_ECLAIRAGE_FINALE = 8; // kWh d'énergie finale/m²/an, toujours électrique
+  // Le besoin d'ECS suit surtout le nombre d'occupants, pas la surface :
+  // un studio a un besoin par m² écrasant, une grande maison un besoin par
+  // m² beaucoup plus faible pour le même foyer. On approxime le nombre
+  // conventionnel d'occupants avec la même forme que la méthode 3CL
+  // (croissance en racine carrée de la surface), calée pour redonner la
+  // même valeur qu'avant (18 kWh/m²/an de besoin) sur un logement de
+  // référence de 100 m².
+  var ECS_BASE_PAR_OCCUPANT = 603; // kWh de besoin ECS/occupant conventionnel/an, avant rendement
+  var AUX_ECLAIRAGE_FINALE = 4; // kWh d'énergie finale/m²/an, toujours électrique
+
+  function nombreOccupantsConventionnel(surface) {
+    var s = surface || 100;
+    if (s <= 10) return 1;
+    return 1 + 1.75 * Math.sqrt((s - 10) / 70);
+  }
 
   function facteurBorne(valeur) {
     return Math.max(0.4, Math.min(2.5, valeur));
@@ -758,7 +789,9 @@
     var chauffageFinale = besoinChauffage / RENDEMENT_CHAUFFAGE[valeurs.chauffage];
 
     var ecsInfo = ECS_INFO[valeurs.ecs];
-    var ecsFinale = ECS_FINALE_BASE / ecsInfo.rendement;
+    var surface = valeurs.surface || 100;
+    var besoinEcsParM2 = ECS_BASE_PAR_OCCUPANT * nombreOccupantsConventionnel(surface) / surface;
+    var ecsFinale = besoinEcsParM2 / ecsInfo.rendement;
 
     var primaire = chauffageFinale * COEFFICIENT_PRIMAIRE[valeurs.chauffage] +
       ecsFinale * COEFFICIENT_PRIMAIRE[ecsInfo.vecteur] +
