@@ -25,8 +25,16 @@ jobs:
 
       - name: Interroger la fiche Google
         env:
-          # Ces deux valeurs vivent dans Settings → Secrets and variables
-          # → Actions. Elles ne sont jamais publiées avec le site.
+          # Ces valeurs vivent dans Settings → Secrets and variables →
+          # Actions. Elles ne sont jamais publiées avec le site.
+          #
+          # Voie complète — tous les avis (autorisation du propriétaire) :
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+          GOOGLE_ACCOUNT_ID: ${{ secrets.GOOGLE_ACCOUNT_ID }}
+          GOOGLE_LOCATION_ID: ${{ secrets.GOOGLE_LOCATION_ID }}
+          # Repli — cinq avis au plus, une simple clef suffit :
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
           GOOGLE_PLACE_ID: ${{ secrets.GOOGLE_PLACE_ID }}
         run: node scripts/recuperer-avis.mjs
