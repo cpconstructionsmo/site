@@ -7,8 +7,8 @@
   <meta name="description" content="Estimez le DPE de votre logement et découvrez les travaux prioritaires pour gagner des classes énergétiques.">
   <link rel="icon" href="assets/logo-icon.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-  <link rel="stylesheet" href="css/style.css?v=34">
-  <script src="js/anim.js?v=34" defer></script>
+  <link rel="stylesheet" href="css/style.css?v=35">
+  <script src="js/anim.js?v=35" defer></script>
 </head>
 <body>
 
@@ -593,17 +593,17 @@
           <tbody>
             <tr>
               <th>Travaux</th>
-              <td id="dpe-sa-travaux">-</td>
-              <td id="dpe-sb-travaux">-</td>
+              <td data-option="Option A" id="dpe-sa-travaux">-</td>
+              <td data-option="Option B" id="dpe-sb-travaux">-</td>
             </tr>
             <tr>
               <th>Étiquette visée</th>
-              <td>
+              <td data-option="Option A">
                 <span class="dpe-etiquette-mini" id="dpe-sa-avant">-</span>
                 <span class="dpe-fleche-mini">→</span>
                 <span class="dpe-etiquette-mini" id="dpe-sa-apres">-</span>
               </td>
-              <td>
+              <td data-option="Option B">
                 <span class="dpe-etiquette-mini" id="dpe-sb-avant">-</span>
                 <span class="dpe-fleche-mini">→</span>
                 <span class="dpe-etiquette-mini" id="dpe-sb-apres">-</span>
@@ -611,38 +611,38 @@
             </tr>
             <tr>
               <th>Gain d'énergie</th>
-              <td id="dpe-sa-gain">-</td>
-              <td id="dpe-sb-gain">-</td>
+              <td data-option="Option A" id="dpe-sa-gain">-</td>
+              <td data-option="Option B" id="dpe-sb-gain">-</td>
             </tr>
             <tr>
               <th>Économie sur la facture</th>
-              <td id="dpe-sa-economie">-</td>
-              <td id="dpe-sb-economie">-</td>
+              <td data-option="Option A" id="dpe-sa-economie">-</td>
+              <td data-option="Option B" id="dpe-sb-economie">-</td>
             </tr>
             <tr>
               <th>Coût estimé des travaux</th>
-              <td id="dpe-sa-cout">-</td>
-              <td id="dpe-sb-cout">-</td>
+              <td data-option="Option A" id="dpe-sa-cout">-</td>
+              <td data-option="Option B" id="dpe-sb-cout">-</td>
             </tr>
             <tr>
               <th>Aides estimées</th>
-              <td id="dpe-sa-aides">-</td>
-              <td id="dpe-sb-aides">-</td>
+              <td data-option="Option A" id="dpe-sa-aides">-</td>
+              <td data-option="Option B" id="dpe-sb-aides">-</td>
             </tr>
             <tr class="dpe-ligne-forte">
               <th>Reste à charge</th>
-              <td id="dpe-sa-reste">-</td>
-              <td id="dpe-sb-reste">-</td>
+              <td data-option="Option A" id="dpe-sa-reste">-</td>
+              <td data-option="Option B" id="dpe-sb-reste">-</td>
             </tr>
             <tr class="dpe-ligne-forte">
               <th>Retour sur investissement</th>
-              <td id="dpe-sa-roi">-</td>
-              <td id="dpe-sb-roi">-</td>
+              <td data-option="Option A" id="dpe-sa-roi">-</td>
+              <td data-option="Option B" id="dpe-sb-roi">-</td>
             </tr>
             <tr>
               <th>Effet sur la valeur du bien</th>
-              <td id="dpe-sa-valeur">-</td>
-              <td id="dpe-sb-valeur">-</td>
+              <td data-option="Option A" id="dpe-sa-valeur">-</td>
+              <td data-option="Option B" id="dpe-sb-valeur">-</td>
             </tr>
           </tbody>
         </table>
@@ -2482,14 +2482,17 @@
     }
     rentables.forEach(function (g) {
       var tr = document.createElement('tr');
+      // Les libellés de colonne sont repris sur chaque cellule : sur
+      // téléphone le tableau se replie en fiches et c'est cet attribut
+      // qui redonne à chaque chiffre son intitulé.
       tr.innerHTML =
-        '<td>' + g.label + '</td>' +
-        '<td>' + fourchetteEuros(g.cout.min, g.cout.max) + '</td>' +
-        '<td>' + euros(arrondiCentaine(g.aide)) + '</td>' +
-        '<td><b>' + euros(arrondiCentaine(g.reste)) + '</b></td>' +
-        '<td>' + euros(g.economie) + '</td>' +
-        '<td><b>' + texteRetour(g.retour) + '</b></td>' +
-        '<td><span class="dpe-etiquette-mini dpe-classe-' + g.classe.toLowerCase() + '">' + g.classe + '</span></td>';
+        '<td data-colonne="Travaux" class="dpe-geste-nom">' + g.label + '</td>' +
+        '<td data-colonne="Coût estimé">' + fourchetteEuros(g.cout.min, g.cout.max) + '</td>' +
+        '<td data-colonne="Aides">' + euros(arrondiCentaine(g.aide)) + '</td>' +
+        '<td data-colonne="Reste à charge"><b>' + euros(arrondiCentaine(g.reste)) + '</b></td>' +
+        '<td data-colonne="Économie / an">' + euros(g.economie) + '</td>' +
+        '<td data-colonne="Retour"><b>' + texteRetour(g.retour) + '</b></td>' +
+        '<td data-colonne="Classe visée"><span class="dpe-etiquette-mini dpe-classe-' + g.classe.toLowerCase() + '">' + g.classe + '</span></td>';
       corps.appendChild(tr);
     });
   }

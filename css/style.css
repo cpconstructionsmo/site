@@ -37,7 +37,14 @@
 
 * { box-sizing: border-box; }
 
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+  /* Sans cela, Safari et Chrome mobiles « gonflent » eux-mêmes la taille
+     des textes qu'ils jugent trop petits pour l'écran, ce qui casse les
+     tailles choisies et fait déborder des blocs calibrés au pixel. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
 
 body {
   margin: 0;
@@ -2514,7 +2521,9 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
 
 .dpe-fleche-mini { color: var(--gris); margin: 0 6px; }
 
-@media (max-width: 780px) {
+/* Entre 721 et 780 px, les tableaux restent des tableaux mais serrés ;
+   en dessous ils se replient (voir plus bas). */
+@media (min-width: 721px) and (max-width: 780px) {
   .dpe-scenarios { min-width: 520px; }
   .dpe-scenarios tbody th { width: 128px; }
   .dpe-scenarios th,
@@ -2567,38 +2576,153 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
   .dpe-part-barre { width: 48px; margin-right: 6px; }
 }
 
-/* Les tableaux comparatifs des scénarios sont, eux, réellement larges :
-   comparer deux options suppose de les voir côte à côte. Ils gardent donc
-   leur défilement horizontal, avec un dégradé sur le bord droit pour
-   signaler qu'il reste quelque chose à voir — mais la colonne des
-   critères reste collée à gauche pendant le glissement, sans quoi on ne
-   sait plus quelle ligne on est en train de lire. */
+/* Les tableaux comparatifs demandaient 520 et 560 px : sur un téléphone,
+   chaque colonne était tronquée en plein milieu d'un mot et il fallait
+   faire glisser le doigt pour lire la seconde option. Un tableau rogné
+   n'a pas l'air défilable, il a l'air cassé — et une comparaison qu'on ne
+   voit pas d'un seul tenant ne compare plus rien. Ils se replient donc,
+   sans aucun défilement horizontal.
+
+   Scénarios : le critère passe en titre pleine largeur, et les deux
+   options restent côte à côte en dessous — c'est ce qui permet encore de
+   les comparer d'un coup d'œil, ligne par ligne. */
 @media (max-width: 720px) {
-  .dpe-tableau-conteneur {
-    -webkit-overflow-scrolling: touch;
-    mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent 100%);
+  .dpe-tableau-conteneur { overflow-x: visible; }
+
+  .dpe-scenarios { min-width: 0; display: block; }
+  .dpe-scenarios thead,
+  .dpe-scenarios tbody,
+  .dpe-scenarios tr { display: block; }
+
+  .dpe-scenarios thead tr,
+  .dpe-scenarios tbody tr {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px 14px;
+    align-items: start;
   }
-  /* Deux réglages sont nécessaires pour que le collage prenne effet :
-     Chrome et Safari l'ignorent sur une cellule tant que les bordures
-     sont fusionnées, et la règle globale « table { overflow: hidden } »,
-     qui sert à rogner les angles arrondis, fait du tableau son propre
-     contexte de rognage. Les bordures de ligne sont de toute façon
-     portées par chaque cellule, et le conteneur au-dessus rogne déjà ce
-     qu'il faut. Les largeurs, elles, restent fixées par le bloc
-     « max-width: 780px » ci-dessus. */
-  .dpe-scenarios,
-  .dpe-gestes {
-    border-collapse: separate;
-    border-spacing: 0;
-    overflow: visible;
-  }
-  .dpe-scenarios th:first-child,
-  .dpe-gestes th:first-child {
-    position: sticky;
-    left: 0;
-    z-index: 1;
+
+  /* la cellule vide du coin disparaît : l'en-tête sert alors de légende,
+     rappelant une seule fois ce que recouvrent A et B */
+  .dpe-scenarios thead th:first-child { display: none; }
+  .dpe-scenarios thead tr {
+    padding: 12px 14px;
     background: var(--fond-tiede);
-    padding-left: 10px;
-    box-shadow: 1px 0 0 var(--filet);
+    border-radius: var(--r-s) var(--r-s) 0 0;
   }
+  .dpe-scenarios thead th {
+    display: block;
+    white-space: normal;
+    padding: 0;
+    border-bottom: none;
+    background: none;
+  }
+
+  .dpe-scenarios tbody tr {
+    padding: 14px;
+    border-bottom: 1px solid var(--filet);
+  }
+  .dpe-scenarios tbody tr:last-child { border-bottom: none; }
+
+  /* le critère, en titre au-dessus des deux valeurs */
+  .dpe-scenarios tbody th {
+    display: block;
+    grid-column: 1 / -1;
+    width: auto;
+    padding: 0 0 8px;
+    border-bottom: none;
+    /* la règle globale « th { background } » colorait la colonne des
+       critères ; en pleine largeur elle devient une bande qui hache la
+       lecture, le titre se suffit à lui-même */
+    background: none;
+  }
+
+  /* display: block est indispensable ici : une cellule restée
+     table-cell est ré-enveloppée dans un tableau anonyme qui se rétracte
+     sur son contenu au lieu de remplir la colonne de la grille. */
+  .dpe-scenarios tbody td {
+    display: block;
+    /* la règle bureau « .dpe-scenarios td { width: 32% } » rapportait
+       32 % de la colonne de grille, soit 48 px : les valeurs se
+       repliaient caractère par caractère */
+    width: auto;
+    padding: 0;
+    border-bottom: none;
+    border-top: none;   /* trait hérité de la règle globale « td » */
+    min-width: 0;
+    /* break-word et non anywhere : « anywhere » entre dans le calcul de
+       la largeur minimale du contenu, les colonnes 1fr se résolvaient
+       alors sur presque rien et coupaient « d'énergie » en « d'énerg /
+       ie ». */
+    overflow-wrap: break-word;
+  }
+
+  /* rappel court de l'option au-dessus de chaque valeur : l'en-tête est
+     loin dès qu'on a fait défiler un peu */
+  .dpe-scenarios tbody td::before {
+    content: attr(data-option);
+    display: block;
+    margin-bottom: 3px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--gris);
+  }
+
+  /* Gestes : sept colonnes, impossible à garder en tableau. Chaque
+     travail devient une fiche, son intitulé en titre et ses chiffres en
+     paires intitulé/valeur. */
+  .dpe-gestes { min-width: 0; display: block; }
+  .dpe-gestes thead { display: none; }
+  .dpe-gestes tbody { display: block; }
+
+  .dpe-gestes tbody tr {
+    display: block;
+    border: 1px solid var(--filet);
+    border-radius: var(--r-s);
+    padding: 14px 16px;
+    margin-bottom: 12px;
+  }
+
+  .dpe-gestes tbody td {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 14px;
+    padding: 7px 0;
+    border-top: none;
+    border-bottom: 1px solid var(--filet);
+    white-space: normal;
+    text-align: right;
+  }
+  .dpe-gestes tbody td:last-child { border-bottom: none; padding-bottom: 0; }
+
+  .dpe-gestes tbody td::before {
+    content: attr(data-colonne);
+    flex: 0 0 auto;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--gris);
+    text-align: left;
+  }
+
+  /* l'intitulé du travail fait le titre de la fiche */
+  .dpe-gestes tbody td.dpe-geste-nom {
+    display: block;
+    border-top: none;
+    padding: 0 0 10px;
+    margin-bottom: 4px;
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--brique);
+    text-align: left;
+  }
+  .dpe-gestes tbody td.dpe-geste-nom::before { display: none; }
+
+  /* la ligne « aucun travaux rentable » n'a pas d'intitulé de colonne */
+  .dpe-gestes tbody td[colspan] { display: block; text-align: left; border-bottom: none; }
+  .dpe-gestes tbody td[colspan]::before { display: none; }
 }
