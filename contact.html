@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Contact — CP Constructions</title>
   <link rel="icon" href="assets/logo-icon.png">
-  <link rel="stylesheet" href="css/style.css?v=37">
-  <script src="js/anim.js?v=37" defer></script>
+  <link rel="stylesheet" href="css/style.css?v=41">
+  <script src="js/anim.js?v=41" defer></script>
 </head>
 <body>
 
@@ -43,7 +43,7 @@
   Vous avez un projet de rénovation, d'extension ou de surélévation ? Contactez-nous pour en discuter sans engagement.
 </p>
 
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px; margin: 48px 0;">
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 32px; margin: 48px 0;">
 
   <div style="background: var(--surface); border: 1px solid var(--filet); border-radius: var(--r-m); padding: 24px;">
     <h3 style="color: var(--brique); margin-top: 0;">Par téléphone</h3>
@@ -71,12 +71,12 @@
 
 </div>
 
-<section style="background: var(--surface); border: 1px solid var(--filet); border-radius: var(--r-m); padding: 40px; margin-top: 48px;">
+<section class="bloc-encadre">
   <h2 style="margin-top: 0;">Demander un devis</h2>
   <p style="color: var(--gris);">Remplissez le formulaire ci-dessous et nous vous recontacterons rapidement.</p>
 
   <form id="contactForm" style="margin-top: 32px;">
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr)); gap: 20px;">
       <div class="form-group">
         <label for="nom">Nom complet *</label>
         <input type="text" id="nom" name="nom" required>
