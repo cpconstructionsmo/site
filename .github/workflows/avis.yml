@@ -1,10 +1,13 @@
-name: Rafraîchir les avis Google
+name: Avis Google
+
+# Rafraîchit avis.json depuis la fiche d'établissement Google.
+# Tant que les secrets ne sont pas renseignés, l'exécution ne fait rien
+# et reste au vert : voir outils/LISEZMOI-avis.md pour la mise en place.
 
 on:
   schedule:
-    # Tous les jours à 5 h 00 UTC, soit 7 h du matin en heure d'été.
-    - cron: '0 5 * * *'
-  workflow_dispatch:
+    - cron: '17 4 * * 1'      # tous les lundis, 4 h 17 UTC
+  workflow_dispatch:           # et à la demande, depuis l'onglet Actions
 
 permissions:
   contents: write
@@ -14,31 +17,36 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  rafraichir:
+  mettre-a-jour:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-python@v5
         with:
-          node-version: '20'
+          python-version: '3.12'
 
-      - name: Interroger la fiche Google
+      - name: Récupérer les avis
         env:
-          # Ces deux valeurs vivent dans Settings → Secrets and variables
-          # → Actions. Elles ne sont jamais publiées avec le site.
-          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          # Voie complète : tous les avis (autorisation du propriétaire)
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+          GOOGLE_ACCOUNT_ID: ${{ secrets.GOOGLE_ACCOUNT_ID }}
+          GOOGLE_LOCATION_ID: ${{ secrets.GOOGLE_LOCATION_ID }}
+          # Repli : cinq avis au plus, une simple clé suffit
+          GOOGLE_PLACES_API_KEY: ${{ secrets.GOOGLE_PLACES_API_KEY }}
           GOOGLE_PLACE_ID: ${{ secrets.GOOGLE_PLACE_ID }}
-        run: node scripts/recuperer-avis.mjs
+        run: python3 outils/maj-avis.py
 
-      - name: Publier si les avis ont changé
+      - name: Publier si le fichier a changé
         run: |
           if git diff --quiet -- avis.json; then
-            echo "Rien de neuf, pas de commit."
+            echo "avis.json inchangé, rien à publier."
             exit 0
           fi
-          git config user.name  "github-actions[bot]"
+          git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add avis.json
-          git commit -m "Avis Google du $(date -u +%d/%m/%Y)"
+          git commit -m "Met à jour les avis Google"
           git push
