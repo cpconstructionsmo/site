@@ -7,8 +7,8 @@
   <meta name="description" content="Estimez le DPE de votre logement et découvrez les travaux prioritaires pour gagner des classes énergétiques.">
   <link rel="icon" href="assets/logo-icon.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-  <link rel="stylesheet" href="css/style.css?v=35">
-  <script src="js/anim.js?v=35" defer></script>
+  <link rel="stylesheet" href="css/style.css?v=36">
+  <script src="js/anim.js?v=36" defer></script>
 </head>
 <body>
 
@@ -422,15 +422,56 @@
         </div>
       </div>
       <p class="dpe-astuce">
-        Ce sont les quatre catégories de ressources utilisées par
-        MaPrimeRénov' (barème de l'Anah), calculées sur le revenu fiscal
-        de référence du foyer, le nombre de personnes et la région. À
-        titre de repère, pour un couple en province, « très modestes »
-        correspond à environ 27 000 € de revenu fiscal de référence,
-        « modestes » à environ 33 000 € et « intermédiaires » à environ
-        46 000 €. Sans réponse, l'estimation utilise la catégorie
-        intermédiaire.
+        Ce sont les quatre catégories de ressources de MaPrimeRénov'
+        (barème de l'Anah). Pour savoir laquelle vous concerne, prenez la
+        ligne du nombre de personnes de votre foyer, puis la colonne où
+        tombe votre <b>revenu fiscal de référence</b> : il figure sur
+        votre dernier avis d'impôt, et si plusieurs personnes du foyer
+        déclarent séparément, additionnez leurs revenus fiscaux de
+        référence. Au-delà de la colonne « intermédiaires », vous êtes
+        dans la catégorie « supérieurs ». Sans réponse, l'estimation
+        utilise la catégorie intermédiaire.
       </p>
+
+      <div class="dpe-bareme">
+        <p class="dpe-bareme-titre">Plafonds 2026 — hors Île-de-France</p>
+        <table class="dpe-bareme-table">
+          <thead>
+            <tr><th>Foyer</th><th>Très modestes</th><th>Modestes</th><th>Intermédiaires</th></tr>
+          </thead>
+          <tbody>
+            <tr><th>1 personne</th><td data-colonne="Très modestes">≤ 17 363 €</td><td data-colonne="Modestes">≤ 22 259 €</td><td data-colonne="Intermédiaires">≤ 31 185 €</td></tr>
+            <tr><th>2 personnes</th><td data-colonne="Très modestes">≤ 25 393 €</td><td data-colonne="Modestes">≤ 32 553 €</td><td data-colonne="Intermédiaires">≤ 45 842 €</td></tr>
+            <tr><th>3 personnes</th><td data-colonne="Très modestes">≤ 30 540 €</td><td data-colonne="Modestes">≤ 39 148 €</td><td data-colonne="Intermédiaires">≤ 55 196 €</td></tr>
+            <tr><th>4 personnes</th><td data-colonne="Très modestes">≤ 35 676 €</td><td data-colonne="Modestes">≤ 45 735 €</td><td data-colonne="Intermédiaires">≤ 64 550 €</td></tr>
+            <tr><th>5 personnes</th><td data-colonne="Très modestes">≤ 40 835 €</td><td data-colonne="Modestes">≤ 52 348 €</td><td data-colonne="Intermédiaires">≤ 73 907 €</td></tr>
+            <tr><th>Par personne en plus</th><td data-colonne="Très modestes">+ 5 151 €</td><td data-colonne="Modestes">+ 6 598 €</td><td data-colonne="Intermédiaires">+ 9 357 €</td></tr>
+          </tbody>
+        </table>
+        <details class="dpe-bareme-idf">
+          <summary>Votre logement est en Île-de-France ? Voir les plafonds franciliens</summary>
+        <table class="dpe-bareme-table">
+          <thead>
+            <tr><th>Foyer</th><th>Très modestes</th><th>Modestes</th><th>Intermédiaires</th></tr>
+          </thead>
+          <tbody>
+            <tr><th>1 personne</th><td data-colonne="Très modestes">≤ 24 031 €</td><td data-colonne="Modestes">≤ 29 253 €</td><td data-colonne="Intermédiaires">≤ 40 851 €</td></tr>
+            <tr><th>2 personnes</th><td data-colonne="Très modestes">≤ 35 270 €</td><td data-colonne="Modestes">≤ 42 933 €</td><td data-colonne="Intermédiaires">≤ 60 050 €</td></tr>
+            <tr><th>3 personnes</th><td data-colonne="Très modestes">≤ 42 356 €</td><td data-colonne="Modestes">≤ 51 564 €</td><td data-colonne="Intermédiaires">≤ 71 845 €</td></tr>
+            <tr><th>4 personnes</th><td data-colonne="Très modestes">≤ 49 455 €</td><td data-colonne="Modestes">≤ 60 208 €</td><td data-colonne="Intermédiaires">≤ 84 562 €</td></tr>
+            <tr><th>5 personnes</th><td data-colonne="Très modestes">≤ 56 579 €</td><td data-colonne="Modestes">≤ 68 876 €</td><td data-colonne="Intermédiaires">≤ 96 816 €</td></tr>
+            <tr><th>Par personne en plus</th><td data-colonne="Très modestes">+ 7 116 €</td><td data-colonne="Modestes">+ 8 663 €</td><td data-colonne="Intermédiaires">+ 12 256 €</td></tr>
+          </tbody>
+        </table>
+        </details>
+        <p class="dpe-source-valeur">
+          Barème Anah applicable en 2026, revalorisé de 1,105 % par rapport
+          à 2025. C'est le revenu fiscal de référence de l'année précédente
+          qui est retenu. En cas de doute près d'un seuil, le barème
+          officiel fait foi :
+          <a href="https://www.france-renov.gouv.fr/bareme" target="_blank" rel="noopener">france-renov.gouv.fr/bareme</a>.
+        </p>
+      </div>
 
       <p class="dpe-erreur" id="dpe-erreur-3" hidden>Merci de répondre aux deux questions pour continuer.</p>
 
