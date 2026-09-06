@@ -2533,6 +2533,102 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
   .dpe-gestes { min-width: 560px; }
 }
 
+/* --- Barème de ressources MaPrimeRénov' ---
+   Le simulateur demandait de cocher « très modestes / modestes /
+   intermédiaires / supérieurs » sans dire à quoi cela correspond : sans
+   les plafonds sous les yeux, personne ne peut répondre juste, et une
+   catégorie fausse fausse tout le chiffrage des aides. */
+
+.dpe-bareme {
+  margin: 6px 0 26px;
+  padding: 20px 22px;
+  background: var(--fond-tiede);
+  border-radius: var(--r-m);
+}
+
+.dpe-bareme-titre {
+  margin: 0 0 12px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--gris);
+}
+
+.dpe-bareme-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: none;
+  box-shadow: none;
+  border-radius: 0;
+  overflow: visible;
+  font-size: 13.5px;
+}
+
+.dpe-bareme-table thead th {
+  background: none;
+  color: var(--gris);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  text-align: right;
+  padding: 0 0 8px 14px;
+  border-bottom: 1.5px solid var(--filet);
+  white-space: nowrap;
+}
+.dpe-bareme-table thead th:first-child { text-align: left; padding-left: 0; }
+
+/* les trois colonnes de plafonds se répartissent l'espace à parts égales,
+   sinon la colonne « Foyer » absorbe toute la largeur et les chiffres se
+   tassent contre le bord droit */
+.dpe-bareme-table thead th:not(:first-child),
+.dpe-bareme-table td { width: 21%; }
+
+.dpe-bareme-table tbody th {
+  background: none;
+  color: var(--encre);
+  font-size: 13.5px;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: normal;
+  text-align: left;
+  padding: 9px 14px 9px 0;
+  border-bottom: 1px solid var(--filet);
+  white-space: nowrap;
+}
+
+.dpe-bareme-table td {
+  padding: 9px 0 9px 14px;
+  border-top: none;
+  border-bottom: 1px solid var(--filet);
+  color: var(--encre);
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.dpe-bareme-table tbody tr:last-child th,
+.dpe-bareme-table tbody tr:last-child td {
+  border-bottom: none;
+  color: var(--gris);
+  font-style: italic;
+}
+
+.dpe-bareme-idf { margin-top: 16px; }
+
+.dpe-bareme-idf summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--brique);
+  padding: 8px 0;
+}
+.dpe-bareme-idf summary:hover { text-decoration: underline; }
+.dpe-bareme-idf[open] summary { margin-bottom: 8px; }
+
+.dpe-bareme .dpe-source-valeur { margin: 14px 0 0; }
+
 /* --- Adaptations téléphone ---
    Trois blocs du simulateur restaient plus larges que l'écran et ne se
    lisaient qu'en faisant glisser le doigt : le fil des étapes, le tableau
@@ -2708,6 +2804,54 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
     color: var(--gris);
     text-align: left;
   }
+
+  /* Le barème de ressources se replie de la même façon : une fiche par
+     taille de foyer, ses trois plafonds en paires intitulé/valeur. */
+  .dpe-bareme { padding: 16px; }
+  .dpe-bareme-table { display: block; font-size: 14px; }
+  .dpe-bareme-table thead { display: none; }
+  .dpe-bareme-table tbody { display: block; }
+
+  .dpe-bareme-table tbody tr {
+    display: block;
+    background: var(--surface);
+    border-radius: var(--r-s);
+    padding: 12px 14px;
+    margin-bottom: 10px;
+  }
+  .dpe-bareme-table tbody tr:last-child { margin-bottom: 0; }
+
+  .dpe-bareme-table tbody th {
+    display: block;
+    padding: 0 0 8px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid var(--filet);
+    color: var(--brique);
+    font-size: 14.5px;
+    font-weight: 800;
+  }
+
+  .dpe-bareme-table tbody td {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 14px;
+    padding: 6px 0;
+    border-bottom: none;
+  }
+  .dpe-bareme-table tbody td::before {
+    content: attr(data-colonne);
+    flex: 0 0 auto;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--gris);
+    text-align: left;
+  }
+  .dpe-bareme-table tbody tr:last-child th,
+  .dpe-bareme-table tbody tr:last-child td { font-style: normal; }
+  .dpe-bareme-table tbody tr:last-child td { color: var(--gris); }
 
   /* l'intitulé du travail fait le titre de la fiche */
   .dpe-gestes tbody td.dpe-geste-nom {
