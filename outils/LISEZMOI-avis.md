@@ -1,9 +1,14 @@
 # Mise à jour automatique des avis Google
 
 `avis.json` alimente le bandeau « Ce qu'ils disent » de la page d'accueil.
-Le script `outils/maj-avis.py` le rafraîchit depuis Google, et l'action
-`.github/workflows/avis.yml` l'exécute **tous les lundis matin** ainsi qu'à
-la demande (onglet *Actions* → *Avis Google* → *Run workflow*).
+Le script `scripts/recuperer-avis.mjs` le rafraîchit depuis Google, et
+l'action `.github/workflows/avis.yml` l'exécute **une fois par jour**
+ainsi qu'à la demande (onglet *Actions* → *Rafraîchir les avis Google* →
+*Run workflow*).
+
+La voie « Places » était déjà en place et explique que le fichier ne
+contienne que cinq avis. Ce document décrit surtout la voie à ajouter
+pour les avoir **tous**.
 
 Tant qu'aucun secret n'est renseigné, l'exécution ne fait rien et reste au
 vert. Rien n'est jamais écrasé si Google est injoignable : en cas de
@@ -68,7 +73,9 @@ cinq jusqu'ici.
    restreinte à cette seule API.
 2. Récupérer l'identifiant de l'établissement (*place ID*) avec
    <https://developers.google.com/maps/documentation/places/web-service/place-id>.
-3. Enregistrer deux secrets : `GOOGLE_PLACES_API_KEY` et `GOOGLE_PLACE_ID`.
+3. Enregistrer deux secrets : `GOOGLE_API_KEY` et `GOOGLE_PLACE_ID`.
+   **C'est déjà fait sur ce dépôt** — c'est cette voie qui alimente le
+   fichier aujourd'hui.
 
 Le champ `reviews` est facturé par Google (environ 40 $ pour mille
 requêtes). À raison d'un appel par semaine, cela représente moins de
@@ -78,7 +85,7 @@ soixante appels par an, largement couverts par le crédit mensuel offert.
 
 ## Vérifier que cela fonctionne
 
-Onglet *Actions* → *Avis Google* → *Run workflow*. Le journal indique la
+Onglet *Actions* → *Rafraîchir les avis Google* → *Run workflow*. Le journal indique la
 source retenue et le nombre d'avis. Si `avis.json` a changé, l'action le
 publie elle-même, et le site se met à jour dans la foulée.
 
@@ -86,7 +93,7 @@ En local :
 
 ```sh
 GOOGLE_CLIENT_ID=... GOOGLE_CLIENT_SECRET=... GOOGLE_REFRESH_TOKEN=... \
-  python3 outils/maj-avis.py
+  node scripts/recuperer-avis.mjs
 ```
 
 ## Ce que le script écarte volontairement
