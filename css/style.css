@@ -1016,6 +1016,20 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
   .projet-meta { grid-template-columns: 1fr 1fr; }
   .projet-content { padding: 24px 20px; }
   .cta, .btn { padding: 14px 26px; width: 100%; text-align: center; }
+
+  /* Ce « width: 100% » est voulu pour les boutons pleine largeur, mais il
+     s'applique aussi à un bouton placé dans une ligne : le bouton prend
+     alors toute la place et le champ à côté se réduit à quelques
+     pixels. C'est ce qui écrasait le champ « numéro de DPE ». La ligne
+     s'empile donc, champ puis bouton, chacun pleine largeur. */
+  .dpe-import-ligne { flex-direction: column; }
+  .dpe-import-ligne input { width: 100%; }
+
+  /* Le titre d'étape et le bouton « Charger un DPE » se partageaient une
+     ligne : le texte d'explication se retrouvait dans une colonne de
+     quatre mots de large. */
+  .dpe-etape1-tete { flex-direction: column; align-items: stretch; gap: 14px; }
+  .dpe-lien-charger { width: 100%; }
   .hero-actions { flex-direction: column; align-items: stretch; }
   footer { margin-top: 64px; border-radius: var(--r-l) var(--r-l) 0 0; }
 }
@@ -2576,6 +2590,19 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
 
 @media (max-width: 600px) {
   .bloc-encadre { padding: 26px 20px; margin-top: 36px; }
+}
+
+.dpe-import-aide {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--gris);
+  line-height: 1.45;
+}
+
+/* Dépôt par glisser-déposer : le survol d'un fichier se signale. */
+.dpe-import-bouton.survol {
+  background: var(--brique);
+  color: #fff;
 }
 
 /* --- Carrousel des chantiers en cours (page d'accueil) ---

@@ -1,0 +1,7 @@
+pdf.js 3.11.174 (build « legacy », compatible navigateurs anciens)
+Mozilla — licence Apache 2.0 — https://github.com/mozilla/pdf.js
+
+Copié depuis le paquet npm pdfjs-dist@3.11.174 plutôt que chargé depuis
+un CDN : la lecture du PDF se fait déjà entièrement dans le navigateur,
+autant ne pas y ajouter une requête vers un tiers. Ces deux fichiers ne
+sont téléchargés que si un visiteur dépose réellement un PDF.
