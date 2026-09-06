@@ -233,22 +233,96 @@
       lien.hidden = false;
     }
 
-    // Les flèches ne servent que s'il y a de quoi défiler.
-    var fleches = sectionAvis.querySelector('.avis-fleches');
-    var defiler = function (sens) {
-      var carte = piste.querySelector('.avis-carte');
-      piste.scrollBy({ left: sens * (carte.offsetWidth + 20), behavior: 'smooth' });
-    };
-    fleches.querySelector('[data-sens="-1"]').addEventListener('click', function () { defiler(-1); });
-    fleches.querySelector('[data-sens="1"]').addEventListener('click', function () { defiler(1); });
-
     sectionAvis.hidden = false;   // avant toute mesure : masqué, tout vaut zéro
 
+    /* Le bandeau défile tout seul d'un avis à l'autre et revient au début
+       une fois le dernier passé : c'est le seul moyen de voir toute la
+       série sans avoir à cliquer douze fois. Comme pour les chantiers, la
+       rotation se suspend au survol et s'arrête définitivement dès que la
+       personne prend la main — rien ne doit bouger pendant qu'elle lit. */
+    var fleches = sectionAvis.querySelector('.avis-fleches');
+    var points = fleches.querySelector('.avis-points');
+    var cartes = piste.querySelectorAll('.avis-carte');
+    var courant = 0;
+    var minuterie = null;
+
+    Array.prototype.forEach.call(cartes, function (carte, i) {
+      var nom = carte.querySelector('.avis-nom');
+      var point = document.createElement('button');
+      point.type = 'button';
+      point.setAttribute('role', 'tab');
+      point.setAttribute('aria-selected', i === 0 ? 'true' : 'false');
+      point.setAttribute('aria-label', 'Avis de ' + (nom ? nom.textContent.trim() : (i + 1)));
+      point.addEventListener('click', function () { arreterAvis(); allerAvis(i); });
+      points.appendChild(point);
+    });
+
+    function allerAvis(i) {
+      courant = (i + cartes.length) % cartes.length;
+      piste.scrollTo({ left: cartes[courant].offsetLeft - piste.offsetLeft,
+                       behavior: mouvementReduit ? 'auto' : 'smooth' });
+      majPointsAvis();
+    }
+
+    /* Sur un large écran, trois avis tiennent côte à côte : la piste
+       cesse de défiler alors qu'il reste des cartes à droite, et le
+       dernier index atteignable n'est pas le dernier avis. On boucle
+       donc sur la fin réelle du défilement, pas sur un numéro de carte. */
+    function auBoutAvis() {
+      return piste.scrollLeft >= piste.scrollWidth - piste.clientWidth - 4;
+    }
+
+    function suivantAvis() {
+      if (auBoutAvis()) allerAvis(0); else allerAvis(courant + 1);
+    }
+
+    function majPointsAvis() {
+      Array.prototype.forEach.call(points.children, function (b, i) {
+        b.setAttribute('aria-selected', i === courant ? 'true' : 'false');
+      });
+    }
+
+    function arreterAvis() {
+      if (minuterie) { window.clearInterval(minuterie); minuterie = null; }
+    }
+
+    fleches.querySelector('[data-sens="-1"]').addEventListener('click', function () {
+      arreterAvis(); allerAvis(courant - 1);
+    });
+    fleches.querySelector('[data-sens="1"]').addEventListener('click', function () {
+      arreterAvis(); suivantAvis();
+    });
+
+    // Le balayage au doigt fait foi : on recale les pastilles dessus.
+    var recalageAvis = null;
+    piste.addEventListener('scroll', function () {
+      window.clearTimeout(recalageAvis);
+      recalageAvis = window.setTimeout(function () {
+        var gauche = piste.scrollLeft;
+        var proche = 0;
+        Array.prototype.forEach.call(cartes, function (carte, i) {
+          var ecart = Math.abs(carte.offsetLeft - piste.offsetLeft - gauche);
+          var ref = Math.abs(cartes[proche].offsetLeft - piste.offsetLeft - gauche);
+          if (ecart < ref) proche = i;
+        });
+        if (proche !== courant) { courant = proche; majPointsAvis(); }
+      }, 120);
+    }, { passive: true });
+
+    piste.addEventListener('pointerdown', arreterAvis, { passive: true });
+
+    // Les flèches et les pastilles ne servent que s'il y a de quoi défiler.
     var majFleches = function () {
-      fleches.hidden = piste.scrollWidth <= piste.clientWidth + 4;
+      fleches.hidden = cartes.length < 2 || piste.scrollWidth <= piste.clientWidth + 4;
     };
     majFleches();
     window.addEventListener('resize', majFleches, { passive: true });
+
+    if (!mouvementReduit && cartes.length > 1) {
+      minuterie = window.setInterval(suivantAvis, 6000);
+      piste.addEventListener('mouseenter', arreterAvis);
+      piste.addEventListener('focusin', arreterAvis);
+    }
   }
 
   /* --- 5. Barres d'avancement des chantiers ---

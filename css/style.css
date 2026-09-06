@@ -1113,6 +1113,23 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
                     linear-gradient(140deg, #94886F, #453B2C);
 }
 
+.photo-projet[data-photo="charchigne-7"] {
+  background-image: url("../assets/chantiers/charchigne-7.jpg"),
+                    linear-gradient(140deg, #94886F, #453B2C);
+}
+.photo-projet[data-photo="charchigne-8"] {
+  background-image: url("../assets/chantiers/charchigne-8.jpg"),
+                    linear-gradient(140deg, #94886F, #453B2C);
+}
+.photo-projet[data-photo="charchigne-9"] {
+  background-image: url("../assets/chantiers/charchigne-9.jpg"),
+                    linear-gradient(140deg, #94886F, #453B2C);
+}
+.photo-projet[data-photo="charchigne-10"] {
+  background-image: url("../assets/chantiers/charchigne-10.jpg"),
+                    linear-gradient(140deg, #94886F, #453B2C);
+}
+
 /* Chantier de Ceaucé, dans l'ordre chronologique. */
 .photo-projet[data-photo="ceauce-1"] {
   background-image: url("../assets/chantiers/ceauce-1.jpg"),
@@ -1439,7 +1456,36 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
 
 .avis-fleches[hidden] { display: none; }
 
-.avis-fleches { display: flex; gap: 10px; justify-content: center; margin-top: 8px; }
+.avis-fleches { display: flex; gap: 16px; align-items: center; justify-content: center; margin-top: 8px; }
+
+/* Pastilles de position : avec une douzaine d'avis, les seules flèches
+   ne disent pas combien il en reste ni où l'on en est. */
+.avis-points { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; max-width: 60%; }
+
+/* « .avis-fleches button » a la même spécificité et vient plus bas dans
+   la feuille : sans ce sélecteur plus précis, les pastilles héritaient
+   des 42 px des flèches. */
+.avis-fleches .avis-points button {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--filet);
+  cursor: pointer;
+  transition: background var(--transition), width var(--transition);
+}
+
+.avis-fleches .avis-points button[aria-selected="true"] {
+  width: 24px;
+  border-radius: var(--pilule);
+  background: var(--brique);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .avis-piste { scroll-behavior: auto; }
+  .avis-fleches .avis-points button { transition: none; }
+}
 
 .avis-fleches button {
   width: 42px; height: 42px;
