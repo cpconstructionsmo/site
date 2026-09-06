@@ -32,16 +32,35 @@ cinq jusqu'ici.
 
 ## Voie 1 — tous les avis (recommandée)
 
+0. **Vérifier les conditions.** Google n'accorde l'accès qu'à une fiche
+   vérifiée et active depuis plus de soixante jours, rattachée à un site
+   web valide. C'est le cas ici.
+
 1. **Demander l'accès à l'API.** Sur
-   <https://developers.google.com/my-business/content/prereqs>, remplir le
-   formulaire de demande d'accès aux *Business Profile APIs*. Google
-   valide en quelques jours. Activer ensuite, dans la console Google
-   Cloud, les API `My Business Account Management`,
-   `My Business Business Information` et `Google My Business`.
+   <https://developers.google.com/my-business/content/prereqs>, suivre le
+   lien vers le formulaire de demande d'accès aux *Business Profile
+   APIs*. Compter une vingtaine de minutes de saisie, puis de quelques
+   jours à quelques semaines de délai de validation. Activer ensuite,
+   dans la console Google Cloud, les API `My Business Account
+   Management`, `My Business Business Information` et
+   `Google My Business`.
+
+   **Tant que la demande n'est pas validée, le quota du projet reste à
+   zéro et tous les appels échouent en 429.** Ce n'est pas une panne du
+   script : c'est l'attente de l'accord de Google.
 
 2. **Créer des identifiants OAuth.** Console Cloud → *API et services* →
-   *Identifiants* → *Créer* → *ID client OAuth* → type **Application de
-   bureau**. Noter l'**ID client** et le **secret client**.
+   *Identifiants* → *Créer* → *ID client OAuth* → type **Application
+   Web** — et non « Application de bureau », que l'OAuth Playground de
+   l'étape suivante refuse. Dans *URI de redirection autorisés*, ajouter
+   exactement :
+
+   ```
+   https://developers.google.com/oauthplayground
+   ```
+
+   Sans cette ligne, l'étape 3 échoue sur `redirect_uri_mismatch`. Noter
+   l'**ID client** et le **secret client**.
 
 3. **Obtenir un jeton de rafraîchissement.** C'est l'étape à faire une
    seule fois, dans votre navigateur, connecté au compte propriétaire de
@@ -51,6 +70,9 @@ cinq jusqu'ici.
    secret → dans la liste de gauche, saisir la portée
    `https://www.googleapis.com/auth/business.manage` → *Authorize APIs* →
    *Exchange authorization code for tokens* → copier le **refresh token**.
+
+   Une fois le jeton en main, on peut retirer cette URI de redirection de
+   l'identifiant : elle n'a servi qu'à cet échange.
 
 4. **Enregistrer les secrets** dans le dépôt : *Settings* → *Secrets and
    variables* → *Actions* → *New repository secret*.
