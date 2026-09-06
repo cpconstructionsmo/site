@@ -1584,6 +1584,16 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
   min-height: 560px;
 }
 
+/* Un élément de grille refuse par défaut de descendre sous la largeur
+   minimale de son contenu (min-width: auto). Le tableau des déperditions
+   et le fil des étapes, tous deux larges, imposaient donc au panneau une
+   largeur de 733 px que le overflow: hidden ci-dessus se contentait de
+   rogner : sur un téléphone, la moitié droite du résultat était coupée
+   sans qu'aucun défilement ne permette d'y accéder. Autoriser la
+   réduction rend la largeur au viewport ; les blocs réellement larges
+   gèrent leur propre débordement plus bas. */
+.dpe-app > * { min-width: 0; }
+
 @media (max-width: 780px) {
   .dpe-app { grid-template-columns: 1fr; }
 }
@@ -2512,4 +2522,83 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
   .dpe-gestes th,
   .dpe-gestes td { padding-right: 10px; }
   .dpe-gestes { min-width: 560px; }
+}
+
+/* --- Adaptations téléphone ---
+   Trois blocs du simulateur restaient plus larges que l'écran et ne se
+   lisaient qu'en faisant glisser le doigt : le fil des étapes, le tableau
+   des déperditions et les tableaux comparatifs. */
+
+/* Le fil des étapes demande 656 px pour ses quatre libellés. Sous cette
+   largeur on ne garde que les pastilles numérotées, et le libellé de la
+   seule étape en cours — celle dont l'utilisateur a besoin. Le texte des
+   étapes est un nœud de texte nu, d'où le font-size: 0 sur le conteneur
+   plutôt qu'un display: none. */
+@media (max-width: 720px) {
+  .dpe-etapes { gap: 10px; padding: 18px 20px; overflow-x: visible; }
+  .dpe-etape {
+    font-size: 0;
+    gap: 0;
+    padding: 6px 0;
+    flex: 0 0 auto;
+  }
+  .dpe-etape-numero { font-size: 12px; }
+  .dpe-etape.actuelle {
+    font-size: 13px;
+    gap: 9px;
+    min-width: 0;
+    white-space: normal;
+  }
+}
+
+/* Le tableau des déperditions demandait 463 px : les libellés y étaient
+   insécables et la barre de part figée à 90 px. Le libellé peut se
+   replier, la barre se resserrer, et le schéma de maison passe au-dessus
+   du tableau plutôt qu'à côté. */
+@media (max-width: 600px) {
+  .dpe-deperditions-corps { gap: 14px; justify-content: center; }
+  .dpe-maison-schema { width: 104px; }
+  .dpe-deperditions-tableau-conteneur { flex: 1 1 100%; }
+  .dpe-deperditions-tableau { font-size: 12.5px; }
+  .dpe-deperditions-tableau th { padding-right: 8px; font-size: 10px; }
+  .dpe-deperditions-tableau td { padding: 9px 8px 9px 0; }
+  .dpe-deperditions-tableau td:first-child,
+  .dpe-deperditions-tableau th:first-child { white-space: normal; }
+  .dpe-part-barre { width: 48px; margin-right: 6px; }
+}
+
+/* Les tableaux comparatifs des scénarios sont, eux, réellement larges :
+   comparer deux options suppose de les voir côte à côte. Ils gardent donc
+   leur défilement horizontal, avec un dégradé sur le bord droit pour
+   signaler qu'il reste quelque chose à voir — mais la colonne des
+   critères reste collée à gauche pendant le glissement, sans quoi on ne
+   sait plus quelle ligne on est en train de lire. */
+@media (max-width: 720px) {
+  .dpe-tableau-conteneur {
+    -webkit-overflow-scrolling: touch;
+    mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent 100%);
+  }
+  /* Deux réglages sont nécessaires pour que le collage prenne effet :
+     Chrome et Safari l'ignorent sur une cellule tant que les bordures
+     sont fusionnées, et la règle globale « table { overflow: hidden } »,
+     qui sert à rogner les angles arrondis, fait du tableau son propre
+     contexte de rognage. Les bordures de ligne sont de toute façon
+     portées par chaque cellule, et le conteneur au-dessus rogne déjà ce
+     qu'il faut. Les largeurs, elles, restent fixées par le bloc
+     « max-width: 780px » ci-dessus. */
+  .dpe-scenarios,
+  .dpe-gestes {
+    border-collapse: separate;
+    border-spacing: 0;
+    overflow: visible;
+  }
+  .dpe-scenarios th:first-child,
+  .dpe-gestes th:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: var(--fond-tiede);
+    padding-left: 10px;
+    box-shadow: 1px 0 0 var(--filet);
+  }
 }
