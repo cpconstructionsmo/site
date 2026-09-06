@@ -7,8 +7,8 @@
   <meta name="description" content="Estimez le DPE de votre logement et découvrez les travaux prioritaires pour gagner des classes énergétiques.">
   <link rel="icon" href="assets/logo-icon.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-  <link rel="stylesheet" href="css/style.css?v=41">
-  <script src="js/anim.js?v=41" defer></script>
+  <link rel="stylesheet" href="css/style.css?v=42">
+  <script src="js/anim.js?v=42" defer></script>
 </head>
 <body>
 
@@ -91,9 +91,12 @@
             </div>
           </div>
           <div class="dpe-import-option">
-            <label for="dpe-fichier">Importer un fichier HTML du DPE</label>
-            <label for="dpe-fichier" class="dpe-import-bouton">Choisir un fichier .html</label>
-            <input type="file" id="dpe-fichier" accept=".html,.htm,text/html" hidden>
+            <label for="dpe-fichier">Déposer le fichier de votre DPE</label>
+            <label for="dpe-fichier" class="dpe-import-bouton" id="dpe-depot">
+              Choisir un fichier PDF ou HTML
+            </label>
+            <input type="file" id="dpe-fichier" accept=".pdf,application/pdf,.html,.htm,text/html" hidden>
+            <p class="dpe-import-aide">Le PDF est lu dans votre navigateur ; le fichier ne quitte pas votre téléphone.</p>
           </div>
         </div>
         <p class="dpe-import-statut" id="dpe-import-statut"></p>
@@ -1334,6 +1337,79 @@
     panneauImport.hidden = true;
   });
 
+  /* Lecture d'un DPE au format PDF.
+     pdf.js est hébergé avec le site plutôt que chargé depuis un CDN, et
+     il n'est téléchargé que si un visiteur dépose réellement un PDF :
+     personne ne paie 1,5 Mo pour une page qu'il ne fait que consulter.
+     Le fichier est analysé dans le navigateur, il n'est envoyé nulle
+     part. */
+
+  var BASE_PDFJS = 'js/vendor/pdfjs/';
+  var pdfjsPret = null;
+
+  function chargerPdfjs() {
+    if (pdfjsPret) return pdfjsPret;
+    pdfjsPret = new Promise(function (resoudre, rejeter) {
+      if (window.pdfjsLib) { resoudre(window.pdfjsLib); return; }
+      var script = document.createElement('script');
+      script.src = BASE_PDFJS + 'pdf.min.js';
+      script.onload = function () {
+        if (!window.pdfjsLib) { rejeter(new Error('pdfjsLib absent')); return; }
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = BASE_PDFJS + 'pdf.worker.min.js';
+        resoudre(window.pdfjsLib);
+      };
+      script.onerror = function () { rejeter(new Error('script indisponible')); };
+      document.head.appendChild(script);
+    });
+    return pdfjsPret;
+  }
+
+  function tamponDuFichier(fichier) {
+    return new Promise(function (resoudre, rejeter) {
+      var lecteur = new FileReader();
+      lecteur.onload = function () { resoudre(this.result); };
+      lecteur.onerror = function () { rejeter(new Error('lecture impossible')); };
+      lecteur.readAsArrayBuffer(fichier);
+    });
+  }
+
+  function texteDuPdf(fichier) {
+    return Promise.all([chargerPdfjs(), tamponDuFichier(fichier)]).then(function (r) {
+      return r[0].getDocument({ data: new Uint8Array(r[1]) }).promise;
+    }).then(function (doc) {
+      var suite = Promise.resolve('');
+      var lire = function (n) {
+        return function (accumule) {
+          return doc.getPage(n)
+            .then(function (page) { return page.getTextContent(); })
+            .then(function (contenu) {
+              return accumule + ' ' + contenu.items.map(function (i) { return i.str; }).join(' ');
+            });
+        };
+      };
+      for (var n = 1; n <= doc.numPages; n++) suite = suite.then(lire(n));
+      return suite;
+    });
+  }
+
+  /* Le numéro de DPE vaut mieux que tout le reste : avec lui, on
+     interroge la base ADEME et on récupère des données structurées et
+     complètes, au lieu de deviner des valeurs dans une mise en page de
+     PDF qui varie d'un logiciel de diagnostic à l'autre. */
+  function numeroDpeDansTexte(texte) {
+    var compact = texte.replace(/\s+/g, ' ');
+    var pres = compact.match(/(?:num[ée]ro|n\s*[°o]|r[ée]f[ée]rence)[^0-9A-Za-z]{0,20}([0-9A-Za-z]{13})(?![0-9A-Za-z])/i);
+    if (pres) return pres[1].toUpperCase();
+    var jetons = compact.toUpperCase().match(/(?:^|[^0-9A-Z])([0-9A-Z]{13})(?![0-9A-Z])/g) || [];
+    for (var i = 0; i < jetons.length; i++) {
+      var jeton = jetons[i].replace(/[^0-9A-Z]/g, '');
+      // un numéro mêle chiffres et lettres : cela écarte les nombres
+      // longs et les mots de treize lettres.
+      if (/[0-9]/.test(jeton) && /[A-Z]/.test(jeton)) return jeton;
+    }
+    return '';
+  }
+
   var champFichier = document.getElementById('dpe-fichier');
   var statutImport = document.getElementById('dpe-import-statut');
 
@@ -1370,6 +1446,28 @@
 
     var mFacture = texte.match(/([\d]+[,.]\d{2})\s*€\s*(?:abonnements|\)|$)/i);
     if (mFacture) trouve.facture = normaliserNombre(mFacture[1]);
+
+    // Formulations rencontrées sur les PDF réglementaires, où les
+    // libellés sont séparés de leur valeur par la mise en page.
+    if (!trouve.surface) {
+      var mSurfacePdf = texte.match(/surface\s+habitable[^0-9]{0,40}([\d]+[,.]?\d*)/i);
+      if (mSurfacePdf) trouve.surface = normaliserNombre(mSurfacePdf[1]);
+    }
+    if (!trouve.annee) {
+      var mAnneePdf = texte.match(/(?:ann[ée]e|p[ée]riode)\s+de\s+construction[^0-9]{0,40}(\d{4})/i);
+      if (mAnneePdf) trouve.annee = parseInt(mAnneePdf[1], 10);
+    }
+    if (!trouve.conso) {
+      // « m² » s'écrit tantôt avec l'exposant, tantôt « m2 » selon la
+      // police du PDF, et le séparateur est « / » ou « . » selon le
+      // logiciel de diagnostic.
+      var mConsoPdf = texte.match(/([\d]+(?:[,.]\d+)?)\s*kWh\s*(?:EP)?\s*[\/.]?\s*m\s*[²2]?\s*[\/.·]?\s*an/i);
+      if (mConsoPdf) trouve.conso = normaliserNombre(mConsoPdf[1]);
+    }
+    if (!trouve.ges) {
+      var mGesPdf = texte.match(/([\d]+(?:[,.]\d+)?)\s*kg\s*(?:[ée]q)?\s*CO\s*2?\s*[\/.]?\s*m\s*[²2]?/i);
+      if (mGesPdf) trouve.ges = normaliserNombre(mGesPdf[1]);
+    }
 
     return trouve;
   }
@@ -1410,30 +1508,101 @@
     }
   }
 
-  champFichier.addEventListener('change', function () {
-    var fichier = champFichier.files[0];
-    if (!fichier) return;
+  function echecLecture(message) {
+    statutImport.textContent = message ||
+      'Ce fichier n\'a pas pu être lu. Complétez les champs manuellement ci-dessous.';
+    statutImport.className = 'dpe-import-statut dpe-import-echec';
+  }
 
-    statutImport.textContent = 'Lecture du fichier en cours...';
+  /* Une fois le texte du document en main, quelle que soit son origine :
+     on cherche d'abord le numéro pour interroger la base ADEME, qui
+     donne des données complètes et fiables ; la lecture directe du texte
+     ne sert que de repli. */
+  function exploiterTexteDpe(texte, origine) {
+    var numero = numeroDpeDansTexte(texte);
+    var replier = function () {
+      var trouve = analyserTexteDPE(texte);
+      appliquerDonneesDPE(trouve);
+      if (!Object.keys(trouve).length && origine === 'pdf') {
+        echecLecture('Nous n\'avons rien pu lire dans ce PDF. S\'il s\'agit d\'un document scanné, ' +
+          'saisissez plutôt le numéro de DPE ci-dessus, ou complétez les champs manuellement.');
+      }
+    };
+
+    if (!numero) { replier(); return; }
+
+    champNumeroDpe.value = numero;
+    statutImport.textContent = 'Numéro ' + numero + ' trouvé dans le document, vérification auprès de la base ADEME...';
     statutImport.className = 'dpe-import-statut';
+    derniereRechercheAdeme = '';
+
+    chercherDpeAdeme(numero).then(function () {
+      if (!dpeAdemeTrouve) { replier(); return; }
+      banniereAdeme.hidden = true;
+      appliquerDpeAdeme(dpeAdemeTrouve);
+      statutImport.textContent = 'DPE n° ' + numero + ' retrouvé dans la base ADEME et appliqué' +
+        (dpeAdemeTrouve.classe ? ' (classe ' + dpeAdemeTrouve.classe + ')' : '') +
+        '. Vérifiez les champs ci-dessous avant de continuer.';
+      statutImport.className = 'dpe-import-statut dpe-import-ok';
+      dpeAdemeTrouve = null;
+    }).catch(replier);
+  }
+
+  function lireFichierDpe(fichier) {
+    if (!fichier) return;
+    var estPdf = /\.pdf$/i.test(fichier.name) || fichier.type === 'application/pdf';
+
+    statutImport.textContent = estPdf
+      ? 'Lecture du PDF en cours...'
+      : 'Lecture du fichier en cours...';
+    statutImport.className = 'dpe-import-statut';
+
+    if (estPdf) {
+      texteDuPdf(fichier)
+        .then(function (texte) { exploiterTexteDpe(texte, 'pdf'); })
+        .catch(function () {
+          echecLecture('Ce PDF n\'a pas pu être ouvert. Saisissez le numéro de DPE ci-dessus, ' +
+            'ou complétez les champs manuellement.');
+        });
+      return;
+    }
 
     var lecteur = new FileReader();
     lecteur.onload = function () {
       try {
         var document_ = new DOMParser().parseFromString(String(this.result), 'text/html');
-        var texte = document_.body ? document_.body.textContent : String(this.result);
-        appliquerDonneesDPE(analyserTexteDPE(texte));
+        exploiterTexteDpe(document_.body ? document_.body.textContent : String(this.result), 'html');
       } catch (err) {
-        statutImport.textContent = 'Ce fichier n\'a pas pu être lu. Complétez les champs manuellement ci-dessous.';
-        statutImport.className = 'dpe-import-statut dpe-import-echec';
+        echecLecture();
       }
     };
-    lecteur.onerror = function () {
-      statutImport.textContent = 'Ce fichier n\'a pas pu être lu. Complétez les champs manuellement ci-dessous.';
-      statutImport.className = 'dpe-import-statut dpe-import-echec';
-    };
+    lecteur.onerror = function () { echecLecture(); };
     lecteur.readAsText(fichier);
+  }
+
+  champFichier.addEventListener('change', function () {
+    lireFichierDpe(champFichier.files[0]);
   });
+
+  /* Glisser-déposer sur le bouton, pour qui est sur un ordinateur. */
+  var zoneDepot = document.getElementById('dpe-depot');
+  if (zoneDepot) {
+    ['dragenter', 'dragover'].forEach(function (evt) {
+      zoneDepot.addEventListener(evt, function (e) {
+        e.preventDefault();
+        zoneDepot.classList.add('survol');
+      });
+    });
+    ['dragleave', 'drop'].forEach(function (evt) {
+      zoneDepot.addEventListener(evt, function (e) {
+        e.preventDefault();
+        zoneDepot.classList.remove('survol');
+      });
+    });
+    zoneDepot.addEventListener('drop', function (e) {
+      if (e.dataTransfer && e.dataTransfer.files) lireFichierDpe(e.dataTransfer.files[0]);
+    });
+  }
 
   /* Recherche par numéro de DPE : même service ADEME, même fonction de
      recherche que l'adresse — seul le texte interrogé change. */
