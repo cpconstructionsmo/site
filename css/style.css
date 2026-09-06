@@ -1538,7 +1538,12 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
   grid-template-columns: 1.1fr 1fr;
   align-items: stretch;
   gap: 0;
+  /* Sa section porte la classe « container », qui écrase le padding
+     vertical de « section » : le bandeau n'a donc aucune marge propre.
+     Sans marge basse, le bloc blanc « Pourquoi nous choisir » venait
+     coller au bandeau, bord à bord. */
   margin-top: 60px;
+  margin-bottom: 60px;
   border-radius: var(--r-xl);
   overflow: hidden;
   box-shadow: var(--ombre-l);
@@ -1613,7 +1618,7 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
 .bandeau-dpe-etiquette:nth-child(3) span { background: #3E9E4F; }
 
 @media (max-width: 780px) {
-  .bandeau-dpe { grid-template-columns: 1fr; margin-top: 40px; }
+  .bandeau-dpe { grid-template-columns: 1fr; margin-top: 40px; margin-bottom: 40px; }
   .bandeau-dpe-texte { padding: 40px 28px; }
   .bandeau-dpe-visuel { min-height: 180px; padding: 30px; }
 }
@@ -1863,12 +1868,21 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
   font-size: 16px;
 }
 
+/* La boîte de recherche est ancrée en bas de la carte : une liste qui
+   s'ouvre vers le bas sort aussitôt de la carte, où le « overflow:
+   hidden » la rogne, et tombe sous le bas de l'écran. Aucune des cinq
+   adresses proposées n'était entièrement visible, y compris sur
+   ordinateur. Elle s'ouvre donc vers le haut, par-dessus la carte, et se
+   limite en hauteur pour ne jamais dépasser au-delà. */
 .dpe-suggestions {
   position: absolute;
   z-index: 500;
   left: 0;
   right: 0;
-  top: calc(100% + 6px);
+  bottom: calc(100% + 6px);
+  max-height: 244px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   background: var(--surface);
   border: 1px solid var(--filet);
   border-radius: var(--r-s);
@@ -3048,4 +3062,42 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
   /* la ligne « aucun travaux rentable » n'a pas d'intitulé de colonne */
   .dpe-gestes tbody td[colspan] { display: block; text-align: left; border-bottom: none; }
   .dpe-gestes tbody td[colspan]::before { display: none; }
+}
+
+@media (max-width: 860px) {
+  /* Sur téléphone, la recherche d'adresse quitte la superposition et
+     passe au-dessus de la carte : la liste s'ouvre alors vers le bas,
+     par-dessus la carte, où elle a toute la place. La carte elle-même
+     est raccourcie — 480 px occupaient presque tout l'écran. */
+  .dpe-carte-pleine {
+    display: flex;
+    flex-direction: column;
+    /* la carte ne rogne plus : sinon la liste d'adresses, qui descend
+       par-dessus elle, perdait sa dernière proposition sur les écrans
+       les plus étroits. C'est la carte elle-même qui porte désormais
+       l'arrondi et le rognage. */
+    overflow: visible;
+  }
+  .dpe-carte-pleine #dpe-carte-conteneur {
+    height: 300px;
+    order: 2;
+    overflow: hidden;
+    border-radius: 0 0 var(--r-m) var(--r-m);
+  }
+  .dpe-carte-recherche {
+    position: static;
+    order: 1;
+    max-width: none;
+    border-radius: var(--r-m) var(--r-m) 0 0;
+    box-shadow: none;
+    border-bottom: 1px solid var(--filet);
+    padding: 16px 16px 18px;
+  }
+  .dpe-suggestions {
+    top: calc(100% + 6px);
+    bottom: auto;
+    max-height: 60vh;
+  }
+  /* la bascule de fond reste au-dessus de la carte, pas du champ */
+  .dpe-carte-fonds { top: auto; bottom: 14px; left: 14px; }
 }
