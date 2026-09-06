@@ -192,7 +192,7 @@ nav.main a.active { color: var(--nuit); background: var(--ocre); }
   background: var(--nuit);
   color: #fff;
   border-radius: 0 0 var(--r-xl) var(--r-xl);
-  padding: 118px 20px 92px;
+  padding: 118px var(--gouttiere) 92px;
 
   /* Deux panneaux photo encadrent la colonne de texte, comme sur les
      sites de maîtrise d'œuvre : la photo porte le message, le texte reste
@@ -383,7 +383,18 @@ nav.main a.active { color: var(--nuit); background: var(--ocre); }
 
 /* ---------- Structure ---------- */
 
-.container { max-width: 1180px; margin: 0 auto; padding: 0 20px; }
+/* La marge latérale du site tient dans une seule variable : elle était
+   auparavant recopiée à trois endroits — conteneur, héros, pied de page —
+   avec trois valeurs différentes (20, 18 et 20 px), si bien que le
+   contenu ne s'alignait pas d'un bloc à l'autre. Elle se desserre un peu
+   sur téléphone, où le texte court les bords. */
+:root { --gouttiere: 20px; }
+
+@media (max-width: 600px) {
+  :root { --gouttiere: 22px; }
+}
+
+.container { max-width: 1180px; margin: 0 auto; padding: 0 var(--gouttiere); }
 
 section { padding: 84px 0; }
 
@@ -411,7 +422,11 @@ section h2::after {
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  /* minmax(min(Npx, 100%), 1fr) et non minmax(Npx, 1fr) : une piste de
+     largeur minimale fixe refuse de descendre sous cette valeur même
+     quand le conteneur est plus étroit, et déborde alors de l'écran.
+     C'est ce qui décalait les colonnes sur un écran de 320 px. */
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
   gap: 24px;
   margin-top: 48px;
 }
@@ -513,7 +528,7 @@ section h2::after {
 
 .projet-meta {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr));
   gap: 18px;
   margin: 22px 0;
   padding: 20px;
@@ -612,7 +627,13 @@ section h2::after {
 
 /* La barre flottante déborde sur le contenu : les pages sans héros
    doivent réserver la place. */
-.page-detail { padding: 122px 0 40px; }
+/* Padding vertical seulement : « .page-detail » a la même spécificité que
+   « .container » et vient après lui dans la feuille, si bien qu'un
+   raccourci « padding: 122px 0 40px » y écrasait le « padding: 0 20px »
+   du conteneur. Les quinze pages construites sur ce gabarit avaient donc
+   une gouttière nulle : titres et paragraphes touchaient le bord de
+   l'écran. Les longhands ne touchent qu'à l'axe vertical. */
+.page-detail { padding-top: 122px; padding-bottom: 40px; }
 
 .page-detail h1 {
   font-size: clamp(28px, 4.4vw, 44px);
@@ -895,7 +916,7 @@ input:focus, textarea:focus, select:focus {
 
 footer {
   margin-top: 96px;
-  padding: 56px 20px 44px;
+  padding: 56px var(--gouttiere) 44px;
   text-align: center;
   color: #fff;
   border-radius: var(--r-xl) var(--r-xl) 0 0;
@@ -974,7 +995,7 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
   /* Les panneaux passent en bandeau unique sous le texte. */
   .hero {
     grid-template-columns: 1fr;
-    padding: 132px 18px 30px;
+    padding: 132px var(--gouttiere) 30px;
     border-radius: 0 0 var(--r-l) var(--r-l);
     gap: 28px;
   }
@@ -983,7 +1004,14 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
   .hero-centre { order: 1; padding: 0; }
 
   section { padding: 60px 0; }
-  .page-detail { padding: 176px 0 30px; }
+
+  /* Sur téléphone, la marge basse de l'introduction et le rembourrage
+     haut de la première section s'additionnaient : 148 px de vide entre
+     le chapeau et le premier bloc, à faire défiler avant d'atteindre le
+     contenu. */
+  .page-detail-intro { margin-bottom: 24px; }
+  .page-detail > section:first-of-type { padding-top: 10px; }
+  .page-detail { padding-top: 176px; padding-bottom: 30px; }
   .grid { grid-template-columns: 1fr; gap: 18px; }
   .projet-meta { grid-template-columns: 1fr 1fr; }
   .projet-content { padding: 24px 20px; }
@@ -1731,7 +1759,7 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
 
 .dpe-import-options {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
   gap: 24px;
   margin-top: 8px;
 }
@@ -1855,12 +1883,12 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
 
 .dpe-grille-champs {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
   gap: 22px;
   margin-bottom: 24px;
 }
 
-.dpe-grille-3 { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+.dpe-grille-3 { grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr)); }
 
 .dpe-section-titre {
   font-size: 11px;
@@ -1989,7 +2017,7 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
 
 .dpe-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
   gap: 18px;
   margin-bottom: 32px;
 }
@@ -2110,7 +2138,7 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
 
 .dpe-confort-grille {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(140px, 100%), 1fr));
   gap: 18px;
 }
 
@@ -2531,6 +2559,23 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
   .dpe-gestes th,
   .dpe-gestes td { padding-right: 10px; }
   .dpe-gestes { min-width: 560px; }
+}
+
+/* Encadré de formulaire (page contact). Le style était en ligne, avec
+   40 px de marge intérieure : sur un écran de 320 px, cela ne laissait
+   que 194 px au formulaire, et les champs débordaient. La marge se
+   resserre donc sur les petits écrans. */
+
+.bloc-encadre {
+  background: var(--surface);
+  border: 1px solid var(--filet);
+  border-radius: var(--r-m);
+  padding: 40px;
+  margin-top: 48px;
+}
+
+@media (max-width: 600px) {
+  .bloc-encadre { padding: 26px 20px; margin-top: 36px; }
 }
 
 /* --- Carrousel des chantiers en cours (page d'accueil) ---
