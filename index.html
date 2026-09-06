@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CP Constructions — Maîtrise d'Œuvre</title>
   <link rel="icon" href="assets/logo-icon.png">
-  <link rel="stylesheet" href="css/style.css?v=36">
-  <script src="js/anim.js?v=36" defer></script>
+  <link rel="stylesheet" href="css/style.css?v=37">
+  <script src="js/anim.js?v=37" defer></script>
 </head>
 <body>
 
@@ -165,7 +165,8 @@
 
 <section class="container">
   <h2>Chantiers en cours</h2>
-  <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));">
+  <div class="chantiers-carrousel">
+    <div class="chantiers-piste" id="chantiers-piste">
 
     <div class="projet">
       <div class="chantier-teaser-photo">
@@ -295,8 +296,14 @@
       </div>
     </div>
 
+    </div>
+    <div class="chantiers-nav" hidden>
+      <button type="button" class="chantiers-fleche" data-sens="-1" aria-label="Chantier précédent">‹</button>
+      <div class="chantiers-points" role="tablist" aria-label="Choisir un chantier"></div>
+      <button type="button" class="chantiers-fleche" data-sens="1" aria-label="Chantier suivant">›</button>
+    </div>
   </div>
-  <div style="text-align: center; margin-top: 44px;">
+  <div style="text-align: center; margin-top: 34px;">
     <a href="chantiers.html" class="btn sombre">Voir tous les chantiers en cours</a>
   </div>
 </section>

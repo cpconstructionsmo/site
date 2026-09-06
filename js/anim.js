@@ -284,6 +284,96 @@
     }, index * 1200);
   });
 
+  /* --- 6bis. Carrousel des chantiers en cours (page d'accueil) ---
+     La piste défile déjà toute seule au doigt grâce à l'accroche CSS :
+     ce bloc n'ajoute que le confort, flèches, pastilles et défilement
+     automatique. S'il ne s'exécute pas, la nav reste masquée et le
+     balayage continue de fonctionner. */
+
+  var piste = document.getElementById('chantiers-piste');
+  var navChantiers = piste && piste.parentElement.querySelector('.chantiers-nav');
+
+  if (piste && navChantiers) {
+    var fiches = piste.querySelectorAll('.projet');
+
+    if (fiches.length > 1) {
+      var points = navChantiers.querySelector('.chantiers-points');
+      var precedent = navChantiers.querySelector('[data-sens="-1"]');
+      var suivant = navChantiers.querySelector('[data-sens="1"]');
+      var courant = 0;
+      var minuterie = null;
+
+      Array.prototype.forEach.call(fiches, function (fiche, i) {
+        var titre = fiche.querySelector('h3');
+        var point = document.createElement('button');
+        point.type = 'button';
+        point.setAttribute('role', 'tab');
+        point.setAttribute('aria-selected', i === 0 ? 'true' : 'false');
+        point.setAttribute('aria-label', titre ? titre.textContent.trim() : 'Chantier ' + (i + 1));
+        point.addEventListener('click', function () { arreter(); aller(i); });
+        points.appendChild(point);
+      });
+
+      var pastilles = points.children;
+
+      function aller(i) {
+        courant = Math.max(0, Math.min(fiches.length - 1, i));
+        // scrollIntoView ferait aussi défiler la page verticalement :
+        // on ne touche qu'au décalage horizontal de la piste.
+        piste.scrollTo({ left: fiches[courant].offsetLeft - piste.offsetLeft,
+                         behavior: mouvementReduit ? 'auto' : 'smooth' });
+        majNav();
+      }
+
+      function majNav() {
+        Array.prototype.forEach.call(pastilles, function (b, i) {
+          b.setAttribute('aria-selected', i === courant ? 'true' : 'false');
+        });
+        precedent.disabled = courant === 0;
+        suivant.disabled = courant === fiches.length - 1;
+      }
+
+      function arreter() {
+        // Une fois que la personne a pris la main, la rotation ne
+        // reprend pas : rien ne doit bouger pendant qu'elle lit.
+        if (minuterie) { window.clearInterval(minuterie); minuterie = null; }
+      }
+
+      precedent.addEventListener('click', function () { arreter(); aller(courant - 1); });
+      suivant.addEventListener('click', function () { arreter(); aller(courant + 1); });
+
+      // Le défilement au doigt fait foi : on recale les pastilles dessus.
+      var recalage = null;
+      piste.addEventListener('scroll', function () {
+        window.clearTimeout(recalage);
+        recalage = window.setTimeout(function () {
+          var milieu = piste.scrollLeft + piste.clientWidth / 2;
+          var proche = 0;
+          Array.prototype.forEach.call(fiches, function (fiche, i) {
+            var centre = fiche.offsetLeft - piste.offsetLeft + fiche.offsetWidth / 2;
+            var refCentre = fiches[proche].offsetLeft - piste.offsetLeft + fiches[proche].offsetWidth / 2;
+            if (Math.abs(centre - milieu) < Math.abs(refCentre - milieu)) proche = i;
+          });
+          if (proche !== courant) { courant = proche; majNav(); }
+        }, 120);
+      }, { passive: true });
+
+      piste.addEventListener('pointerdown', arreter, { passive: true });
+
+      navChantiers.hidden = false;
+      majNav();
+
+      if (!mouvementReduit) {
+        minuterie = window.setInterval(function () {
+          aller(courant === fiches.length - 1 ? 0 : courant + 1);
+        }, 7000);
+        // On suspend pendant la lecture, sans annuler la rotation.
+        piste.addEventListener('mouseenter', arreter);
+        piste.addEventListener('focusin', arreter);
+      }
+    }
+  }
+
   /* --- 7. Apparitions au défilement ---
      Sans IntersectionObserver, ou en mouvement réduit, on ne pose jamais
      la classe .reveal : les contenus restent simplement visibles. */
@@ -303,6 +393,10 @@
   // apparition : on ne garde que les blocs de plus haut niveau, sinon les
   // titres intérieurs apparaissent deux fois.
   var elements = Array.prototype.filter.call(candidats, function (el) {
+    // Une fiche du carrousel est hors champ tant qu'on ne l'a pas fait
+    // défiler : lui donner une apparition la laisserait transparente,
+    // et elle arriverait vide au bout de la flèche.
+    if (el.closest && el.closest('.chantiers-piste')) return false;
     for (var p = el.parentElement; p; p = p.parentElement) {
       if (Array.prototype.indexOf.call(candidats, p) !== -1) return false;
     }

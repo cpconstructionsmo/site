@@ -2533,6 +2533,113 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
   .dpe-gestes { min-width: 560px; }
 }
 
+/* --- Carrousel des chantiers en cours (page d'accueil) ---
+   Les quatre chantiers étaient affichés côte à côte : sur un écran large
+   la grille les tassait, et sur téléphone il fallait dérouler quatre
+   fiches complètes avant d'atteindre la suite de la page. Ils défilent
+   maintenant un par un.
+
+   La piste est un simple conteneur à défilement horizontal avec accroche :
+   le balayage au doigt fonctionne sans une ligne de JavaScript, et les
+   flèches comme les pastilles ne sont révélées que si le script tourne. */
+
+.chantiers-carrousel { position: relative; }
+
+.chantiers-piste {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  /* la carte se soulève au survol : sans marge verticale elle serait
+     rognée par le conteneur à défilement. Rien horizontalement, sinon un
+     liseré de la fiche suivante dépasse sur le bord droit. */
+  padding: 6px 0 10px;
+}
+.chantiers-piste::-webkit-scrollbar { display: none; }
+
+.chantiers-piste > .projet {
+  flex: 0 0 100%;
+  min-width: 0;
+  scroll-snap-align: center;
+  margin-bottom: 0;
+}
+
+/* Sur écran large, une fiche seule occuperait toute la largeur et sa
+   photo, au format 16/10, ferait plus de 700 px de haut. Photo et texte
+   passent donc côte à côte. */
+@media (min-width: 861px) {
+  .chantiers-piste > .projet {
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    align-items: stretch;
+  }
+  .chantiers-piste > .projet .chantier-teaser-photo {
+    aspect-ratio: auto;
+    height: 100%;
+    min-height: 400px;
+  }
+  .chantiers-piste > .projet .projet-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+}
+
+.chantiers-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.chantiers-fleche {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1.5px solid var(--filet);
+  background: var(--surface);
+  color: var(--brique);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition), color var(--transition);
+}
+
+.chantiers-fleche:hover:not(:disabled) {
+  background: var(--brique);
+  border-color: var(--brique);
+  color: #fff;
+}
+
+.chantiers-fleche:disabled { opacity: .35; cursor: default; }
+
+.chantiers-points { display: flex; align-items: center; gap: 9px; }
+
+.chantiers-points button {
+  width: 9px;
+  height: 9px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--filet);
+  cursor: pointer;
+  transition: background var(--transition), width var(--transition);
+}
+
+.chantiers-points button[aria-selected="true"] {
+  width: 26px;
+  border-radius: var(--pilule);
+  background: var(--brique);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chantiers-piste { scroll-behavior: auto; }
+  .chantiers-points button { transition: none; }
+}
+
 /* --- Barème de ressources MaPrimeRénov' ---
    Le simulateur demandait de cocher « très modestes / modestes /
    intermédiaires / supérieurs » sans dire à quoi cela correspond : sans
