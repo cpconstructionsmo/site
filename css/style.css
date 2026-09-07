@@ -270,7 +270,7 @@ nav.main a.active { color: var(--nuit); background: var(--ocre); }
    qu'au fil du diaporama ; leur photo attend dans data-fond-diapo et
    n'est demandée qu'à cet instant (voir anim.js). Le dégradé tient la
    place, et suffit si le script ne tourne pas. */
-.diapo:nth-child(1) { background-image: url("../assets/hero/1.jpg"), linear-gradient(150deg, #6B4030, #3A211A); }
+.diapo:nth-child(1) { background-image: url("../assets/hero/1.webp"), linear-gradient(150deg, #6B4030, #3A211A); }
 .diapo:nth-child(2) { background-image: linear-gradient(150deg, #8A5A3C, #46251A); }
 .diapo:nth-child(3) { background-image: linear-gradient(150deg, #B08050, #55301F); }
 .diapo:nth-child(4) { background-image: linear-gradient(150deg, #5E3A2C, #2E1913); }
@@ -1118,248 +1118,248 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
 }
 
 .photo-projet[data-photo="1"] {
-  background-image: url("../assets/projets/magny-1.jpg"),
+  background-image: url("../assets/projets/magny-1.webp"),
                     linear-gradient(140deg, #C9BFAC, #7E6F58);
 }
 
 .photo-projet[data-photo="2"] {
-  background-image: url("../assets/projets/magny-2.jpg"),
+  background-image: url("../assets/projets/magny-2.webp"),
                     linear-gradient(140deg, #B3A894, #635847);
 }
 
 /* Chantier de Charchigné, dans l'ordre chronologique. */
 .photo-projet[data-photo="charchigne-1"] {
-  background-image: url("../assets/chantiers/charchigne-1.jpg"),
+  background-image: url("../assets/chantiers/charchigne-1.webp"),
                     linear-gradient(140deg, #C2B49A, #6B5A42);
 }
 
 .photo-projet[data-photo="charchigne-2"] {
-  background-image: url("../assets/chantiers/charchigne-2.jpg"),
+  background-image: url("../assets/chantiers/charchigne-2.webp"),
                     linear-gradient(140deg, #A99C86, #564C3D);
 }
 
 .photo-projet[data-photo="charchigne-3"] {
-  background-image: url("../assets/chantiers/charchigne-3.jpg"),
+  background-image: url("../assets/chantiers/charchigne-3.webp"),
                     linear-gradient(140deg, #B0A188, #574B39);
 }
 
 .photo-projet[data-photo="charchigne-4"] {
-  background-image: url("../assets/chantiers/charchigne-4.jpg"),
+  background-image: url("../assets/chantiers/charchigne-4.webp"),
                     linear-gradient(140deg, #9C8F79, #4E4335);
 }
 
 .photo-projet[data-photo="charchigne-5"] {
-  background-image: url("../assets/chantiers/charchigne-5.jpg"),
+  background-image: url("../assets/chantiers/charchigne-5.webp"),
                     linear-gradient(140deg, #A89A80, #4F4433);
 }
 
 .photo-projet[data-photo="charchigne-6"] {
-  background-image: url("../assets/chantiers/charchigne-6.jpg"),
+  background-image: url("../assets/chantiers/charchigne-6.webp"),
                     linear-gradient(140deg, #94886F, #453B2C);
 }
 
 .photo-projet[data-photo="charchigne-7"] {
-  background-image: url("../assets/chantiers/charchigne-7.jpg"),
+  background-image: url("../assets/chantiers/charchigne-7.webp"),
                     linear-gradient(140deg, #94886F, #453B2C);
 }
 .photo-projet[data-photo="charchigne-8"] {
-  background-image: url("../assets/chantiers/charchigne-8.jpg"),
+  background-image: url("../assets/chantiers/charchigne-8.webp"),
                     linear-gradient(140deg, #94886F, #453B2C);
 }
 .photo-projet[data-photo="charchigne-9"] {
-  background-image: url("../assets/chantiers/charchigne-9.jpg"),
+  background-image: url("../assets/chantiers/charchigne-9.webp"),
                     linear-gradient(140deg, #94886F, #453B2C);
 }
 .photo-projet[data-photo="charchigne-10"] {
-  background-image: url("../assets/chantiers/charchigne-10.jpg"),
+  background-image: url("../assets/chantiers/charchigne-10.webp"),
                     linear-gradient(140deg, #94886F, #453B2C);
 }
 
 /* Chantier de Ceaucé, dans l'ordre chronologique. */
 .photo-projet[data-photo="ceauce-1"] {
-  background-image: url("../assets/chantiers/ceauce-1.jpg"),
+  background-image: url("../assets/chantiers/ceauce-1.webp"),
                     linear-gradient(140deg, #C7B99C, #6E5C40);
 }
 
 .photo-projet[data-photo="ceauce-2"] {
-  background-image: url("../assets/chantiers/ceauce-2.jpg"),
+  background-image: url("../assets/chantiers/ceauce-2.webp"),
                     linear-gradient(140deg, #B8AA8C, #5F4E36);
 }
 
 .photo-projet[data-photo="ceauce-3"] {
-  background-image: url("../assets/chantiers/ceauce-3.jpg"),
+  background-image: url("../assets/chantiers/ceauce-3.webp"),
                     linear-gradient(140deg, #ACA083, #55452F);
 }
 
 .photo-projet[data-photo="ceauce-4"] {
-  background-image: url("../assets/chantiers/ceauce-4.jpg"),
+  background-image: url("../assets/chantiers/ceauce-4.webp"),
                     linear-gradient(140deg, #A79A7C, #504029);
 }
 
 .photo-projet[data-photo="ceauce-5"] {
-  background-image: url("../assets/chantiers/ceauce-5.jpg"),
+  background-image: url("../assets/chantiers/ceauce-5.webp"),
                     linear-gradient(140deg, #9F9375, #4A3B26);
 }
 
 .photo-projet[data-photo="ceauce-6"] {
-  background-image: url("../assets/chantiers/ceauce-6.jpg"),
+  background-image: url("../assets/chantiers/ceauce-6.webp"),
                     linear-gradient(140deg, #97917E, #443F30);
 }
 
 .photo-projet[data-photo="ceauce-7"] {
-  background-image: url("../assets/chantiers/ceauce-7.jpg"),
+  background-image: url("../assets/chantiers/ceauce-7.webp"),
                     linear-gradient(140deg, #A6ADB4, #3E444A);
 }
 
 .photo-projet[data-photo="ceauce-8"] {
-  background-image: url("../assets/chantiers/ceauce-8.jpg"),
+  background-image: url("../assets/chantiers/ceauce-8.webp"),
                     linear-gradient(140deg, #9CA4AC, #383E44);
 }
 
 .photo-projet[data-photo="ceauce-9"] {
-  background-image: url("../assets/chantiers/ceauce-9.jpg"),
+  background-image: url("../assets/chantiers/ceauce-9.webp"),
                     linear-gradient(140deg, #A8ADAF, #3C4143);
 }
 
 .photo-projet[data-photo="ceauce-10"] {
-  background-image: url("../assets/chantiers/ceauce-10.jpg"),
+  background-image: url("../assets/chantiers/ceauce-10.webp"),
                     linear-gradient(140deg, #A2A7A3, #3A3F3C);
 }
 
 /* Chantier de Saint-Cyr-en-Pail, dans l'ordre chronologique. */
 .photo-projet[data-photo="saintcyr-1"] {
-  background-image: url("../assets/chantiers/saintcyr-1.jpg"),
+  background-image: url("../assets/chantiers/saintcyr-1.webp"),
                     linear-gradient(140deg, #C7C2A8, #6E6A50);
 }
 
 .photo-projet[data-photo="saintcyr-2"] {
-  background-image: url("../assets/chantiers/saintcyr-2.jpg"),
+  background-image: url("../assets/chantiers/saintcyr-2.webp"),
                     linear-gradient(140deg, #BEB9A0, #656148);
 }
 
 .photo-projet[data-photo="saintcyr-3"] {
-  background-image: url("../assets/chantiers/saintcyr-3.jpg"),
+  background-image: url("../assets/chantiers/saintcyr-3.webp"),
                     linear-gradient(140deg, #B5B098, #5C5840);
 }
 
 .photo-projet[data-photo="saintcyr-4"] {
-  background-image: url("../assets/chantiers/saintcyr-4.jpg"),
+  background-image: url("../assets/chantiers/saintcyr-4.webp"),
                     linear-gradient(140deg, #ACA890, #534F39);
 }
 
 .photo-projet[data-photo="saintcyr-5"] {
-  background-image: url("../assets/chantiers/saintcyr-5.jpg"),
+  background-image: url("../assets/chantiers/saintcyr-5.webp"),
                     linear-gradient(140deg, #A3A088, #4A4732);
 }
 
 .photo-projet[data-photo="saintcyr-6"] {
-  background-image: url("../assets/chantiers/saintcyr-6.jpg"),
+  background-image: url("../assets/chantiers/saintcyr-6.webp"),
                     linear-gradient(140deg, #9A9780, #41402C);
 }
 
 .photo-projet[data-photo="saintcyr-7"] {
-  background-image: url("../assets/chantiers/saintcyr-7.jpg"),
+  background-image: url("../assets/chantiers/saintcyr-7.webp"),
                     linear-gradient(140deg, #ABB0B4, #40454A);
 }
 
 .photo-projet[data-photo="saintcyr-8"] {
-  background-image: url("../assets/chantiers/saintcyr-8.jpg"),
+  background-image: url("../assets/chantiers/saintcyr-8.webp"),
                     linear-gradient(140deg, #A2A7A9, #383D40);
 }
 
 .photo-projet[data-photo="saintcyr-9"] {
-  background-image: url("../assets/chantiers/saintcyr-9.jpg"),
+  background-image: url("../assets/chantiers/saintcyr-9.webp"),
                     linear-gradient(140deg, #999E9E, #303436);
 }
 
 /* Chantier de Saint-Julien-sur-Sarthe, dans l'ordre chronologique. */
 .photo-projet[data-photo="saintjulien-1"] {
-  background-image: url("../assets/chantiers/saintjulien-1.jpg"),
+  background-image: url("../assets/chantiers/saintjulien-1.webp"),
                     linear-gradient(140deg, #C9C2A8, #6E6A50);
 }
 
 .photo-projet[data-photo="saintjulien-2"] {
-  background-image: url("../assets/chantiers/saintjulien-2.jpg"),
+  background-image: url("../assets/chantiers/saintjulien-2.webp"),
                     linear-gradient(140deg, #C0B9A0, #656148);
 }
 
 .photo-projet[data-photo="saintjulien-3"] {
-  background-image: url("../assets/chantiers/saintjulien-3.jpg"),
+  background-image: url("../assets/chantiers/saintjulien-3.webp"),
                     linear-gradient(140deg, #B7B098, #5C5840);
 }
 
 .photo-projet[data-photo="saintjulien-4"] {
-  background-image: url("../assets/chantiers/saintjulien-4.jpg"),
+  background-image: url("../assets/chantiers/saintjulien-4.webp"),
                     linear-gradient(140deg, #AEA890, #534F39);
 }
 
 .photo-projet[data-photo="saintjulien-5"] {
-  background-image: url("../assets/chantiers/saintjulien-5.jpg"),
+  background-image: url("../assets/chantiers/saintjulien-5.webp"),
                     linear-gradient(140deg, #A5A088, #4A4732);
 }
 
 .photo-projet[data-photo="saintjulien-6"] {
-  background-image: url("../assets/chantiers/saintjulien-6.jpg"),
+  background-image: url("../assets/chantiers/saintjulien-6.webp"),
                     linear-gradient(140deg, #9C9780, #41402C);
 }
 
 .photo-projet[data-photo="saintjulien-7"] {
-  background-image: url("../assets/chantiers/saintjulien-7.jpg"),
+  background-image: url("../assets/chantiers/saintjulien-7.webp"),
                     linear-gradient(140deg, #93A0B4, #40454A);
 }
 
 .photo-projet[data-photo="saintjulien-8"] {
-  background-image: url("../assets/chantiers/saintjulien-8.jpg"),
+  background-image: url("../assets/chantiers/saintjulien-8.webp"),
                     linear-gradient(140deg, #8AA7A9, #383D40);
 }
 
 .photo-projet[data-photo="saintjulien-9"] {
-  background-image: url("../assets/chantiers/saintjulien-9.jpg"),
+  background-image: url("../assets/chantiers/saintjulien-9.webp"),
                     linear-gradient(140deg, #819E9E, #303436);
 }
 
 .photo-projet[data-photo="saintjulien-10"] {
-  background-image: url("../assets/chantiers/saintjulien-10.jpg"),
+  background-image: url("../assets/chantiers/saintjulien-10.webp"),
                     linear-gradient(140deg, #C9BFAC, #7E6F58);
 }
 
 .photo-projet[data-photo="saintjulien-11"] {
-  background-image: url("../assets/chantiers/saintjulien-11.jpg"),
+  background-image: url("../assets/chantiers/saintjulien-11.webp"),
                     linear-gradient(140deg, #B3A894, #635847);
 }
 
 .photo-projet[data-photo="saintjulien-12"] {
-  background-image: url("../assets/chantiers/saintjulien-12.jpg"),
+  background-image: url("../assets/chantiers/saintjulien-12.webp"),
                     linear-gradient(140deg, #9DA0A4, #4A4E50);
 }
 
 .photo-projet[data-photo="saintjulien-13"] {
-  background-image: url("../assets/chantiers/saintjulien-13.jpg"),
+  background-image: url("../assets/chantiers/saintjulien-13.webp"),
                     linear-gradient(140deg, #8A9296, #3A3E40);
 }
 
 .photo-projet[data-photo="saintjulien-14"] {
-  background-image: url("../assets/chantiers/saintjulien-14.jpg"),
+  background-image: url("../assets/chantiers/saintjulien-14.webp"),
                     linear-gradient(140deg, #B0A88C, #584F38);
 }
 
 .photo-projet[data-photo="saintjulien-15"] {
-  background-image: url("../assets/chantiers/saintjulien-15.jpg"),
+  background-image: url("../assets/chantiers/saintjulien-15.webp"),
                     linear-gradient(140deg, #A79F84, #4F4730);
 }
 
 .photo-projet[data-photo="saintjulien-16"] {
-  background-image: url("../assets/chantiers/saintjulien-16.jpg"),
+  background-image: url("../assets/chantiers/saintjulien-16.webp"),
                     linear-gradient(140deg, #9E9E9E, #4A4A4A);
 }
 
 .photo-projet[data-photo="saintjulien-17"] {
-  background-image: url("../assets/chantiers/saintjulien-17.jpg"),
+  background-image: url("../assets/chantiers/saintjulien-17.webp"),
                     linear-gradient(140deg, #8C9294, #3D4142);
 }
 
 .photo-projet[data-photo="saintjulien-18"] {
-  background-image: url("../assets/chantiers/saintjulien-18.jpg"),
+  background-image: url("../assets/chantiers/saintjulien-18.webp"),
                     linear-gradient(140deg, #7A8586, #2E3334);
 }
 
