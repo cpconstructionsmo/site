@@ -24,8 +24,9 @@
   <link rel="icon" href="assets/logo-icon.png">
   <link rel="apple-touch-icon" href="assets/logo-icon.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-  <link rel="stylesheet" href="css/style.css?v=51">
-  <script src="js/anim.js?v=51" defer></script>
+  <link rel="stylesheet" href="css/style.css?v=52">
+  <script src="js/anim.js?v=52" defer></script>
+  <script src="js/formulaires.js?v=1" defer></script>
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -806,7 +807,13 @@
               <input type="email" id="dpe-lead-email" required>
             </div>
           </div>
+          <label class="piege-robot" aria-hidden="true">
+            Ne pas remplir ce champ
+            <input type="checkbox" name="botcheck" tabindex="-1" autocomplete="off">
+          </label>
+
           <button type="submit" class="btn">Être contacté(e) par un expert</button>
+          <div class="statut-formulaire" id="dpe-form-statut" hidden></div>
         </form>
       </div>
 
@@ -3035,21 +3042,36 @@
 
   document.getElementById('dpe-form').addEventListener('submit', function (e) {
     e.preventDefault();
+    var formulaire = e.target;
     var nom = document.getElementById('dpe-lead-nom').value;
     var tel = document.getElementById('dpe-lead-tel').value;
     var email = document.getElementById('dpe-lead-email').value;
     var classeActuelle = 'Classe ' + (etat.derniereClasseRetenue || '?');
 
     var sujet = 'Estimation DPE - ' + nom;
-    var corps = 'Nom: ' + nom + '%0ATel: ' + tel + '%0AEmail: ' + email +
+    var corpsMailto = 'Nom: ' + nom + '%0ATel: ' + tel + '%0AEmail: ' + email +
       '%0AAdresse: ' + etat.adresseTexte +
       '%0ASurface: ' + etat.surface + ' m²' +
       '%0A' + classeActuelle +
       '%0AOccupation: ' + etat.occupation +
       '%0ADélai souhaité: ' + etat.delai +
       (etat.dpeConnu ? '%0A(DPE existant importé par le client)' : '');
+    var mailtoSecours = 'mailto:contact@cpconstructions.fr?subject=' +
+      encodeURIComponent(sujet) + '&body=' + corpsMailto;
 
-    window.location.href = 'mailto:contact@cpconstructions.fr?subject=' + encodeURIComponent(sujet) + '&body=' + corps;
+    envoyerFormulaire(
+      formulaire,
+      formulaire.querySelector('button[type="submit"]'),
+      document.getElementById('dpe-form-statut'),
+      {
+        from_name: nom, nom: nom, telephone: tel, email: email, replyto: email,
+        adresse: etat.adresseTexte, surface_m2: etat.surface, classe_estimee: classeActuelle,
+        occupation: etat.occupation, delai_souhaite: etat.delai,
+        dpe_existant_importe: etat.dpeConnu ? 'oui' : 'non'
+      },
+      sujet,
+      mailtoSecours
+    );
   });
 
   initCarte();

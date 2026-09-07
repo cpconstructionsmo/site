@@ -3228,3 +3228,49 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
 main[tabindex]:focus, main[tabindex]:focus-visible { outline: none; }
 /* (sélecteur avec [tabindex] : sinon la règle générique
    [tabindex]:focus-visible, plus spécifique, l'emporterait) */
+
+
+/* ---------- Statut d'envoi des formulaires ----------
+   Même emplacement pour la confirmation et l'échec : le message
+   remplace le précédent plutôt que de s'empiler. */
+
+.statut-formulaire {
+  margin-top: 16px;
+  padding: 14px 18px;
+  border-radius: var(--r-s, 6px);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.statut-formulaire[hidden] { display: none; }
+
+.statut-formulaire-succes {
+  background: #EAF3EA;
+  color: #2F5233;
+  border: 1px solid #C3DCC5;
+}
+
+.statut-formulaire-erreur {
+  background: #FBEBE7;
+  color: var(--brique-fonce);
+  border: 1px solid #F0C9BE;
+}
+
+.statut-formulaire-erreur a { color: inherit; text-decoration: underline; }
+
+.btn[disabled], .cta[disabled] {
+  opacity: .65;
+  cursor: wait;
+  transform: none !important;
+}
+
+/* Piège à robots : champ invisible que seul un script automatisé
+   remplit. Un humain ne le voit ni au clavier ni à la souris. */
+.piege-robot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
