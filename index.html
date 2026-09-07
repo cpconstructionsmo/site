@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CP Constructions — Maîtrise d'Œuvre</title>
   <link rel="icon" href="assets/logo-icon.png">
-  <link rel="stylesheet" href="css/style.css?v=44">
-  <script src="js/anim.js?v=44" defer></script>
+  <link rel="stylesheet" href="css/style.css?v=48">
+  <script src="js/anim.js?v=48" defer></script>
 </head>
 <body>
 
@@ -45,21 +45,21 @@
         <source src="assets/hero/1.mp4" type="video/mp4">
       </video>
     </div>
-    <div class="diapo">
+    <div class="diapo" data-fond-diapo="assets/hero/2.jpg">
       <video class="diapo-video" muted loop playsinline preload="none"
-             poster="assets/hero/2.jpg">
+             data-poster="assets/hero/2.jpg">
         <source src="assets/hero/2.mp4" type="video/mp4">
       </video>
     </div>
-    <div class="diapo">
+    <div class="diapo" data-fond-diapo="assets/hero/3.jpg">
       <video class="diapo-video" muted loop playsinline preload="none"
-             poster="assets/hero/3.jpg">
+             data-poster="assets/hero/3.jpg">
         <source src="assets/hero/3.mp4" type="video/mp4">
       </video>
     </div>
-    <div class="diapo">
+    <div class="diapo" data-fond-diapo="assets/hero/4.jpg">
       <video class="diapo-video" muted loop playsinline preload="none"
-             poster="assets/hero/4.jpg">
+             data-poster="assets/hero/4.jpg">
         <source src="assets/hero/4.mp4" type="video/mp4">
       </video>
     </div>
@@ -83,21 +83,21 @@
         <source src="assets/hero/1.mp4" type="video/mp4">
       </video>
     </div>
-    <div class="diapo">
+    <div class="diapo" data-fond-diapo="assets/hero/2.jpg">
       <video class="diapo-video" muted loop playsinline preload="none"
-             poster="assets/hero/2.jpg">
+             data-poster="assets/hero/2.jpg">
         <source src="assets/hero/2.mp4" type="video/mp4">
       </video>
     </div>
-    <div class="diapo">
+    <div class="diapo" data-fond-diapo="assets/hero/3.jpg">
       <video class="diapo-video" muted loop playsinline preload="none"
-             poster="assets/hero/3.jpg">
+             data-poster="assets/hero/3.jpg">
         <source src="assets/hero/3.mp4" type="video/mp4">
       </video>
     </div>
-    <div class="diapo">
+    <div class="diapo" data-fond-diapo="assets/hero/4.jpg">
       <video class="diapo-video" muted loop playsinline preload="none"
-             poster="assets/hero/4.jpg">
+             data-poster="assets/hero/4.jpg">
         <source src="assets/hero/4.mp4" type="video/mp4">
       </video>
     </div>
@@ -130,7 +130,8 @@
   <h2>Nos réalisations</h2>
   <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr));">
     <div class="projet">
-      <div class="projet-image" data-photo="1">Maison neuve à Magny-le-Désert</div>
+      <div class="projet-image" data-photo="1"
+           data-differe="assets/projets/magny-1.jpg">Maison neuve à Magny-le-Désert</div>
       <div class="projet-content">
         <h3>Maison neuve à Magny-le-Désert</h3>
         <div class="projet-meta">
@@ -171,9 +172,9 @@
     <div class="projet">
       <div class="chantier-teaser-photo">
         <div class="mini-diapo actif" style="background-image: url('assets/chantiers/saintjulien-2.jpg')"></div>
-        <div class="mini-diapo" style="background-image: url('assets/chantiers/saintjulien-9.jpg')"></div>
-        <div class="mini-diapo" style="background-image: url('assets/chantiers/saintjulien-15.jpg')"></div>
-        <div class="mini-diapo" style="background-image: url('assets/chantiers/saintjulien-18.jpg')"></div>
+        <div class="mini-diapo" data-fond="assets/chantiers/saintjulien-9.jpg"></div>
+        <div class="mini-diapo" data-fond="assets/chantiers/saintjulien-15.jpg"></div>
+        <div class="mini-diapo" data-fond="assets/chantiers/saintjulien-18.jpg"></div>
       </div>
       <div class="projet-content">
         <h3>Second œuvre à Saint-Julien-sur-Sarthe</h3>
@@ -202,10 +203,10 @@
 
     <div class="projet">
       <div class="chantier-teaser-photo">
-        <div class="mini-diapo actif" style="background-image: url('assets/chantiers/ceauce-1.jpg')"></div>
-        <div class="mini-diapo" style="background-image: url('assets/chantiers/ceauce-4.jpg')"></div>
-        <div class="mini-diapo" style="background-image: url('assets/chantiers/ceauce-6.jpg')"></div>
-        <div class="mini-diapo" style="background-image: url('assets/chantiers/ceauce-9.jpg')"></div>
+        <div class="mini-diapo actif" data-fond="assets/chantiers/ceauce-1.jpg"></div>
+        <div class="mini-diapo" data-fond="assets/chantiers/ceauce-4.jpg"></div>
+        <div class="mini-diapo" data-fond="assets/chantiers/ceauce-6.jpg"></div>
+        <div class="mini-diapo" data-fond="assets/chantiers/ceauce-9.jpg"></div>
       </div>
       <div class="projet-content">
         <h3>Maison neuve à Ceaucé</h3>
@@ -234,10 +235,10 @@
 
     <div class="projet">
       <div class="chantier-teaser-photo">
-        <div class="mini-diapo actif" style="background-image: url('assets/chantiers/charchigne-1.jpg')"></div>
-        <div class="mini-diapo" style="background-image: url('assets/chantiers/charchigne-2.jpg')"></div>
-        <div class="mini-diapo" style="background-image: url('assets/chantiers/charchigne-4.jpg')"></div>
-        <div class="mini-diapo" style="background-image: url('assets/chantiers/charchigne-6.jpg')"></div>
+        <div class="mini-diapo actif" data-fond="assets/chantiers/charchigne-1.jpg"></div>
+        <div class="mini-diapo" data-fond="assets/chantiers/charchigne-2.jpg"></div>
+        <div class="mini-diapo" data-fond="assets/chantiers/charchigne-4.jpg"></div>
+        <div class="mini-diapo" data-fond="assets/chantiers/charchigne-6.jpg"></div>
       </div>
       <div class="projet-content">
         <h3>Maison neuve à Charchigné</h3>
@@ -266,10 +267,10 @@
 
     <div class="projet">
       <div class="chantier-teaser-photo">
-        <div class="mini-diapo actif" style="background-image: url('assets/chantiers/saintcyr-1.jpg')"></div>
-        <div class="mini-diapo" style="background-image: url('assets/chantiers/saintcyr-5.jpg')"></div>
-        <div class="mini-diapo" style="background-image: url('assets/chantiers/saintcyr-7.jpg')"></div>
-        <div class="mini-diapo" style="background-image: url('assets/chantiers/saintcyr-9.jpg')"></div>
+        <div class="mini-diapo actif" data-fond="assets/chantiers/saintcyr-1.jpg"></div>
+        <div class="mini-diapo" data-fond="assets/chantiers/saintcyr-5.jpg"></div>
+        <div class="mini-diapo" data-fond="assets/chantiers/saintcyr-7.jpg"></div>
+        <div class="mini-diapo" data-fond="assets/chantiers/saintcyr-9.jpg"></div>
       </div>
       <div class="projet-content">
         <h3>Maison neuve à Saint-Cyr-en-Pail</h3>
