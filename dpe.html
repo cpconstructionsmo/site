@@ -24,8 +24,8 @@
   <link rel="icon" href="assets/logo-icon.png">
   <link rel="apple-touch-icon" href="assets/logo-icon.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-  <link rel="stylesheet" href="css/style.css?v=48">
-  <script src="js/anim.js?v=48" defer></script>
+  <link rel="stylesheet" href="css/style.css?v=50">
+  <script src="js/anim.js?v=50" defer></script>
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -49,6 +49,8 @@
 </head>
 <body>
 
+<a class="lien-evitement" href="#contenu">Aller au contenu</a>
+
 <header>
   <div class="header-inner">
     <a href="/" class="logo">
@@ -71,7 +73,7 @@
   </div>
 </header>
 
-<main class="container page-detail">
+<main id="contenu" tabindex="-1" class="container page-detail">
 
 <div class="breadcrumb">
   <a href="/">Accueil</a> → Estimation DPE
@@ -148,8 +150,10 @@
         <div class="dpe-carte-recherche">
           <p class="dpe-carte-recherche-titre">Saisissez votre adresse pour obtenir une estimation de votre logement.</p>
           <div class="dpe-recherche">
-            <input type="text" id="dpe-adresse" autocomplete="off" placeholder="Saisissez votre adresse">
-            <div class="dpe-suggestions" id="dpe-suggestions" hidden></div>
+            <input type="text" id="dpe-adresse" autocomplete="off" placeholder="Saisissez votre adresse"
+                   aria-label="Adresse du logement" role="combobox" aria-expanded="false"
+                   aria-autocomplete="list" aria-controls="dpe-suggestions">
+            <div class="dpe-suggestions" id="dpe-suggestions" role="listbox" aria-label="Adresses proposées" hidden></div>
           </div>
         </div>
       </div>
@@ -167,7 +171,7 @@
       </div>
       <p class="dpe-import-statut" id="dpe-ademe-statut" hidden></p>
 
-      <p class="dpe-erreur" id="dpe-erreur-1" hidden>Merci de saisir votre adresse pour continuer.</p>
+      <p class="dpe-erreur" id="dpe-erreur-1" role="alert" hidden>Merci de saisir votre adresse pour continuer.</p>
 
       <div class="dpe-actions">
         <button type="button" class="btn" id="dpe-suivant-1">Continuer</button>
@@ -419,7 +423,7 @@
         retour affichés à la fin gagnent alors nettement en fiabilité.
       </p>
 
-      <p class="dpe-erreur" id="dpe-erreur-2" hidden>Merci de compléter tous les champs pour continuer.</p>
+      <p class="dpe-erreur" id="dpe-erreur-2" role="alert" hidden>Merci de compléter tous les champs pour continuer.</p>
 
       <div class="dpe-actions">
         <button type="button" class="dpe-precedent" data-precedent="1">Précédent</button>
@@ -513,7 +517,7 @@
         </p>
       </div>
 
-      <p class="dpe-erreur" id="dpe-erreur-3" hidden>Merci de répondre aux deux questions pour continuer.</p>
+      <p class="dpe-erreur" id="dpe-erreur-3" role="alert" hidden>Merci de répondre aux deux questions pour continuer.</p>
 
       <div class="dpe-actions">
         <button type="button" class="dpe-precedent" data-precedent="2">Précédent</button>
@@ -527,7 +531,7 @@
       <p class="dpe-soustitre" id="dpe-adresse-resultat"></p>
       <p class="dpe-source-dpe" id="dpe-source-dpe" hidden></p>
 
-      <div class="dpe-resultat-double">
+      <div class="dpe-resultat-double" role="status" aria-live="polite">
         <div class="dpe-resultat-tete">
           <div class="dpe-etiquette-classe" id="dpe-classe-energie">-</div>
           <div class="dpe-resultat-detail">
@@ -574,7 +578,8 @@
           vous obtenez une estimation plus proche de votre situation.
         </p>
         <div class="dpe-modifier-ligne">
-          <input type="number" id="dpe-modifier-valeur" min="0" step="1" placeholder="Ex : 1200">
+          <input type="number" id="dpe-modifier-valeur" min="0" step="1" placeholder="Ex : 1200"
+                 aria-label="Valeur réelle constatée">
           <span id="dpe-modifier-unite-texte">€/an</span>
         </div>
         <div class="dpe-modifier-actions">
@@ -948,6 +953,7 @@
   function masquerSuggestions() {
     suggestions.hidden = true;
     suggestions.innerHTML = '';
+    champAdresse.setAttribute('aria-expanded', 'false');
   }
 
   /* --- Zone climatique déduite du code postal ---
@@ -1292,6 +1298,7 @@
             var bouton = document.createElement('button');
             bouton.type = 'button';
             bouton.className = 'dpe-suggestion';
+            bouton.setAttribute('role', 'option');
             bouton.textContent = f.properties.label;
             bouton.addEventListener('click', function () {
               champAdresse.value = f.properties.label;
@@ -1306,6 +1313,7 @@
             suggestions.appendChild(bouton);
           });
           suggestions.hidden = false;
+          champAdresse.setAttribute('aria-expanded', 'true');
         })
         .catch(function () {
           // Le simulateur reste utilisable même si la recherche d'adresse échoue.
