@@ -3274,3 +3274,31 @@ main[tabindex]:focus, main[tabindex]:focus-visible { outline: none; }
   height: 1px;
   overflow: hidden;
 }
+
+
+/* ---------- Précision de statut (accueil) ----------
+   Lève l'ambiguïté avec les constructeurs de maison individuelle (CCMI) :
+   un visiteur pressé doit comprendre en un coup d'œil, sans lire tout un
+   article, que CP Constructions est un maître d'œuvre indépendant. */
+
+.precision-statut {
+  background: var(--fond-tiede);
+  border-left: 4px solid var(--ocre);
+  border-radius: var(--r-m);
+  padding: 22px 28px;
+  margin: 0 auto;
+  max-width: 900px;
+}
+
+.precision-statut p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--encre);
+}
+
+.precision-statut a { font-weight: 700; }
+
+@media (max-width: 600px) {
+  .precision-statut { padding: 18px 20px; }
+}
