@@ -463,7 +463,7 @@ section h2::after {
 .card:hover { transform: translateY(-6px); box-shadow: var(--ombre-l); border-color: transparent; }
 .card:hover::before { transform: scaleX(1); }
 
-.card h3 { color: var(--brique); margin: 0 0 10px; font-size: 19px; letter-spacing: -.01em; }
+.card h2, .card h3 { color: var(--brique); margin: 0 0 10px; font-size: 19px; letter-spacing: -.01em; }
 .card p  { margin: 0; font-size: 15px; color: var(--gris); }
 
 
@@ -529,7 +529,7 @@ section h2::after {
 .mini-diapo.actif { opacity: 1; }
 
 .projet-content { padding: 30px 28px; }
-.projet h3 { margin: 0 0 6px; color: var(--brique); font-size: 22px; letter-spacing: -.01em; }
+.projet h2, .projet h3 { margin: 0 0 6px; color: var(--brique); font-size: 22px; letter-spacing: -.01em; }
 
 .projet-meta {
   display: grid;
@@ -730,6 +730,46 @@ input:focus, textarea:focus, select:focus {
   outline: none;
   border-color: var(--brique);
   box-shadow: 0 0 0 4px rgba(126,59,42,.12);
+}
+
+/* ---------- Navigation au clavier ----------
+   Un visiteur qui navigue à la tabulation doit voir en permanence où il
+   se trouve. :focus-visible ne se déclenche qu'au clavier, la souris ne
+   fait donc apparaître aucun contour. */
+
+a:focus-visible,
+button:focus-visible,
+[tabindex]:focus-visible,
+summary:focus-visible {
+  outline: 3px solid var(--brique);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+header a:focus-visible,
+footer a:focus-visible,
+.hero a:focus-visible,
+.appel a:focus-visible {
+  outline-color: #fff;
+}
+
+/* Premier lien du document : caché jusqu'à ce qu'on l'atteigne au clavier. */
+.lien-evitement {
+  position: absolute;
+  left: 12px;
+  top: -60px;
+  z-index: 2000;
+  padding: 12px 18px;
+  background: var(--brique);
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+  border-radius: var(--r-s, 6px);
+  transition: top .15s ease;
+}
+
+.lien-evitement:focus {
+  top: 12px;
 }
 
 
@@ -3155,3 +3195,36 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
   /* la bascule de fond reste au-dessus de la carte, pas du champ */
   .dpe-carte-fonds { top: auto; bottom: 14px; left: 14px; }
 }
+
+
+/* ---------- Titres de cartes ----------
+   Les titres de cartes sont passés de h3 à h2 pour que la hiérarchie du
+   document soit continue (h1 puis h2, sans saut). Ces règles sont placées
+   ici, après « .page-detail h2 », car elles ont la même spécificité :
+   à égalité, c'est la dernière déclarée qui l'emporte. Sans cela, les
+   titres de cartes reprendraient la taille des titres de section. */
+
+.card h2 {
+  text-align: left;
+  font-size: 19px;
+  margin: 0 0 10px;
+  letter-spacing: -.01em;
+  color: var(--brique);
+}
+
+.projet h2 {
+  text-align: left;
+  font-size: 22px;
+  margin: 0 0 6px;
+  letter-spacing: -.01em;
+  color: var(--brique);
+}
+
+.card h2::after, .projet h2::after { content: none; }
+
+/* Le <main> porte tabindex="-1" pour que le lien d'évitement y déplace
+   réellement le focus. Il n'est pas atteignable à la tabulation, on ne
+   dessine donc pas de contour autour de toute la page. */
+main[tabindex]:focus, main[tabindex]:focus-visible { outline: none; }
+/* (sélecteur avec [tabindex] : sinon la règle générique
+   [tabindex]:focus-visible, plus spécifique, l'emporterait) */
