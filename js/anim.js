@@ -75,6 +75,30 @@
     var diapos = panneau.querySelectorAll('.diapo');
     if (!diapos.length) return;
 
+    // Sur téléphone le panneau droit est masqué : inutile de faire
+    // tourner son diaporama, et surtout de télécharger ses photos.
+    if (!panneau.offsetParent) return;
+
+    /* Les diapos 2 et suivantes n'ont pas de poster : leur image est en
+       attente dans data-poster, et n'est demandée qu'au moment de les
+       montrer. Sans cela, la page d'accueil téléchargeait quatre photos
+       de héros pour n'en afficher qu'une. */
+    var poserImage = function (diapo) {
+      // La photo de fond, déclarée sur la diapo plutôt qu'en CSS pour
+      // pouvoir attendre : on la pose devant le dégradé déjà en place.
+      if (diapo.dataset.fondDiapo) {
+        var degrade = getComputedStyle(diapo).backgroundImage;
+        diapo.style.backgroundImage = "url('" + diapo.dataset.fondDiapo + "')" +
+          (degrade && degrade !== 'none' ? ', ' + degrade : '');
+        delete diapo.dataset.fondDiapo;
+      }
+      var video = diapo.querySelector('.diapo-video');
+      if (video && video.dataset.poster) {
+        video.poster = video.dataset.poster;
+        delete video.dataset.poster;
+      }
+    };
+
     Array.prototype.forEach.call(panneau.querySelectorAll('.diapo-video'),
       function (v) {
         if (sansVideo) {
@@ -94,6 +118,7 @@
     var courante = (indexPanneau * 2) % diapos.length;
 
     var montrer = function (i) {
+      poserImage(diapos[i]);
       Array.prototype.forEach.call(diapos, function (d, j) {
         var actif = (j === i);
         d.classList.toggle('actif', actif);
@@ -344,6 +369,16 @@
 
   var vignettes = document.querySelectorAll('.chantier-teaser-photo');
 
+  /* Seule la photo de la fiche affichée est chargée par le document ;
+     toutes les autres attendent dans data-fond. Seize photos étaient
+     téléchargées pour n'en montrer qu'une. */
+  function poserFond(diapo) {
+    if (diapo && diapo.dataset.fond) {
+      diapo.style.backgroundImage = "url('" + diapo.dataset.fond + "')";
+      delete diapo.dataset.fond;
+    }
+  }
+
   Array.prototype.forEach.call(vignettes, function (boite, index) {
     var diapos = boite.querySelectorAll('.mini-diapo');
     if (diapos.length < 2 || mouvementReduit) return;
@@ -351,12 +386,47 @@
     var courante = 0;
     window.setTimeout(function () {
       window.setInterval(function () {
+        var suivante = (courante + 1) % diapos.length;
+        poserFond(diapos[suivante]);   // l'image arrive avant d'être montrée
         diapos[courante].classList.remove('actif');
-        courante = (courante + 1) % diapos.length;
+        courante = suivante;
         diapos[courante].classList.add('actif');
       }, 3400);
     }, index * 1200);
   });
+
+  /* --- 5bis. Visuels de projet : chargement à l'approche ---
+     Le visuel de la section « réalisations » se trouve à plus de
+     1 700 px sous la ligne de flottaison et se téléchargeait pourtant
+     dès l'arrivée. Le dégradé déclaré en CSS tient la place tant que la
+     photo n'est pas demandée, et reste visible si le script ne tourne
+     pas : rien n'est jamais vide. */
+
+  var visuelsDifferes = document.querySelectorAll('[data-differe]');
+
+  function chargerVisuel(el) {
+    var url = el.getAttribute('data-differe');
+    if (!url) return;
+    var fond = getComputedStyle(el).backgroundImage;
+    el.style.backgroundImage = "url('" + url + "')" +
+      (fond && fond !== 'none' ? ', ' + fond : '');
+    el.removeAttribute('data-differe');
+  }
+
+  if (visuelsDifferes.length) {
+    if (!('IntersectionObserver' in window)) {
+      Array.prototype.forEach.call(visuelsDifferes, chargerVisuel);
+    } else {
+      var guetteur = new IntersectionObserver(function (entrees) {
+        entrees.forEach(function (e) {
+          if (!e.isIntersecting) return;
+          chargerVisuel(e.target);
+          guetteur.unobserve(e.target);
+        });
+      }, { rootMargin: '300px' });   // un peu avant l'écran, pour éviter le clignotement
+      Array.prototype.forEach.call(visuelsDifferes, function (el) { guetteur.observe(el); });
+    }
+  }
 
   /* --- 6bis. Carrousel des chantiers en cours (page d'accueil) ---
      La piste défile déjà toute seule au doigt grâce à l'accroche CSS :
@@ -390,8 +460,19 @@
 
       var pastilles = points.children;
 
+      /* On charge la photo de la fiche affichée et celle de la suivante :
+         la rotation ne doit pas faire apparaître un bloc vide le temps du
+         téléchargement. */
+      function preparerFiche(i) {
+        if (i < 0 || i >= fiches.length) return;
+        var premiere = fiches[i].querySelector('.mini-diapo');
+        if (premiere) poserFond(premiere);
+      }
+
       function aller(i) {
         courant = Math.max(0, Math.min(fiches.length - 1, i));
+        preparerFiche(courant);
+        preparerFiche(courant + 1);
         // scrollIntoView ferait aussi défiler la page verticalement :
         // on ne touche qu'au décalage horizontal de la piste.
         piste.scrollTo({ left: fiches[courant].offsetLeft - piste.offsetLeft,
@@ -428,13 +509,20 @@
             var refCentre = fiches[proche].offsetLeft - piste.offsetLeft + fiches[proche].offsetWidth / 2;
             if (Math.abs(centre - milieu) < Math.abs(refCentre - milieu)) proche = i;
           });
-          if (proche !== courant) { courant = proche; majNav(); }
+          if (proche !== courant) {
+          courant = proche;
+          preparerFiche(courant);
+          preparerFiche(courant + 1);
+          majNav();
+        }
         }, 120);
       }, { passive: true });
 
       piste.addEventListener('pointerdown', arreter, { passive: true });
 
       navChantiers.hidden = false;
+      preparerFiche(0);
+      preparerFiche(1);
       majNav();
 
       if (!mouvementReduit) {

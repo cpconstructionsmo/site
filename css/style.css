@@ -265,10 +265,15 @@ nav.main a.active { color: var(--nuit); background: var(--ocre); }
   display: block;
 }
 
+/* Seule la première vue porte sa photo ici : c'est l'image d'accroche,
+   elle doit s'afficher tout de suite. Les trois autres ne sont montrées
+   qu'au fil du diaporama ; leur photo attend dans data-fond-diapo et
+   n'est demandée qu'à cet instant (voir anim.js). Le dégradé tient la
+   place, et suffit si le script ne tourne pas. */
 .diapo:nth-child(1) { background-image: url("../assets/hero/1.jpg"), linear-gradient(150deg, #6B4030, #3A211A); }
-.diapo:nth-child(2) { background-image: url("../assets/hero/2.jpg"), linear-gradient(150deg, #8A5A3C, #46251A); }
-.diapo:nth-child(3) { background-image: url("../assets/hero/3.jpg"), linear-gradient(150deg, #B08050, #55301F); }
-.diapo:nth-child(4) { background-image: url("../assets/hero/4.jpg"), linear-gradient(150deg, #5E3A2C, #2E1913); }
+.diapo:nth-child(2) { background-image: linear-gradient(150deg, #8A5A3C, #46251A); }
+.diapo:nth-child(3) { background-image: linear-gradient(150deg, #B08050, #55301F); }
+.diapo:nth-child(4) { background-image: linear-gradient(150deg, #5E3A2C, #2E1913); }
 
 /* Voile bas pour que rien ne vienne concurrencer le texte central. */
 .hero-panneau::after {
@@ -1376,9 +1381,12 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
 }
 
 /* Vignette d'un projet dans une liste. */
+/* La photo n'est plus posée ici mais par data-differe, à l'approche de
+   l'écran (voir anim.js) : elle se trouve très bas dans la page et se
+   téléchargeait dès l'arrivée. Le dégradé tient la place en attendant,
+   et suffit si le script ne tourne pas. */
 .projet-image[data-photo="1"] {
-  background-image: url("../assets/projets/magny-1.jpg"),
-                    linear-gradient(140deg, #C9BFAC, #7E6F58);
+  background-image: linear-gradient(140deg, #C9BFAC, #7E6F58);
   background-size: cover;
   background-position: center;
   color: transparent;
