@@ -13,7 +13,7 @@
      3. La clé arrive par email : la copier ci-dessous.
    Voir outils/LISEZMOI-formulaires.md pour le détail. */
 
-var CLE_WEB3FORMS = 'À_REMPLACER_PAR_VOTRE_CLE_WEB3FORMS';
+var CLE_WEB3FORMS = '94c548a1-a9c7-427d-a14d-823d4e61e7aa';
 
 (function () {
   'use strict';
