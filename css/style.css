@@ -3302,3 +3302,35 @@ main[tabindex]:focus, main[tabindex]:focus-visible { outline: none; }
 @media (max-width: 600px) {
   .precision-statut { padding: 18px 20px; }
 }
+
+
+/* ---------- Photo par service (accueil) ----------
+   Même principe que .projet-image : la photo se pose sur un dégradé de
+   repli et se charge à l'approche de l'écran (voir data-differe dans
+   anim.js), pour ne rien ajouter au poids de la page tant qu'on ne
+   scrolle pas jusque-là. */
+
+.service-card { padding: 0; }
+
+.service-photo {
+  position: relative;
+  overflow: hidden;
+  height: 190px;
+  background: linear-gradient(135deg, var(--fond-tiede), #E2D8C6);
+  background-size: cover;
+  background-position: center;
+}
+
+.service-photo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 38%, rgba(255,255,255,.55) 50%, transparent 62%);
+  transform: translateX(-100%);
+  transition: transform .9s cubic-bezier(.22,.61,.36,1);
+}
+
+.service-card:hover .service-photo::after { transform: translateX(100%); }
+
+.service-body { padding: 26px 24px 28px; }
+.service-body h3, .service-body p { position: relative; }
