@@ -16,6 +16,12 @@
       "texte": "Entreprise sérieuse et suivi impeccable ! La communication est fluide. Nous sommes totalemét satisfait de CP CONSTRUCTION et gros plus pour monsieur PORTIER qui est tres professionnel."
     },
     {
+      "auteur": "Marie Portier",
+      "date": "il y a une semaine",
+      "note": 5,
+      "texte": "Maître d'oeuvre compétent et à l'écoute de ses clients. Je recommande"
+    },
+    {
       "auteur": "Melanie Wallner",
       "date": "il y a un an",
       "note": 5,
@@ -26,12 +32,6 @@
       "date": "il y a 9 mois",
       "note": 5,
       "texte": "Artisan partenaire, je suis très satisfait de notre collaboration : sérieux bonne communication et chantier bien organisé. Je recommande ce constructeur."
-    },
-    {
-      "auteur": "Guillemette Ellien",
-      "date": "il y a 6 mois",
-      "note": 5,
-      "texte": "Claude sait répondre à nos demandes et à nos projets en toutes circonstances.\nPatiente et pertinence en sont les mots clé.\nJe recommande CP constructions !"
     }
   ]
 }
