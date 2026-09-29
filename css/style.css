@@ -613,6 +613,14 @@ section h2::after {
   text-decoration: none;
 }
 
+/* La règle générique « section { padding: 84px 0 } », pensée pour les
+   grands blocs de la page d'accueil, s'appliquait aussi à ces
+   sous-sections de texte : 168 px de vide au-dessus et en dessous de
+   chacune. Peu visible avec 2-3 sections (articles), ça devenait un mur
+   de blanc dès qu'une page en empile 6 ou 7 (mentions légales). */
+.article-section { padding: 0 0 40px; }
+.article-section:last-child { padding-bottom: 0; }
+
 .article-section p {
   margin: 0 0 18px;
   color: var(--gris);
@@ -3334,3 +3342,39 @@ main[tabindex]:focus, main[tabindex]:focus-visible { outline: none; }
 
 .service-body { padding: 26px 24px 28px; }
 .service-body h3, .service-body p { position: relative; }
+
+
+/* ---------- Marqueur "à compléter" ----------
+   Signale en clair, sur la page même, une information qui manque
+   encore (données légales, chiffres, éléments à fournir). Visible à
+   l'écran et pas seulement dans le code, pour qu'il saute aux yeux
+   lors d'une relecture avant mise en ligne. */
+
+.a-completer {
+  background: #FFF3CD;
+  color: #7A5B00;
+  border: 1px dashed #D6A100;
+  border-radius: 4px;
+  padding: 1px 7px;
+  font-weight: 600;
+  font-size: .95em;
+}
+
+
+/* ---------- Pied de page : rappel de statut et liens légaux ---------- */
+
+.footer-rappel {
+  font-size: 13px !important;
+  opacity: .85;
+  max-width: 480px;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+.footer-liens {
+  font-size: 13px !important;
+  margin-top: 4px !important;
+}
+
+.footer-liens a { font-weight: 400; opacity: .9; }
+.footer-liens a:hover { opacity: 1; }
