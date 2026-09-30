@@ -96,4 +96,22 @@
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
+  <url>
+    <loc>https://cpconstructions.fr/mentions-legales.html</loc>
+    <lastmod>2026-09-29</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://cpconstructions.fr/confidentialite.html</loc>
+    <lastmod>2026-09-29</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://cpconstructions.fr/plan-du-site.html</loc>
+    <lastmod>2026-09-29</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
 </urlset>
