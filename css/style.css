@@ -3378,3 +3378,25 @@ main[tabindex]:focus, main[tabindex]:focus-visible { outline: none; }
 
 .footer-liens a { font-weight: 400; opacity: .9; }
 .footer-liens a:hover { opacity: 1; }
+
+
+/* ---------- En-tête, très petits écrans ----------
+   Le bouton d'appel principal est passé de « Être conseillé » (15
+   caractères) à « Demander un rendez-vous » (24 caractères) pour
+   harmoniser tous les boutons du site. En dessous de 360 px, ce texte
+   plus long dépassait du cadre. On resserre le bouton lui-même plutôt
+   que de raccourcir le texte, qui reste identique partout ailleurs. */
+@media (max-width: 360px) {
+  .nav-cta { padding: 8px 10px; font-size: 11px; gap: 5px; }
+}
+
+
+/* ---------- Sections de contenu empilées (services, à propos...) ----------
+   Même défaut que .article-section corrigé au lot précédent : la règle
+   générique « section { padding: 84px 0 } », pensée pour les grands
+   blocs de la page d'accueil, s'applique aussi à <section class="mt-4">,
+   utilisé pour empiler plusieurs blocs de texte sur une même page. Avec
+   5 à 7 sections à la suite (services, à propos), ça fait un mur de
+   blanc. .mt-4 seul seul n'est pas touché : il sert aussi hors <section>. */
+section.mt-4 { padding: 0 0 40px; }
+section.mt-4:last-of-type { padding-bottom: 0; }
