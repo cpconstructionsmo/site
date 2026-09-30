@@ -3400,3 +3400,73 @@ main[tabindex]:focus, main[tabindex]:focus-visible { outline: none; }
    blanc. .mt-4 seul seul n'est pas touché : il sert aussi hors <section>. */
 section.mt-4 { padding: 0 0 40px; }
 section.mt-4:last-of-type { padding-bottom: 0; }
+
+
+/* ---------- FAQ (accordéon) ---------- */
+
+.faq-liste { margin-top: 8px; }
+
+.faq-item {
+  border-bottom: 1px solid var(--filet);
+  padding: 18px 0;
+}
+.faq-item:first-child { padding-top: 0; }
+.faq-item:last-child { border-bottom: none; }
+
+.faq-item summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-weight: 700;
+  font-size: 16.5px;
+  color: var(--nuit);
+}
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::after {
+  content: '+';
+  flex-shrink: 0;
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 1;
+  color: var(--ocre);
+  transition: transform var(--transition);
+}
+.faq-item[open] summary::after { transform: rotate(45deg); }
+.faq-item summary:hover { color: var(--brique); }
+.faq-item p { margin-top: 12px; color: var(--gris); }
+
+
+/* ---------- Bouton d'appel fixe (mobile) ----------
+   Sur petit écran, l'appel direct reste toujours à portée de pouce,
+   sans dépendre du bouton d'en-tête qui défile avec la page. Absent du
+   simulateur DPE et du simulateur de financement : la carte et les
+   suggestions d'adresse, ou le formulaire, s'ancrent déjà en bas de
+   l'écran sur mobile, et une seconde barre fixe s'y superposerait. */
+.appel-mobile-fixe { display: none; }
+
+@media (max-width: 600px) {
+  body { padding-bottom: 60px; }
+  .appel-mobile-fixe {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 500;
+    padding: 14px var(--gouttiere);
+    padding-bottom: calc(14px + env(safe-area-inset-bottom));
+    background: var(--nuit);
+    color: #fff;
+    font-weight: 700;
+    font-size: 15px;
+    text-decoration: none;
+    box-shadow: 0 -6px 24px rgba(0,0,0,.3);
+  }
+  .appel-mobile-fixe:active { background: var(--nuit-clair); }
+}
