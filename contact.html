@@ -23,8 +23,8 @@
   <meta name="theme-color" content="#3A211A">
   <link rel="icon" href="assets/logo-icon.png">
   <link rel="apple-touch-icon" href="assets/logo-icon.png">
-  <link rel="stylesheet" href="css/style.css?v=59">
-  <script src="js/anim.js?v=59" defer></script>
+  <link rel="stylesheet" href="css/style.css?v=60">
+  <script src="js/anim.js?v=60" defer></script>
   <script src="js/formulaires.js?v=2" defer></script>
   <script type="application/ld+json">
   {
@@ -114,6 +114,20 @@
   </div>
 
 </div>
+
+<section class="mt-4" id="avis" hidden>
+  <h2>Ce qu'ils disent</h2>
+  <p class="avis-resume" hidden></p>
+  <div class="avis-piste"></div>
+  <div class="avis-fleches">
+    <button type="button" data-sens="-1" aria-label="Avis précédent">‹</button>
+    <div class="avis-points" role="tablist" aria-label="Choisir un avis"></div>
+    <button type="button" data-sens="1" aria-label="Avis suivant">›</button>
+  </div>
+  <div style="text-align: center; margin-top: 26px;">
+    <a class="avis-lien btn sombre" href="#" target="_blank" rel="noopener" hidden>Voir tous nos avis sur Google</a>
+  </div>
+</section>
 
 <section class="bloc-encadre">
   <h2 style="margin-top: 0;">Demander un rendez-vous</h2>
@@ -211,10 +225,15 @@
   <p class="footer-liens">
     <a href="mentions-legales.html">Mentions légales</a> ·
     <a href="confidentialite.html">Confidentialité</a> ·
-    <a href="plan-du-site.html">Plan du site</a>
+    <a href="plan-du-site.html">Plan du site</a> ·
+    <a href="faq.html">FAQ</a>
   </p>
   <p style="font-size: 12px; margin-top: 20px; opacity: .8;">© 2026 CP Constructions. Tous droits réservés.</p>
 </footer>
+
+<a href="tel:+33665676881" class="appel-mobile-fixe" aria-label="Appeler CP Constructions au 06 65 67 68 81">
+  📞 Appeler 06 65 67 68 81
+</a>
 
 <script>
   document.getElementById('contactForm').addEventListener('submit', function (e) {
@@ -229,7 +248,7 @@
     var budget = document.getElementById('budget').value;
     var message = document.getElementById('message').value;
 
-    var sujet = 'Devis ' + service + ' - ' + nom;
+    var sujet = 'Demande de rendez-vous ' + service + ' - ' + nom;
     var corpsMailto = 'Nom: ' + nom + '%0ATel: ' + tel + '%0AEmail: ' + email +
       '%0ACommune: ' + commune + '%0AService: ' + service + '%0ASurface: ' + surface +
       ' m²%0ABudget: ' + budget + '%0A%0AMessage:%0A' + message;
