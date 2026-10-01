@@ -23,8 +23,8 @@
   <meta name="theme-color" content="#3A211A">
   <link rel="icon" href="assets/logo-icon.png">
   <link rel="apple-touch-icon" href="assets/logo-icon.png">
-  <link rel="stylesheet" href="css/style.css?v=61">
-  <script src="js/anim.js?v=61" defer></script>
+  <link rel="stylesheet" href="css/style.css?v=62">
+  <script src="js/anim.js?v=62" defer></script>
   <script src="js/formulaires.js?v=2" defer></script>
   <script type="application/ld+json">
   {
@@ -64,15 +64,26 @@
     </button>
     <nav class="main" id="nav-principal">
       <a href="/">Accueil</a>
+      <details class="nav-dropdown">
+        <summary>Nos projets</summary>
+        <div class="nav-sous-menu">
+          <a href="projets.html">Réalisations</a>
+          <a href="chantiers.html">Chantiers en cours</a>
+        </div>
+      </details>
+      <a href="services.html">Notre accompagnement</a>
       <a href="a-propos.html">À propos</a>
-      <a href="services.html">Services</a>
-      <a href="projets.html">Projets</a>
-      <a href="chantiers.html">Chantiers en cours</a>
-      <a href="articles.html">Articles</a>
-      <a href="financement.html">Financement</a>
-      <a href="contact.html" class="active">Contact</a>
+      <details class="nav-dropdown">
+        <summary>Conseils</summary>
+        <div class="nav-sous-menu">
+          <a href="articles.html">Articles</a>
+          <a href="faq.html">Questions fréquentes</a>
+          <a href="dpe.html">Simulateur DPE</a>
+          <a href="financement.html">Simulateur de financement</a>
+        </div>
+      </details>
     </nav>
-      <a href="contact.html" class="nav-cta">Demander un rendez-vous</a>
+      <a href="contact.html" class="nav-cta">Parlons de votre projet</a>
   </div>
 </header>
 
@@ -114,20 +125,6 @@
   </div>
 
 </div>
-
-<section class="mt-4" id="avis" hidden>
-  <h2>Ce qu'ils disent</h2>
-  <p class="avis-resume" hidden></p>
-  <div class="avis-piste"></div>
-  <div class="avis-fleches">
-    <button type="button" data-sens="-1" aria-label="Avis précédent">‹</button>
-    <div class="avis-points" role="tablist" aria-label="Choisir un avis"></div>
-    <button type="button" data-sens="1" aria-label="Avis suivant">›</button>
-  </div>
-  <div style="text-align: center; margin-top: 26px;">
-    <a class="avis-lien btn sombre" href="#" target="_blank" rel="noopener" hidden>Voir tous nos avis sur Google</a>
-  </div>
-</section>
 
 <section class="bloc-encadre">
   <h2 style="margin-top: 0;">Demander un rendez-vous</h2>
@@ -204,6 +201,24 @@
     destinées à CP Constructions pour traiter votre demande. Voir notre
     <a href="confidentialite.html">politique de confidentialité</a>.
   </p>
+</section>
+
+<!-- Les avis arrivent après le formulaire, jamais avant : affichés
+     au-dessus, ils poussaient le formulaire vers le bas une fois
+     avis.json chargé (quelques centaines de millisecondes après
+     l'affichage initial de la page). -->
+<section class="mt-4" id="avis" hidden>
+  <h2>Ce qu'ils disent</h2>
+  <p class="avis-resume" hidden></p>
+  <div class="avis-piste"></div>
+  <div class="avis-fleches">
+    <button type="button" data-sens="-1" aria-label="Avis précédent">‹</button>
+    <div class="avis-points" role="tablist" aria-label="Choisir un avis"></div>
+    <button type="button" data-sens="1" aria-label="Avis suivant">›</button>
+  </div>
+  <div style="text-align: center; margin-top: 26px;">
+    <a class="avis-lien btn sombre" href="#" target="_blank" rel="noopener" hidden>Voir tous nos avis sur Google</a>
+  </div>
 </section>
 
 <section style="margin-top: 48px; text-align: center;">

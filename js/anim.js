@@ -55,97 +55,32 @@
     });
   }
 
-  /* --- 2. Diaporama des panneaux du héros ---
-     Chaque panneau enchaîne ses diapositives en fondu. Une diapositive
-     peut porter une vidéo : on ne la lit que lorsqu'elle est visible,
-     pour ne pas faire tourner quatre décodeurs en même temps.
+  /* --- 1ter. Sous-menus de navigation (<details>) ---
+     Un seul sous-menu ouvert à la fois, et un clic en dehors ou une
+     touche Échap le referme — <details> ne le fait pas tout seul. */
 
-     Sur mobile et en mouvement réduit, les vidéos sont retirées : il
-     reste le poster (la photo). Quelques mégaoctets de vidéo sur un
-     forfait 4G, pour un fond décoratif, ne se justifient pas. */
-
-  var ecranEtroit = window.matchMedia &&
-    window.matchMedia('(max-width: 860px)').matches;
-
-  var sansVideo = ecranEtroit || mouvementReduit;
-
-  var panneaux = document.querySelectorAll('.hero-panneau');
-
-  Array.prototype.forEach.call(panneaux, function (panneau, indexPanneau) {
-    var diapos = panneau.querySelectorAll('.diapo');
-    if (!diapos.length) return;
-
-    // Sur téléphone le panneau droit est masqué : inutile de faire
-    // tourner son diaporama, et surtout de télécharger ses photos.
-    if (!panneau.offsetParent) return;
-
-    /* Les diapos 2 et suivantes n'ont pas de poster : leur image est en
-       attente dans data-poster, et n'est demandée qu'au moment de les
-       montrer. Sans cela, la page d'accueil téléchargeait quatre photos
-       de héros pour n'en afficher qu'une. */
-    var poserImage = function (diapo) {
-      // La photo de fond, déclarée sur la diapo plutôt qu'en CSS pour
-      // pouvoir attendre : on la pose devant le dégradé déjà en place.
-      if (diapo.dataset.fondDiapo) {
-        var degrade = getComputedStyle(diapo).backgroundImage;
-        diapo.style.backgroundImage = "url('" + diapo.dataset.fondDiapo + "')" +
-          (degrade && degrade !== 'none' ? ', ' + degrade : '');
-        delete diapo.dataset.fondDiapo;
-      }
-      var video = diapo.querySelector('.diapo-video');
-      if (video && video.dataset.poster) {
-        video.poster = video.dataset.poster;
-        delete video.dataset.poster;
-      }
-    };
-
-    Array.prototype.forEach.call(panneau.querySelectorAll('.diapo-video'),
-      function (v) {
-        if (sansVideo) {
-          // Le poster disparaît avec la balise ; le .jpg du dégradé CSS
-          // prend le relais.
-          v.remove();
-          return;
-        }
-        // Une source absente ou illisible laisse la place au poster.
-        v.addEventListener('error', function () { v.remove(); });
-        var src = v.querySelector('source');
-        if (src) src.addEventListener('error', function () { v.remove(); });
+  var sousMenus = document.querySelectorAll('.nav-dropdown');
+  if (sousMenus.length) {
+    Array.prototype.forEach.call(sousMenus, function (menu) {
+      menu.addEventListener('toggle', function () {
+        if (!menu.open) return;
+        Array.prototype.forEach.call(sousMenus, function (autre) {
+          if (autre !== menu) autre.open = false;
+        });
       });
-
-    // Les deux panneaux démarrent sur des vues différentes, sinon ils
-    // affichent la même image côte à côte au chargement.
-    var courante = (indexPanneau * 2) % diapos.length;
-
-    var montrer = function (i) {
-      poserImage(diapos[i]);
-      Array.prototype.forEach.call(diapos, function (d, j) {
-        var actif = (j === i);
-        d.classList.toggle('actif', actif);
-        var v = d.querySelector('.diapo-video');
-        if (!v) return;
-        if (actif) {
-          var lecture = v.play();
-          if (lecture && lecture.catch) lecture.catch(function () {});
-        } else {
-          v.pause();
-        }
+    });
+    document.addEventListener('click', function (e) {
+      Array.prototype.forEach.call(sousMenus, function (menu) {
+        if (menu.open && !menu.contains(e.target)) menu.open = false;
       });
-    };
-
-    montrer(courante);
-    if (diapos.length < 2 || mouvementReduit) return;
-
-    var avancer = function () {
-      courante = (courante + 1) % diapos.length;
-      montrer(courante);
-    };
-
-    // Décalage initial pour que les panneaux ne basculent pas ensemble.
-    window.setTimeout(function () {
-      window.setInterval(avancer, 5200);
-    }, indexPanneau * 2600);
-  });
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape') return;
+      Array.prototype.forEach.call(sousMenus, function (menu) {
+        menu.open = false;
+      });
+    });
+  }
 
   /* --- 3. Compteurs chiffrés ---
      Le nombre final reste écrit dans le HTML : si le script échoue ou si
@@ -186,15 +121,36 @@
      est vide ou illisible, la section reste masquée. */
 
   var sectionAvis = document.getElementById('avis');
+  var preuveHero = document.querySelector('.hero-preuve');
 
-  if (sectionAvis && window.fetch) {
+  if ((sectionAvis || preuveHero) && window.fetch) {
     fetch('avis.json', { cache: 'no-cache' })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (donnees) {
         if (!donnees || !donnees.avis || !donnees.avis.length) return;
-        afficherAvis(donnees);
+        if (sectionAvis) afficherAvis(donnees);
+        if (preuveHero) afficherPreuveHero(donnees);
       })
-      .catch(function () { /* section laissée masquée */ });
+      .catch(function () { /* sections laissées masquées */ });
+  }
+
+  /* Preuve courte sous les actions du héros : la même note Google que
+     le bandeau d'avis, jamais figée en dur, absente tant qu'elle n'est
+     pas arrivée. */
+  function afficherPreuveHero(donnees) {
+    if (!donnees.note_moyenne) return;
+    var note = Math.max(0, Math.min(5, Math.round(Number(donnees.note_moyenne))));
+    var moyenne = Number(donnees.note_moyenne).toFixed(1).replace('.', ',');
+    var etoiles = preuveHero.querySelector('.hero-preuve-etoiles');
+    var texte = preuveHero.querySelector('.hero-preuve-texte');
+    var lien = preuveHero.querySelector('.hero-preuve-lien');
+    if (etoiles) etoiles.textContent = '★★★★★'.slice(0, note) + '☆☆☆☆☆'.slice(0, 5 - note);
+    if (texte) {
+      texte.textContent = moyenne + ' sur Google' +
+        (donnees.nombre_avis ? ' (' + donnees.nombre_avis + ' avis)' : '');
+    }
+    if (lien && donnees.lien_google) lien.href = donnees.lien_google;
+    preuveHero.hidden = false;
   }
 
   function afficherAvis(donnees) {

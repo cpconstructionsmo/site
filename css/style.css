@@ -10,6 +10,8 @@
   --ocre: #D29B48;
   --ocre-clair: #E8B966;
   --encre: #1A2B36;
+  --brun-texte: #30251F;
+  --brun-gris: #5C5247;
   --fond: #F7F5F0;
   --fond-tiede: #F1EDE4;
   --surface: #fff;
@@ -130,6 +132,67 @@ nav.main a:hover {
 
 nav.main a.active { color: var(--nuit); background: var(--ocre); }
 
+/* Sous-menus « Nos projets » et « Conseils » : un <details> plutôt qu'un
+   script de survol, pour fonctionner au clic comme au clavier et au
+   toucher d'emblée, sans dépendance supplémentaire. */
+.nav-dropdown { position: relative; }
+
+.nav-dropdown summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: .02em;
+  color: rgba(255,255,255,.82);
+  padding: 9px 14px;
+  border-radius: var(--pilule);
+  white-space: nowrap;
+  transition: color var(--transition), background var(--transition);
+}
+.nav-dropdown summary::-webkit-details-marker { display: none; }
+.nav-dropdown summary::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg) translateY(-2px);
+  transition: transform var(--transition);
+}
+.nav-dropdown[open] summary::after { transform: rotate(-135deg) translateY(2px); }
+.nav-dropdown summary:hover { color: #fff; background: rgba(255,255,255,.1); }
+.nav-dropdown[open] summary { color: #fff; background: rgba(255,255,255,.1); }
+
+.nav-sous-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 210px;
+  padding: 8px;
+  margin: 0;
+  background: var(--nuit-clair);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: var(--r-m);
+  box-shadow: var(--ombre-l);
+  z-index: 50;
+}
+.nav-sous-menu a {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,.82);
+  padding: 9px 12px;
+  border-radius: var(--r-s);
+  white-space: nowrap;
+}
+.nav-sous-menu a:hover { color: #fff; background: rgba(255,255,255,.1); text-decoration: none; }
+.nav-sous-menu a.active { color: var(--nuit); background: var(--ocre); }
+
 .nav-cta {
   flex: 0 0 auto;
   display: inline-flex;
@@ -187,35 +250,32 @@ nav.main a.active { color: var(--nuit); background: var(--ocre); }
 
 .hero {
   position: relative;
-  isolation: isolate;
   overflow: hidden;
-  background: var(--nuit);
-  color: #fff;
+  background: var(--fond-tiede);
   border-radius: 0 0 var(--r-xl) var(--r-xl);
-  padding: 118px var(--gouttiere) 92px;
+  padding: 150px var(--gouttiere) 84px;
 
-  /* Deux panneaux photo encadrent la colonne de texte, comme sur les
-     sites de maîtrise d'œuvre : la photo porte le message, le texte reste
-     lisible au centre. */
+  /* Texte à gauche, une seule grande photo à droite : le cadrage reste
+     lisible (toiture et façade entières), plutôt que deux bandeaux
+     recadrés qui ne montrent jamais la maison en entier. */
   display: grid;
-  grid-template-columns: minmax(0,1fr) minmax(0,2.1fr) minmax(0,1fr);
-  align-items: stretch;
-  gap: 34px;
+  grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+  align-items: center;
+  gap: 56px;
 }
 
-/* Halo ocre qui dérive lentement derrière la colonne centrale. */
+/* Halo ocre discret, désormais sur fond clair. */
 .hero::before {
   content: "";
   position: absolute;
   z-index: 0;
-  top: -20%; left: 50%;
-  width: 60vw; height: 60vw;
-  min-width: 420px; min-height: 420px;
-  margin-left: -30vw;
+  top: -25%; right: -10%;
+  width: 46vw; height: 46vw;
+  min-width: 360px; min-height: 360px;
   border-radius: 50%;
   filter: blur(90px);
-  opacity: .3;
-  background: radial-gradient(circle, rgba(210,155,72,.75), transparent 68%);
+  opacity: .25;
+  background: radial-gradient(circle, rgba(210,155,72,.6), transparent 68%);
   animation: derive 20s ease-in-out infinite alternate;
   pointer-events: none;
 }
@@ -226,109 +286,83 @@ nav.main a.active { color: var(--nuit); background: var(--ocre); }
 }
 
 
-/* --- Panneaux photo latéraux --- */
+/* --- Colonne de texte --- */
 
-.hero-panneau {
+.hero-texte {
   position: relative;
   z-index: 1;
-  overflow: hidden;
-  min-height: 460px;
-  border-radius: var(--r-l);
-  background: var(--nuit-clair);
-  box-shadow: 0 20px 50px rgba(0,0,0,.32);
-}
-
-/* Chaque diapositive porte un dégradé de repli SOUS la photo : tant
-   qu'aucun fichier n'est déposé dans assets/hero/, le panneau reste beau
-   au lieu d'afficher un carré vide. */
-.diapo {
-  position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-position: center;
-  opacity: 0;
-  transform: scale(1.06);
-  transition: opacity 1.4s ease, transform 7s linear;
-}
-
-.diapo.actif { opacity: 1; transform: scale(1); }
-
-/* Une diapositive peut porter une vidéo. Le poster (la photo .jpg) occupe
-   la place pendant le chargement et reste affiché si le .mp4 manque ; le
-   dégradé de repli est encore en dessous. */
-.diapo-video {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-/* Seule la première vue porte sa photo ici : c'est l'image d'accroche,
-   elle doit s'afficher tout de suite. Les trois autres ne sont montrées
-   qu'au fil du diaporama ; leur photo attend dans data-fond-diapo et
-   n'est demandée qu'à cet instant (voir anim.js). Le dégradé tient la
-   place, et suffit si le script ne tourne pas. */
-.diapo:nth-child(1) { background-image: url("../assets/hero/1.webp"), linear-gradient(150deg, #6B4030, #3A211A); }
-.diapo:nth-child(2) { background-image: linear-gradient(150deg, #8A5A3C, #46251A); }
-.diapo:nth-child(3) { background-image: linear-gradient(150deg, #B08050, #55301F); }
-.diapo:nth-child(4) { background-image: linear-gradient(150deg, #5E3A2C, #2E1913); }
-
-/* Voile bas pour que rien ne vienne concurrencer le texte central. */
-.hero-panneau::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(36,19,16,.12), rgba(36,19,16,.55));
-  pointer-events: none;
-}
-
-
-/* --- Colonne centrale --- */
-
-.hero-centre {
-  position: relative;
-  z-index: 2;
-  text-align: center;
-  align-self: center;
-  padding: 24px 0;
 }
 
 .hero .surtitre {
   display: inline-block;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: .18em;
+  letter-spacing: .16em;
   text-transform: uppercase;
-  color: var(--ocre-clair);
-  margin-bottom: 22px;
+  color: var(--brique);
+  margin-bottom: 18px;
 }
 
 .hero h1 {
-  font-size: clamp(32px, 4.6vw, 54px);
-  line-height: 1.12;
-  letter-spacing: -.025em;
-  margin: 0 0 20px;
+  font-size: clamp(32px, 3.4vw, 48px);
+  line-height: 1.14;
+  letter-spacing: -.02em;
+  margin: 0 0 18px;
   font-weight: 800;
+  color: var(--brun-texte);
   text-wrap: balance;
 }
 
-.hero h1 em { font-style: normal; color: var(--ocre); }
-
 .hero p {
-  font-size: clamp(15px, 1.5vw, 17px);
-  margin: 0 auto 34px;
-  max-width: 540px;
-  color: rgba(255,255,255,.76);
+  font-size: clamp(15px, 1.2vw, 17px);
+  margin: 0 0 30px;
+  max-width: 480px;
+  /* --gris (déjà utilisé ailleurs sur fond blanc) ne tient que 3,7:1 sur
+     le fond crème du héros ; --brun-gris est le même registre, mais
+     repasse au-dessus du seuil WCAG AA de 4,5:1 pour du texte courant. */
+  color: var(--brun-gris);
   text-wrap: pretty;
 }
 
 .hero-actions {
   display: flex;
   gap: 12px;
-  justify-content: center;
   flex-wrap: wrap;
+}
+
+/* Preuve courte sous les actions : remplie en JS à partir du même
+   avis.json que le bandeau d'avis plus bas, jamais figée en dur, et
+   absente tant que la donnée n'est pas arrivée (voir anim.js). */
+.hero-preuve {
+  margin-top: 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--brun-texte);
+}
+.hero-preuve .hero-preuve-etoiles { color: var(--ocre); letter-spacing: 1px; }
+.hero-preuve a { color: inherit; }
+
+
+/* --- Photo --- */
+
+.hero-photo {
+  position: relative;
+  z-index: 1;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--r-l);
+  overflow: hidden;
+  box-shadow: var(--ombre-l);
+  background: var(--filet);
+}
+
+.hero-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 
@@ -364,6 +398,19 @@ nav.main a.active { color: var(--nuit); background: var(--ocre); }
   color: #fff;
   border: 1.5px solid rgba(255,255,255,.4);
   box-shadow: none;
+}
+
+/* Le bouton fantôme était pensé pour le fond sombre de l'ancien héros ;
+   sur son fond clair actuel, du blanc sur blanc disparaît. Seul le
+   héros utilise ce bouton pour l'instant. */
+.hero .btn.fantome {
+  color: var(--brun-texte);
+  border-color: rgba(48,37,31,.3);
+}
+.hero .btn.fantome:hover {
+  background: rgba(48,37,31,.06);
+  border-color: var(--brun-texte);
+  color: var(--brun-texte);
 }
 
 .btn.fantome:hover {
@@ -756,7 +803,6 @@ summary:focus-visible {
 
 header a:focus-visible,
 footer a:focus-visible,
-.hero a:focus-visible,
 .appel a:focus-visible {
   outline-color: #fff;
 }
@@ -1002,10 +1048,7 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
 /* ---------- Écrans intermédiaires ---------- */
 
 @media (max-width: 1080px) {
-  /* Un seul panneau photo : deux colonnes latérales deviennent trop
-     étroites pour montrer quoi que ce soit d'utile. */
-  .hero { grid-template-columns: minmax(0,1fr) minmax(0,1.25fr); gap: 26px; }
-  .hero-panneau.droite { display: none; }
+  .hero { gap: 32px; padding-top: 138px; }
 }
 
 
@@ -1045,16 +1088,29 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
   }
   nav.main a { padding: 13px 16px; font-size: 14.5px; text-align: center; }
 
-  /* Les panneaux passent en bandeau unique sous le texte. */
+  /* Dans le menu replié, le sous-menu s'ouvre en ligne au lieu de
+     flotter par-dessus : il n'y a plus de survol à imiter, juste une
+     liste verticale qui s'allonge. */
+  .nav-dropdown summary { justify-content: center; padding: 13px 16px; font-size: 14.5px; }
+  .nav-sous-menu {
+    position: static;
+    margin-top: 2px;
+    box-shadow: none;
+    background: rgba(255,255,255,.06);
+  }
+
+  /* Le texte et le bouton restent visibles avant la photo, qui passe en
+     bandeau sous le texte plutôt qu'en premier (on ne veut pas faire
+     défiler une grande image avant d'atteindre l'accroche et l'appel à
+     l'action). */
   .hero {
     grid-template-columns: 1fr;
-    padding: 132px var(--gouttiere) 30px;
+    padding: 130px var(--gouttiere) 30px;
     border-radius: 0 0 var(--r-l) var(--r-l);
-    gap: 28px;
+    gap: 24px;
   }
-  .hero-panneau.gauche { order: 2; min-height: 240px; }
-  .hero-panneau.droite { display: none; }
-  .hero-centre { order: 1; padding: 0; }
+  .hero-texte { order: 1; }
+  .hero-photo { order: 2; aspect-ratio: 16 / 10; }
 
   section { padding: 60px 0; }
 
@@ -3320,6 +3376,22 @@ main[tabindex]:focus, main[tabindex]:focus-visible { outline: none; }
 
 .service-card { padding: 0; }
 
+/* Grille dédiée (plutôt que .grid, partagée par trop d'autres listes) :
+   quatre colonnes quand la place le permet, puis deux, puis une seule —
+   jamais trois cartes suivies d'une quatrième isolée sur sa propre
+   ligne, ce qu'un auto-fit générique produisait à certaines largeurs. */
+.grille-services {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+@media (max-width: 1080px) {
+  .grille-services { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+  .grille-services { grid-template-columns: 1fr; }
+}
+
 .service-photo {
   position: relative;
   overflow: hidden;
@@ -3339,6 +3411,25 @@ main[tabindex]:focus, main[tabindex]:focus-visible { outline: none; }
 }
 
 .service-card:hover .service-photo::after { transform: translateX(100%); }
+
+/* Composition volontaire pour un service sans photo (ex. surélévation,
+   tant qu'aucun chantier n'en fournit une) : un pictogramme assumé
+   plutôt qu'un rectangle qui a l'air cassé. */
+.service-photo.sans-photo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--brique-clair), var(--brique-fonce));
+}
+.service-photo.sans-photo svg {
+  width: 44px;
+  height: 44px;
+  stroke: rgba(255,255,255,.85);
+  fill: none;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
 
 .service-body { padding: 26px 24px 28px; }
 .service-body h3, .service-body p { position: relative; }

@@ -23,10 +23,9 @@
   <meta name="theme-color" content="#3A211A">
   <link rel="icon" href="assets/logo-icon.png">
   <link rel="apple-touch-icon" href="assets/logo-icon.png">
-  <link rel="preload" as="image" href="assets/hero/1.webp" fetchpriority="high">
-  <link rel="preload" as="image" href="assets/hero/3.webp" fetchpriority="high" media="(min-width: 1081px)">
-  <link rel="stylesheet" href="css/style.css?v=61">
-  <script src="js/anim.js?v=61" defer></script>
+  <link rel="preload" as="image" href="assets/projets/magny-1.webp" fetchpriority="high">
+  <link rel="stylesheet" href="css/style.css?v=62">
+  <script src="js/anim.js?v=62" defer></script>
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -152,87 +151,50 @@
     </button>
     <nav class="main" id="nav-principal">
       <a href="/" class="active">Accueil</a>
+      <details class="nav-dropdown">
+        <summary>Nos projets</summary>
+        <div class="nav-sous-menu">
+          <a href="projets.html">Réalisations</a>
+          <a href="chantiers.html">Chantiers en cours</a>
+        </div>
+      </details>
+      <a href="services.html">Notre accompagnement</a>
       <a href="a-propos.html">À propos</a>
-      <a href="services.html">Services</a>
-      <a href="projets.html">Projets</a>
-      <a href="chantiers.html">Chantiers en cours</a>
-      <a href="articles.html">Articles</a>
-      <a href="financement.html">Financement</a>
-      <a href="contact.html">Contact</a>
+      <details class="nav-dropdown">
+        <summary>Conseils</summary>
+        <div class="nav-sous-menu">
+          <a href="articles.html">Articles</a>
+          <a href="faq.html">Questions fréquentes</a>
+          <a href="dpe.html">Simulateur DPE</a>
+          <a href="financement.html">Simulateur de financement</a>
+        </div>
+      </details>
     </nav>
-      <a href="contact.html" class="nav-cta">Demander un rendez-vous</a>
+      <a href="contact.html" class="nav-cta">Parlons de votre projet</a>
   </div>
 </header>
 
 <main id="contenu" tabindex="-1">
 
 <section class="hero">
-  <!-- Les panneaux affichent assets/hero/1.jpg à 4.jpg en fondu enchaîné.
-       Tant qu'aucune photo n'est déposée, chaque diapositive retombe sur
-       son dégradé et le héros reste présentable. -->
-  <div class="hero-panneau gauche" aria-hidden="true">
-    <div class="diapo">
-      <video class="diapo-video" muted loop playsinline preload="none"
-             poster="assets/hero/1.webp">
-        <source src="assets/hero/1.mp4" type="video/mp4">
-      </video>
-    </div>
-    <div class="diapo" data-fond-diapo="assets/hero/2.webp">
-      <video class="diapo-video" muted loop playsinline preload="none"
-             data-poster="assets/hero/2.webp">
-        <source src="assets/hero/2.mp4" type="video/mp4">
-      </video>
-    </div>
-    <div class="diapo" data-fond-diapo="assets/hero/3.webp">
-      <video class="diapo-video" muted loop playsinline preload="none"
-             data-poster="assets/hero/3.webp">
-        <source src="assets/hero/3.mp4" type="video/mp4">
-      </video>
-    </div>
-    <div class="diapo" data-fond-diapo="assets/hero/4.webp">
-      <video class="diapo-video" muted loop playsinline preload="none"
-             data-poster="assets/hero/4.webp">
-        <source src="assets/hero/4.mp4" type="video/mp4">
-      </video>
-    </div>
-  </div>
-
-  <div class="hero-centre">
-    <span class="surtitre">Maîtrise d'œuvre indépendante</span>
-    <h1>Concrétisez vos projets<br><em>de construction</em></h1>
-    <p>Construction neuve, rénovation, extension et surélévation en Normandie et Pays de la Loire.
-       De l'esquisse à la réception des travaux, nous assurons la conception et la coordination de votre chantier.</p>
+  <div class="hero-texte">
+    <span class="surtitre">Maître d'œuvre dans l'Orne, la Sarthe et la Mayenne</span>
+    <h1>Votre maison, pensée avec vous.<br><em>Suivie à chaque étape.</em></h1>
+    <p>Construction neuve, rénovation ou extension : Claude Portier vous
+       accompagne de la conception à la réception des travaux, avec un
+       interlocuteur dédié et un suivi clair de votre projet.</p>
     <div class="hero-actions">
-      <a href="contact.html" class="cta">Demander un rendez-vous</a>
-      <a href="projets.html" class="btn fantome">Voir nos réalisations</a>
+      <a href="contact.html" class="cta">Parlons de votre projet</a>
+      <a href="projets.html" class="btn fantome">Découvrir nos projets</a>
     </div>
+    <p class="hero-preuve" hidden>
+      <span class="hero-preuve-etoiles" aria-hidden="true"></span>
+      <span class="hero-preuve-texte"></span>
+      <a class="hero-preuve-lien" href="https://maps.google.com/?cid=627876290551233175" target="_blank" rel="noopener">Voir les avis</a>
+    </p>
   </div>
-
-  <div class="hero-panneau droite" aria-hidden="true">
-    <div class="diapo">
-      <video class="diapo-video" muted loop playsinline preload="none"
-             poster="assets/hero/1.webp">
-        <source src="assets/hero/1.mp4" type="video/mp4">
-      </video>
-    </div>
-    <div class="diapo" data-fond-diapo="assets/hero/2.webp">
-      <video class="diapo-video" muted loop playsinline preload="none"
-             data-poster="assets/hero/2.webp">
-        <source src="assets/hero/2.mp4" type="video/mp4">
-      </video>
-    </div>
-    <div class="diapo" data-fond-diapo="assets/hero/3.webp">
-      <video class="diapo-video" muted loop playsinline preload="none"
-             data-poster="assets/hero/3.webp">
-        <source src="assets/hero/3.mp4" type="video/mp4">
-      </video>
-    </div>
-    <div class="diapo" data-fond-diapo="assets/hero/4.webp">
-      <video class="diapo-video" muted loop playsinline preload="none"
-             data-poster="assets/hero/4.webp">
-        <source src="assets/hero/4.mp4" type="video/mp4">
-      </video>
-    </div>
+  <div class="hero-photo">
+    <img src="assets/projets/magny-1.webp" alt="Maison neuve construite par CP Constructions à Magny-le-Désert" width="1400" height="875" fetchpriority="high">
   </div>
 </section>
 
@@ -250,7 +212,7 @@
 
 <section class="container">
   <h2>Nos services</h2>
-  <div class="grid">
+  <div class="grille-services">
     <div class="card service-card">
       <div class="service-photo" data-differe="assets/services/construction-neuve.webp" aria-hidden="true"></div>
       <div class="service-body">
@@ -273,7 +235,9 @@
       </div>
     </div>
     <div class="card service-card">
-      <div class="service-photo" aria-hidden="true"></div>
+      <div class="service-photo sans-photo" aria-hidden="true">
+        <svg viewBox="0 0 48 48"><path d="M8 28 L24 14 L40 28"/><path d="M24 40 L24 18"/><path d="M18 24 L24 18 L30 24"/></svg>
+      </div>
       <div class="service-body">
         <h3>Surélévation</h3>
         <p>Conception et coordination d'un nouvel étage pour augmenter votre surface habitable.</p>
@@ -538,7 +502,7 @@
     Vous avez un projet de construction, de rénovation, d'extension ou de surélévation ? Contactez-nous pour une première consultation gratuite.
   </p>
   <div style="text-align: center;">
-    <a href="contact.html" class="btn">Demander un rendez-vous</a>
+    <a href="contact.html" class="btn">Parlons de votre projet</a>
   </div>
 </section>
 
