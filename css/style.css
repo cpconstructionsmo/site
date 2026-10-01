@@ -3575,3 +3575,49 @@ section.mt-4:last-of-type { padding-bottom: 0; }
   margin-bottom: 28px;
 }
 .article-meta span:not(:last-child)::after { content: '·'; margin-left: 10px; color: var(--filet); }
+
+
+/* ---------- Présentation du fondateur (accueil et à-propos) ----------
+   Pas de portrait disponible pour l'instant : un bloc typographique
+   assumé (initiales sur fond dégradé) plutôt qu'une photo inventée ou
+   un cadre vide. À remplacer par un vrai portrait dès qu'il existe. */
+
+.fondateur-bloc {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) minmax(0,1.7fr);
+  gap: 44px;
+  align-items: center;
+}
+
+.fondateur-portrait {
+  aspect-ratio: 1;
+  max-width: 260px;
+  border-radius: var(--r-l);
+  background: linear-gradient(150deg, var(--brique-clair), var(--nuit-clair));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--ombre-l);
+}
+
+.fondateur-portrait span {
+  font-size: clamp(44px, 7vw, 76px);
+  font-weight: 800;
+  letter-spacing: -.02em;
+  color: rgba(255,255,255,.92);
+}
+
+.surtitre-section {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--brique);
+  margin-bottom: 12px;
+}
+
+@media (max-width: 768px) {
+  .fondateur-bloc { grid-template-columns: 1fr; text-align: center; }
+  .fondateur-portrait { margin: 0 auto; }
+}
