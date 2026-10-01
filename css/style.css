@@ -16,7 +16,11 @@
   --fond-tiede: #F1EDE4;
   --surface: #fff;
   --filet: #E6E0D4;
-  --gris: #6E7B84;
+  /* #6E7B84 à l'origine : 3,7 à 4,3:1 selon le fond, sous le seuil
+     WCAG AA de 4,5:1 pour du texte courant (le token sert de couleur de
+     texte dans 65 cas sur 67). Assombri à contraste vérifié, même
+     teinte bleu-gris. */
+  --gris: #5C6670;
 
   /* Fond sombre du héros et de la barre : un espresso tiré du brun brique,
      assez dense pour que le texte blanc passe sans effort. */
@@ -197,12 +201,15 @@ nav.main a.active { color: var(--nuit); background: var(--ocre); }
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   font-size: 13px;
   font-weight: 700;
   color: var(--nuit);
   background: var(--surface);
   padding: 11px 20px;
+  min-height: 44px;
+  box-sizing: border-box;
   border-radius: var(--pilule);
   white-space: nowrap;
   transition: background var(--transition), transform var(--transition);
@@ -223,8 +230,8 @@ nav.main a.active { color: var(--nuit); background: var(--ocre); }
   justify-content: center;
   align-items: center;
   gap: 5px;
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
   padding: 0;
   border: none;
   border-radius: var(--pilule);
@@ -1098,6 +1105,7 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
     box-shadow: none;
     background: rgba(255,255,255,.06);
   }
+  .nav-sous-menu a { padding: 13px 16px; font-size: 14.5px; text-align: center; }
 
   /* Le texte et le bouton restent visibles avant la photo, qui passe en
      bandeau sous le texte plutôt qu'en premier (on ne veut pas faire
@@ -1600,7 +1608,7 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
 }
 
 .avis-fleches button {
-  width: 42px; height: 42px;
+  width: 44px; height: 44px;
   border: 1px solid var(--filet);
   border-radius: 50%;
   background: var(--surface);
@@ -2840,8 +2848,8 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
 }
 
 .chantiers-fleche {
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   border: 1.5px solid var(--filet);
   background: var(--surface);
@@ -2861,6 +2869,28 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
 .chantiers-fleche:disabled { opacity: .35; cursor: default; }
 
 .chantiers-points { display: flex; align-items: center; gap: 9px; }
+
+/* Bouton pause/reprendre des carrousels à défilement automatique (avis
+   et chantiers) : un contrôle explicite, affiché seulement quand il y a
+   réellement une rotation à mettre en pause (voir anim.js). */
+.carrousel-pause {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1.5px solid var(--filet);
+  background: var(--surface);
+  color: var(--brique);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition), color var(--transition);
+}
+.carrousel-pause:hover {
+  background: var(--brique);
+  border-color: var(--brique);
+  color: #fff;
+}
+.carrousel-pause[hidden] { display: none; }
 
 .chantiers-points button {
   width: 9px;

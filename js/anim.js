@@ -53,6 +53,14 @@
     window.addEventListener('resize', function () {
       if (window.innerWidth > 860) fermerMenu();
     });
+
+    // Échap referme le menu et rend la main au bouton qui l'a ouvert.
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape') return;
+      if (!navPrincipale.classList.contains('ouvert')) return;
+      fermerMenu();
+      boutonMenu.focus();
+    });
   }
 
   /* --- 1ter. Sous-menus de navigation (<details>) ---
@@ -264,7 +272,30 @@
     }
 
     function arreterAvis() {
-      if (minuterie) { window.clearInterval(minuterie); minuterie = null; }
+      if (minuterie) { window.clearInterval(minuterie); minuterie = null; majBoutonPauseAvis(); }
+    }
+
+    /* Bouton pause/reprendre explicite (WCAG 2.2.2) : indépendant de
+       l'arrêt définitif déclenché par une interaction directe (flèches,
+       pastilles, balayage) — ici la personne choisit elle-même. */
+    var boutonPauseAvis = fleches.querySelector('.carrousel-pause');
+    function majBoutonPauseAvis() {
+      if (!boutonPauseAvis) return;
+      var enCours = !!minuterie;
+      boutonPauseAvis.textContent = enCours ? '⏸' : '▶';
+      boutonPauseAvis.setAttribute('aria-pressed', enCours ? 'false' : 'true');
+      boutonPauseAvis.setAttribute('aria-label',
+        enCours ? 'Mettre en pause le défilement automatique' : 'Reprendre le défilement automatique');
+    }
+    function demarrerAvis() {
+      if (minuterie || mouvementReduit || cartes.length < 2) return;
+      minuterie = window.setInterval(suivantAvis, 6000);
+      majBoutonPauseAvis();
+    }
+    if (boutonPauseAvis) {
+      boutonPauseAvis.addEventListener('click', function () {
+        if (minuterie) arreterAvis(); else demarrerAvis();
+      });
     }
 
     fleches.querySelector('[data-sens="-1"]').addEventListener('click', function () {
@@ -303,6 +334,7 @@
       minuterie = window.setInterval(suivantAvis, 6000);
       piste.addEventListener('mouseenter', arreterAvis);
       piste.addEventListener('focusin', arreterAvis);
+      if (boutonPauseAvis) { boutonPauseAvis.hidden = false; majBoutonPauseAvis(); }
     }
   }
 
@@ -447,7 +479,31 @@
       function arreter() {
         // Une fois que la personne a pris la main, la rotation ne
         // reprend pas : rien ne doit bouger pendant qu'elle lit.
-        if (minuterie) { window.clearInterval(minuterie); minuterie = null; }
+        if (minuterie) { window.clearInterval(minuterie); minuterie = null; majBoutonPauseChantiers(); }
+      }
+
+      /* Bouton pause/reprendre explicite (WCAG 2.2.2), indépendant de
+         l'arrêt définitif ci-dessus. */
+      var boutonPauseChantiers = navChantiers.querySelector('.carrousel-pause');
+      function majBoutonPauseChantiers() {
+        if (!boutonPauseChantiers) return;
+        var enCours = !!minuterie;
+        boutonPauseChantiers.textContent = enCours ? '⏸' : '▶';
+        boutonPauseChantiers.setAttribute('aria-pressed', enCours ? 'false' : 'true');
+        boutonPauseChantiers.setAttribute('aria-label',
+          enCours ? 'Mettre en pause le défilement automatique' : 'Reprendre le défilement automatique');
+      }
+      function demarrerChantiers() {
+        if (minuterie || mouvementReduit) return;
+        minuterie = window.setInterval(function () {
+          aller(courant === fiches.length - 1 ? 0 : courant + 1);
+        }, 7000);
+        majBoutonPauseChantiers();
+      }
+      if (boutonPauseChantiers) {
+        boutonPauseChantiers.addEventListener('click', function () {
+          if (minuterie) arreter(); else demarrerChantiers();
+        });
       }
 
       precedent.addEventListener('click', function () { arreter(); aller(courant - 1); });
@@ -488,6 +544,7 @@
         // On suspend pendant la lecture, sans annuler la rotation.
         piste.addEventListener('mouseenter', arreter);
         piste.addEventListener('focusin', arreter);
+        if (boutonPauseChantiers) { boutonPauseChantiers.hidden = false; majBoutonPauseChantiers(); }
       }
     }
   }
