@@ -3470,3 +3470,17 @@ section.mt-4:last-of-type { padding-bottom: 0; }
   }
   .appel-mobile-fixe:active { background: var(--nuit-clair); }
 }
+
+
+/* ---------- Signature d'article (auteur, date, temps de lecture) ---------- */
+
+.article-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  font-size: 13px;
+  color: var(--gris);
+  margin-top: -8px;
+  margin-bottom: 28px;
+}
+.article-meta span:not(:last-child)::after { content: '·'; margin-left: 10px; color: var(--filet); }
