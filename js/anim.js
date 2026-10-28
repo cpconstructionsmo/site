@@ -158,7 +158,7 @@
         (donnees.nombre_avis ? ' (' + donnees.nombre_avis + ' avis)' : '');
     }
     if (lien && donnees.lien_google) lien.href = donnees.lien_google;
-    preuveHero.hidden = false;
+    preuveHero.classList.add('visible');
   }
 
   function afficherAvis(donnees) {
