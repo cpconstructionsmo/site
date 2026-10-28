@@ -1252,6 +1252,62 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
   background-image: url("../assets/chantiers/charchigne-10.webp"),
                     linear-gradient(140deg, #94886F, #453B2C);
 }
+.photo-projet[data-photo="charchigne-11"] {
+  background-image: url("../assets/chantiers/charchigne-11.webp"),
+                    linear-gradient(140deg, #9C8F79, #4E4335);
+}
+.photo-projet[data-photo="charchigne-12"] {
+  background-image: url("../assets/chantiers/charchigne-12.webp"),
+                    linear-gradient(140deg, #9C8F79, #4E4335);
+}
+.photo-projet[data-photo="charchigne-13"] {
+  background-image: url("../assets/chantiers/charchigne-13.webp"),
+                    linear-gradient(140deg, #9C8F79, #4E4335);
+}
+.photo-projet[data-photo="charchigne-14"] {
+  background-image: url("../assets/chantiers/charchigne-14.webp"),
+                    linear-gradient(140deg, #A89A80, #4F4433);
+}
+.photo-projet[data-photo="charchigne-15"] {
+  background-image: url("../assets/chantiers/charchigne-15.webp"),
+                    linear-gradient(140deg, #A89A80, #4F4433);
+}
+.photo-projet[data-photo="charchigne-16"] {
+  background-image: url("../assets/chantiers/charchigne-16.webp"),
+                    linear-gradient(140deg, #A89A80, #4F4433);
+}
+.photo-projet[data-photo="charchigne-17"] {
+  background-image: url("../assets/chantiers/charchigne-17.webp"),
+                    linear-gradient(140deg, #A89A80, #4F4433);
+}
+.photo-projet[data-photo="charchigne-18"] {
+  background-image: url("../assets/chantiers/charchigne-18.webp"),
+                    linear-gradient(140deg, #8E8874, #403A2C);
+}
+.photo-projet[data-photo="charchigne-19"] {
+  background-image: url("../assets/chantiers/charchigne-19.webp"),
+                    linear-gradient(140deg, #8E8874, #403A2C);
+}
+.photo-projet[data-photo="charchigne-20"] {
+  background-image: url("../assets/chantiers/charchigne-20.webp"),
+                    linear-gradient(140deg, #B89A5C, #5A481F);
+}
+.photo-projet[data-photo="charchigne-21"] {
+  background-image: url("../assets/chantiers/charchigne-21.webp"),
+                    linear-gradient(140deg, #B89A5C, #5A481F);
+}
+.photo-projet[data-photo="charchigne-22"] {
+  background-image: url("../assets/chantiers/charchigne-22.webp"),
+                    linear-gradient(140deg, #8C8E8F, #3C3E40);
+}
+.photo-projet[data-photo="charchigne-23"] {
+  background-image: url("../assets/chantiers/charchigne-23.webp"),
+                    linear-gradient(140deg, #8C8E8F, #3C3E40);
+}
+.photo-projet[data-photo="charchigne-24"] {
+  background-image: url("../assets/chantiers/charchigne-24.webp"),
+                    linear-gradient(140deg, #8C8E8F, #3C3E40);
+}
 
 /* Chantier de Ceaucé, dans l'ordre chronologique. */
 .photo-projet[data-photo="ceauce-1"] {
