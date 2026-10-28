@@ -549,6 +549,200 @@
     }
   }
 
+  /* --- 6ter. Assistant des questions fréquentes (chat) ---
+     Pas d'IA : les réponses viennent mot pour mot de faq.html, retrouvées
+     par un simple rapprochement de mots-clés, jamais inventées. Absent
+     des simulateurs DPE et financement, qui ancrent déjà leur propre
+     interface en bas de l'écran sur mobile (voir .appel-mobile-fixe). */
+
+  if (!/\/(dpe|financement)\.html$/.test(window.location.pathname)) {
+    initChatFaq();
+  }
+
+  function initChatFaq() {
+    var MOTS_VIDES = (
+      'le la les un une des de du au aux et ou est es suis sommes êtes sont ' +
+      'ai as a avons avez ont que qui quoi comment combien pourquoi où quand ' +
+      'vous nous votre vos notre nos je tu il elle on ce cette ces mon ma mes ' +
+      'ton ta tes son sa ses pour dans sur avec sans par en à ne pas se sa ' +
+      'être avoir fait faire cp constructions'
+    ).split(' ');
+
+    function normaliser(texte) {
+      return (texte || '')
+        .toLowerCase()
+        .normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .replace(/[^a-z0-9\s]/g, ' ');
+    }
+
+    function motsCles(texte) {
+      return normaliser(texte).split(/\s+/).filter(function (mot) {
+        return mot.length > 2 && MOTS_VIDES.indexOf(mot) === -1;
+      });
+    }
+
+    var entreesFaq = null;   // null = pas encore chargées ; [] = échec ou vide
+
+    // faq.html est la seule source : on y lit les vraies questions et
+    // réponses déjà publiées, jamais une copie qui pourrait s'en écarter.
+    function chargerFaq() {
+      if (entreesFaq !== null) return Promise.resolve(entreesFaq);
+      return fetch('/faq.html', { cache: 'no-cache' })
+        .then(function (r) { return r.ok ? r.text() : ''; })
+        .then(function (html) {
+          var doc = new DOMParser().parseFromString(html, 'text/html');
+          var items = doc.querySelectorAll('.faq-item');
+          entreesFaq = Array.prototype.map.call(items, function (item) {
+            var question = item.querySelector('summary');
+            var reponse = item.querySelector('p');
+            return {
+              question: question ? question.textContent.trim() : '',
+              // Contenu pris sur notre propre page, jamais saisi par un
+              // visiteur : pas le même risque que les avis Google
+              // (textContent plus haut), donc les liens de la réponse
+              // (ex. vers un article) restent utilisables ici.
+              reponseHTML: reponse ? reponse.innerHTML.trim() : '',
+              mots: motsCles((question ? question.textContent : '') + ' ' + (reponse ? reponse.textContent : '')),
+            };
+          }).filter(function (e) { return e.question && e.reponseHTML; });
+          return entreesFaq;
+        })
+        .catch(function () { entreesFaq = []; return entreesFaq; });
+    }
+
+    function trouverReponse(question, entrees) {
+      var motsQuestion = motsCles(question);
+      if (!motsQuestion.length) return null;
+      var meilleure = null;
+      var meilleurScore = 0;
+      entrees.forEach(function (entree) {
+        var score = motsQuestion.filter(function (m) { return entree.mots.indexOf(m) !== -1; }).length;
+        if (score > meilleurScore) { meilleurScore = score; meilleure = entree; }
+      });
+      return meilleurScore > 0 ? meilleure : null;
+    }
+
+    // --- Construction du widget, injecté sur toutes les pages (sauf DPE
+    // et financement) : rien à répéter dans chaque fichier HTML. ---
+
+    var bulle = document.createElement('button');
+    bulle.type = 'button';
+    bulle.className = 'chat-bulle';
+    bulle.id = 'chat-bulle';
+    bulle.setAttribute('aria-label', 'Poser une question');
+    bulle.setAttribute('aria-expanded', 'false');
+    bulle.setAttribute('aria-controls', 'chat-panneau');
+    bulle.innerHTML =
+      '<svg class="chat-icone-ouvrir" viewBox="0 0 24 24" aria-hidden="true">' +
+        '<path d="M4 5h16v11H8l-4 4V5z"/>' +
+      '</svg>' +
+      '<svg class="chat-icone-fermer" viewBox="0 0 24 24" aria-hidden="true">' +
+        '<path d="M6 6l12 12M18 6L6 18"/>' +
+      '</svg>';
+
+    var panneau = document.createElement('section');
+    panneau.className = 'chat-panneau';
+    panneau.id = 'chat-panneau';
+    panneau.hidden = true;
+    panneau.setAttribute('aria-label', 'Questions fréquentes');
+    panneau.innerHTML =
+      '<div class="chat-entete">' +
+        '<strong>Une question ?</strong>' +
+        '<button type="button" class="chat-fermer" aria-label="Fermer la fenêtre de questions">✕</button>' +
+      '</div>' +
+      '<div class="chat-corps" aria-live="polite"></div>' +
+      '<form class="chat-saisie">' +
+        '<input type="text" id="chat-champ" aria-label="Votre question" placeholder="Tapez votre question…" autocomplete="off">' +
+        '<button type="submit" aria-label="Envoyer">➤</button>' +
+      '</form>' +
+      '<div class="chat-pied"><a href="/faq.html">Toutes les questions</a> · <a href="/contact.html">Nous contacter</a></div>';
+
+    document.body.appendChild(bulle);
+    document.body.appendChild(panneau);
+
+    var corps = panneau.querySelector('.chat-corps');
+    var champ = panneau.querySelector('#chat-champ');
+    var premiereOuverture = true;
+
+    function ajouterMessage(html, role) {
+      var p = document.createElement('p');
+      p.className = 'chat-message ' + (role === 'utilisateur' ? 'chat-utilisateur' : 'chat-assistant');
+      // Le rôle « utilisateur » vient de la saisie libre : jamais injecté
+      // tel quel, toujours en texte brut.
+      if (role === 'utilisateur') p.textContent = html;
+      else p.innerHTML = html;
+      corps.appendChild(p);
+      corps.scrollTop = corps.scrollHeight;
+    }
+
+    function afficherSuggestions(entrees) {
+      if (!entrees.length) return;
+      var boite = document.createElement('div');
+      boite.className = 'chat-suggestions';
+      entrees.slice(0, 4).forEach(function (entree) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = entree.question;
+        b.addEventListener('click', function () { poserQuestion(entree.question); });
+        boite.appendChild(b);
+      });
+      corps.appendChild(boite);
+      corps.scrollTop = corps.scrollHeight;
+    }
+
+    function poserQuestion(texte) {
+      texte = texte.trim();
+      if (!texte) return;
+      ajouterMessage(texte, 'utilisateur');
+      chargerFaq().then(function (entrees) {
+        var trouvee = trouverReponse(texte, entrees);
+        if (trouvee) {
+          ajouterMessage(trouvee.reponseHTML, 'assistant');
+        } else {
+          ajouterMessage(
+            'Je n\'ai pas de réponse toute prête à cette question. ' +
+            '<a href="/faq.html">Voir toutes les questions</a> ou ' +
+            '<a href="/contact.html">contactez-nous directement</a>, nous vous répondrons.',
+            'assistant'
+          );
+        }
+      });
+    }
+
+    function ouvrirPanneau() {
+      panneau.hidden = false;
+      bulle.setAttribute('aria-expanded', 'true');
+      if (premiereOuverture) {
+        premiereOuverture = false;
+        ajouterMessage('Bonjour ! Posez votre question, ou choisissez-en une ci-dessous.', 'assistant');
+        chargerFaq().then(afficherSuggestions);
+      }
+      if (!mouvementReduit) champ.focus();
+    }
+
+    function fermerPanneau() {
+      panneau.hidden = true;
+      bulle.setAttribute('aria-expanded', 'false');
+      bulle.focus();
+    }
+
+    bulle.addEventListener('click', function () {
+      if (panneau.hidden) ouvrirPanneau(); else fermerPanneau();
+    });
+    panneau.querySelector('.chat-fermer').addEventListener('click', fermerPanneau);
+
+    panneau.querySelector('.chat-saisie').addEventListener('submit', function (e) {
+      e.preventDefault();
+      poserQuestion(champ.value);
+      champ.value = '';
+      champ.focus();
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !panneau.hidden) fermerPanneau();
+    });
+  }
+
   /* --- 7. Apparitions au défilement ---
      Sans IntersectionObserver, ou en mouvement réduit, on ne pose jamais
      la classe .reveal : les contenus restent simplement visibles. */
