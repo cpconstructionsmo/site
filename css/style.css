@@ -3651,3 +3651,34 @@ section.mt-4:last-of-type { padding-bottom: 0; }
   .fondateur-bloc { grid-template-columns: 1fr; text-align: center; }
   .fondateur-portrait { margin: 0 auto; }
 }
+
+/* ---------- Badges des pages de secteur ----------
+   Pas de vraie photo de ces villes à disposition (ni fabriquée, ni
+   piochée sans vérifier la licence) : même traitement assumé que
+   .service-photo.sans-photo, décliné en badge plutôt qu'en bandeau. */
+.secteur-badge {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--r-m);
+  background: linear-gradient(135deg, var(--brique-clair), var(--brique-fonce));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  margin-bottom: 14px;
+}
+.secteur-badge svg {
+  width: 26px;
+  height: 26px;
+  stroke: rgba(255,255,255,.9);
+  fill: none;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.secteur-badge-grand {
+  width: 76px;
+  height: 76px;
+  margin-bottom: 20px;
+}
+.secteur-badge-grand svg { width: 34px; height: 34px; }
