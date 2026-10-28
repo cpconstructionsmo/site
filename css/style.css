@@ -3407,18 +3407,15 @@ main[tabindex]:focus, main[tabindex]:focus-visible { outline: none; }
 .service-card { padding: 0; }
 
 /* Grille dédiée (plutôt que .grid, partagée par trop d'autres listes) :
-   quatre colonnes quand la place le permet, puis deux, puis une seule —
-   jamais trois cartes suivies d'une quatrième isolée sur sa propre
-   ligne, ce qu'un auto-fit générique produisait à certaines largeurs. */
+   trois colonnes quand la place le permet, puis une seule — pas d'étape
+   à deux colonnes, qui isolerait la troisième carte sur sa propre
+   ligne, ce qu'un auto-fit générique produirait à certaines largeurs. */
 .grille-services {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 24px;
 }
-@media (max-width: 1080px) {
-  .grille-services { grid-template-columns: repeat(2, 1fr); }
-}
-@media (max-width: 600px) {
+@media (max-width: 860px) {
   .grille-services { grid-template-columns: 1fr; }
 }
 
@@ -3441,25 +3438,6 @@ main[tabindex]:focus, main[tabindex]:focus-visible { outline: none; }
 }
 
 .service-card:hover .service-photo::after { transform: translateX(100%); }
-
-/* Composition volontaire pour un service sans photo (ex. surélévation,
-   tant qu'aucun chantier n'en fournit une) : un pictogramme assumé
-   plutôt qu'un rectangle qui a l'air cassé. */
-.service-photo.sans-photo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, var(--brique-clair), var(--brique-fonce));
-}
-.service-photo.sans-photo svg {
-  width: 44px;
-  height: 44px;
-  stroke: rgba(255,255,255,.85);
-  fill: none;
-  stroke-width: 1.6;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
 
 .service-body { padding: 26px 24px 28px; }
 .service-body h3, .service-body p { position: relative; }
@@ -3845,8 +3823,8 @@ section.mt-4:last-of-type { padding-bottom: 0; }
 
 /* ---------- Badges des pages de secteur ----------
    Pas de vraie photo de ces villes à disposition (ni fabriquée, ni
-   piochée sans vérifier la licence) : même traitement assumé que
-   .service-photo.sans-photo, décliné en badge plutôt qu'en bandeau. */
+   piochée sans vérifier la licence) : un pictogramme assumé plutôt
+   qu'un bandeau vide ou cassé. */
 .secteur-badge {
   width: 56px;
   height: 56px;
