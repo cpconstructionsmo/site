@@ -338,8 +338,11 @@ nav.main a.active { color: var(--nuit); background: var(--ocre); }
 }
 
 /* Preuve courte sous les actions : remplie en JS à partir du même
-   avis.json que le bandeau d'avis plus bas, jamais figée en dur, et
-   absente tant que la donnée n'est pas arrivée (voir anim.js). */
+   avis.json que le bandeau d'avis plus bas, jamais figée en dur. La
+   place reste réservée dès le premier rendu (visibility, pas
+   display:none) : sinon l'arrivée tardive de la ligne décale tout ce
+   qui suit en dessous, un décalage de mise en page mesuré à 0,11 sur
+   mobile — au-dessus du seuil CLS « bon » de 0,1. */
 .hero-preuve {
   margin-top: 24px;
   display: flex;
@@ -348,7 +351,10 @@ nav.main a.active { color: var(--nuit); background: var(--ocre); }
   font-size: 13.5px;
   font-weight: 600;
   color: var(--brun-texte);
+  min-height: 22px;
+  visibility: hidden;
 }
+.hero-preuve.visible { visibility: visible; }
 .hero-preuve .hero-preuve-etoiles { color: var(--ocre); letter-spacing: 1px; }
 .hero-preuve a { color: inherit; }
 
