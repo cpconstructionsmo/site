@@ -41,12 +41,12 @@ jobs:
 
       - name: Publier si les avis ont changé
         run: |
-          if git diff --quiet -- avis.json; then
+          if git diff --quiet -- avis.json index.html; then
             echo "Rien de neuf, pas de commit."
             exit 0
           fi
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add avis.json
+          git add avis.json index.html
           git commit -m "Avis Google du $(date -u +%d/%m/%Y)"
           git push

@@ -205,11 +205,35 @@ const nouveau = JSON.stringify(donnees, null, 2) + '\n';
 let ancien = '';
 try { ancien = await readFile(SORTIE, 'utf8'); } catch { /* premier passage */ }
 
-if (nouveau === ancien) {
-  console.log(`Aucun changement (${avis.length} avis).`);
-  process.exit(0);
+let rienDeNeuf = nouveau === ancien;
+
+if (rienDeNeuf) {
+  console.log(`avis.json : aucun changement (${avis.length} avis).`);
+} else {
+  await writeFile(SORTIE, nouveau);
+  console.log(`avis.json mis à jour : ${avis.length} avis, note ${donnees.note_moyenne ?? '?'}`
+            + `, total ${donnees.nombre_avis ?? '?'} (source ${complet ? complet.source : 'Places'}).`);
 }
 
-await writeFile(SORTIE, nouveau);
-console.log(`avis.json mis à jour : ${avis.length} avis, note ${donnees.note_moyenne ?? '?'}`
-          + `, total ${donnees.nombre_avis ?? '?'} (source ${complet ? complet.source : 'Places'}).`);
+// La note moyenne et le nombre d'avis sont aussi affichés dans les
+// données structurées de l'accueil (étoiles dans les résultats
+// Google) : on les tient à jour ici plutôt que de les laisser se
+// périmer en silence. Rien à faire si l'un des deux manque — mieux
+// vaut garder l'ancienne valeur, correcte, que publier un « null ».
+const PAGE_ACCUEIL = 'index.html';
+if (donnees.note_moyenne != null && donnees.nombre_avis != null) {
+  const pageAvant = await readFile(PAGE_ACCUEIL, 'utf8');
+  const pageApres = pageAvant.replace(
+    /"aggregateRating":\s*\{\s*"@type":\s*"AggregateRating",\s*"ratingValue":\s*[\d.]+,\s*"reviewCount":\s*\d+\s*\}/,
+    '"aggregateRating": {\n      "@type": "AggregateRating",\n      "ratingValue": '
+      + donnees.note_moyenne + ',\n      "reviewCount": ' + donnees.nombre_avis + '\n    }',
+  );
+  if (pageApres !== pageAvant) {
+    await writeFile(PAGE_ACCUEIL, pageApres);
+    console.log(`${PAGE_ACCUEIL} : note mise à jour dans les données structurées `
+              + `(${donnees.note_moyenne}, ${donnees.nombre_avis} avis).`);
+    rienDeNeuf = false;
+  }
+}
+
+if (rienDeNeuf) process.exit(0);
