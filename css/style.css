@@ -1406,6 +1406,41 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
                     linear-gradient(140deg, #999E9E, #303436);
 }
 
+.photo-projet[data-photo="saintcyr-10"] {
+  background-image: url("../assets/chantiers/saintcyr-10.webp"),
+                    linear-gradient(140deg, #7F6D55, #42332E);
+}
+
+.photo-projet[data-photo="saintcyr-11"] {
+  background-image: url("../assets/chantiers/saintcyr-11.webp"),
+                    linear-gradient(140deg, #98A0A9, #6C5E49);
+}
+
+.photo-projet[data-photo="saintcyr-12"] {
+  background-image: url("../assets/chantiers/saintcyr-12.webp"),
+                    linear-gradient(140deg, #83A3D5, #796F5F);
+}
+
+.photo-projet[data-photo="saintcyr-13"] {
+  background-image: url("../assets/chantiers/saintcyr-13.webp"),
+                    linear-gradient(140deg, #8FA6C8, #939081);
+}
+
+.photo-projet[data-photo="saintcyr-14"] {
+  background-image: url("../assets/chantiers/saintcyr-14.webp"),
+                    linear-gradient(140deg, #CADBEF, #A29378);
+}
+
+.photo-projet[data-photo="saintcyr-15"] {
+  background-image: url("../assets/chantiers/saintcyr-15.webp"),
+                    linear-gradient(140deg, #B7C9D6, #A98F6B);
+}
+
+.photo-projet[data-photo="saintcyr-16"] {
+  background-image: url("../assets/chantiers/saintcyr-16.webp"),
+                    linear-gradient(140deg, #94A6C7, #898781);
+}
+
 /* Chantier de Saint-Julien-sur-Sarthe, dans l'ordre chronologique. */
 .photo-projet[data-photo="saintjulien-1"] {
   background-image: url("../assets/chantiers/saintjulien-1.webp"),
