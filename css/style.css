@@ -1441,6 +1441,16 @@ footer a { color: var(--ocre-clair); font-weight: 600; }
                     linear-gradient(140deg, #94A6C7, #898781);
 }
 
+.photo-projet[data-photo="saintcyr-17"] {
+  background-image: url("../assets/chantiers/saintcyr-17.webp"),
+                    linear-gradient(140deg, #77A5E9, #324254);
+}
+
+.photo-projet[data-photo="saintcyr-18"] {
+  background-image: url("../assets/chantiers/saintcyr-18.webp"),
+                    linear-gradient(140deg, #8AABDE, #142434);
+}
+
 /* Chantier de Saint-Julien-sur-Sarthe, dans l'ordre chronologique. */
 .photo-projet[data-photo="saintjulien-1"] {
   background-image: url("../assets/chantiers/saintjulien-1.webp"),
