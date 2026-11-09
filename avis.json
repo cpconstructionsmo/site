@@ -16,12 +16,6 @@
       "texte": "Excellente expérience avec ce maître d’œuvre. Très professionnel, sérieux et à l’écoute, il a su nous accompagner ; suivi rigoureux, très bonne communication et vrai souci du travail bien fait.\nNous recommandons vivement M. Portier pour son professionnalisme, sa disponibilité et la qualité de son travail."
     },
     {
-      "auteur": "N T",
-      "date": "il y a 8 mois",
-      "note": 5,
-      "texte": "Entreprise sérieuse et suivi impeccable ! La communication est fluide. Nous sommes totalemét satisfait de CP CONSTRUCTION et gros plus pour monsieur PORTIER qui est tres professionnel."
-    },
-    {
       "auteur": "Sukru Parlak",
       "date": "il y a 2 mois",
       "note": 5,
@@ -32,6 +26,12 @@
       "date": "il y a 2 mois",
       "note": 5,
       "texte": "Maître d'oeuvre compétent et à l'écoute de ses clients. Je recommande"
+    },
+    {
+      "auteur": "N T",
+      "date": "il y a 8 mois",
+      "note": 5,
+      "texte": "Entreprise sérieuse et suivi impeccable ! La communication est fluide. Nous sommes totalemét satisfait de CP CONSTRUCTION et gros plus pour monsieur PORTIER qui est tres professionnel."
     }
   ]
 }
